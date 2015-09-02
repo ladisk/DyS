@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>300</width>
+    <height>385</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>300</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>300</width>
+    <height>1000</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Joint</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout_2">
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_basicInfo">
+     <property name="title">
+      <string>Basic Info</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="name_label">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="jointTypecomboBox">
+        <item>
+         <property name="text">
+          <string>Revolute</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fixed</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Translational</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="jointID_lineEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="name_lineEdit"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="jointType_label">
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="jointID_label">
+        <property name="text">
+         <string>Joint id</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_simulationParameters">
+     <property name="title">
+      <string>Simulation Parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="0">
+       <widget class="QLabel" name="bodyIDj_label">
+        <property name="text">
+         <string>Body ID j</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="uPi_lineEdit"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="bodyIDi_lineEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="bodyIDi_label">
+        <property name="text">
+         <string>Body ID i</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="uPi_label">
+        <property name="text">
+         <string>u_P i, [x, y]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="uPj_lineEdit"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="uPj_label">
+        <property name="text">
+         <string>u_P j, [x, y]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="bodyIDj_lineEdit"/>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="bottom_horizontalLayout">
+     <item>
+      <widget class="QLineEdit" name="info_lineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="save_pushButton">
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancel_pushButton">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_comment">
+     <property name="title">
+      <string>Comment</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QTextEdit" name="comment_textEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>260</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>260</width>
+          <height>40</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>name_lineEdit</tabstop>
+  <tabstop>jointID_lineEdit</tabstop>
+  <tabstop>jointTypecomboBox</tabstop>
+  <tabstop>bodyIDi_lineEdit</tabstop>
+  <tabstop>bodyIDj_lineEdit</tabstop>
+  <tabstop>uPi_lineEdit</tabstop>
+  <tabstop>uPj_lineEdit</tabstop>
+  <tabstop>info_lineEdit</tabstop>
+  <tabstop>save_pushButton</tabstop>
+  <tabstop>cancel_pushButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

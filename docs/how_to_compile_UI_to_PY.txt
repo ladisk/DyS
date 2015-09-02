@@ -1,0 +1,21 @@
+pyuic4.bat filename.ui > filename.py
+pyrcc4 -o qrc_resources.py resources.qrc
+
+pyuic4.bat output_widget.ui > output_widget_ui.py
+pyuic4.bat graph_widget.ui > graph_widget_ui.py
+
+pyuic4.bat addeditmoviedlg.ui > ui_addeditmoviedlg.py
+
+pyuic4.bat tree_view_widget_select.ui > tree_view_widget_select_ui.py
+
+pyuic4.bat simulation_control_widget.ui > simulation_control_widget_ui.py
+
+pyuic4.bat body.ui > body_ui.py
+
+pyuic4.bat contact.ui > contact_ui.py
+
+pyuic4.bat force.ui > force_ui.py
+
+pyuic4.bat joint.ui > joint_ui.py
+
+pyuic4.bat spring.ui > spring_ui.py
