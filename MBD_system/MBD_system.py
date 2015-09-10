@@ -50,7 +50,7 @@ class MBDsystem(MBDsystemItem):
 
         #   solution filetype, options:
         #   .dat, (.xlsx, .csv - not implemented yet)
-        self._solution_filetype = ".dat"
+        self._solution_filetype = ".sol" #.sol
         #   extension of data files
         self._filetype = ".dat"
 

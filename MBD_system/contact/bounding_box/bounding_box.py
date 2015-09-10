@@ -15,7 +15,6 @@ from pprint import pprint
 import ctypes
 from OpenGL import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.vertex_buffer_object import *
 from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 from dxfwrite import DXFEngine as dxf
@@ -25,7 +24,6 @@ try:
     from ...q2R_i import q2R_i
     from ...q2theta_i import q2theta_i
     from ...MBD_system_items import AABBItem
-    from ...Ai_ui_P import Ai_ui_P_vector
     from ...A import A_matrix
 except:
     pass
@@ -34,6 +32,7 @@ from MBD_system.MBD_system_items import AABBItem
 from MBD_system.transform_cs import gcs2lcs_z_axis
 from MBD_system.q2R_i import q2R_i
 from MBD_system.q2theta_i import q2theta_i
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
 
 np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, suppress=False, nanstr=None, infstr=None)
 
@@ -177,8 +176,18 @@ class AABBTree(object):  # AABBItem or object - for testing
             value - value of parameter name (num or str)
         """
         setattr(self, key, value)
-    
-    
+
+
+    def _get_properties(self):
+        """
+
+        :return:
+        """
+        print "---------------------"
+        print "body :", self._parent_body._name
+        pprint(vars(self))
+
+
     def construct(self):
         """
         Function creates AABB object
@@ -334,36 +343,42 @@ class AABBTree(object):  # AABBItem or object - for testing
         if _ratio < _factor:
             #    modify x dimension. if x dimension is too small
             if x_dim < _factor * y_dim:
-    
+                _y_min = y_min
+                _y_max = y_max
                 dx = _factor * y_dim
     
                 if x_min == 0:
-                    x_min = -0.5 * dx
+                    _x_min = -0.5 * dx
                 else:
-                    x_min = x_min - np.sign(x_min) * dx
+                    _x_min = x_min - np.sign(x_min) * dx
                     
                 if x_max == 0:
-                    x_max = +0.5 * dx
+                    _x_max = +0.5 * dx
                 else:
-                    x_max = x_max + np.sign(x_max) * dx
-                
-        
+                    _x_max = x_max + np.sign(x_max) * dx
+
             #    modify y dimension, if y dimension is too small
             if y_dim < _factor * x_dim:
-                dy = _factor * x_dim                
+                _x_min = x_min
+                _x_max = x_max
+                dy = _factor * x_dim
                 
                 if y_min == 0:
-                    y_min = -0.5 * dy
+                    _y_min = -0.5 * dy
                 else:
-                    y_min = y_min - np.sign(y_min) * dy
+                    if np.sign(y_min) == 1:
+                        _y_min = y_min - dy
+                    if np.sign(y_min) == -1:
+                        _y_min = y_min - dy
                     
                 if y_max == 0:
-                    y_max = +0.5 * dy
+                    _y_max = +0.5 * dy
                 else:
-                    y_max = y_max + np.sign(y_max) * dy
-        
-        
-        return x_min, x_max, y_min, y_max
+                    if np.sign(y_max) == 1:
+                        _y_max = y_max + dy
+                    if np.sign(y_max) == -1:
+                        _y_max = y_max + dy
+        return _x_min, _x_max, _y_min, _y_max
 
 
     def __sub_normals(self, normals, sub_nodes_TF):
@@ -382,13 +397,16 @@ class AABBTree(object):  # AABBItem or object - for testing
         """
         Construct boundary frame
         """
-        if _min == None:
+        print "body =", self._parent_body._name
+        if _min is None:
             self._min = np.array(_nodes).min(axis=0)
+            print "self._min =", self._min
         else:
             self._min = _min
 
-        if _max == None:
+        if _max is None:
             self._max = np.array(_nodes).max(axis=0)
+            print "self._max =", self._max
         else:
             self._max = _max
 
@@ -410,16 +428,14 @@ class AABBTree(object):  # AABBItem or object - for testing
         self.z_max = self.z_dim
 
         #    check x/y to height dimension ratio
+        print "self.x_min, self.x_max, self.y_min, self.y_max =", self.x_min, self.x_max, self.y_min, self.y_max
         self.x_min, self.x_max, self.y_min, self.y_max = self._check_ratio(self.x_min, self.x_max, self.y_min, self.y_max)
-
-
+        print "self.x_min, self.x_max, self.y_min, self.y_max =", self.x_min, self.x_max, self.y_min, self.y_max
         #    calculate dimensions of a AABB frame
         self._frame_dimensions(self.x_min, self.x_max, self.y_min, self.y_max)
-        
-        
+
         #    frame center
         self._center(_nodes)
-
 
         #    get divide node - node nearest to the center    
         self._divide_node(_nodes)
@@ -465,11 +481,11 @@ class AABBTree(object):  # AABBItem or object - for testing
         self.center = np.sum(_nodes, axis=0) / len(_nodes)
         #   get components (x,y,z)
         self.x_center, self.y_center, self.z_center = self.center
-        
 
-        [self.x_center_GCS, self.y_center_GCS, self.z_center_GCS] = [self.x_center, self.y_center, self.z_center]
-    
-    
+
+        [self.x_center_GCS, self.y_center_GCS, self.z_center_GCS] = self.R + Ai_ui_P_vector(self.center, self.theta[2])#[self.x_center, self.y_center, self.z_center]
+
+
     def _divide_node(self, _array):
         """
         Function calculates (selects) divide node, that is the node that is nearest
@@ -691,6 +707,7 @@ class AABBTree(object):  # AABBItem or object - for testing
         Function updates frame geometry to use it with contact detection - AABB overlap on CPU.
         q_i - body q vector q = [Rx, Ry, theta]
         """
+        print "update_frame_geometry()"
         R = q_i[0:2]
         theta = q_i[2]
 

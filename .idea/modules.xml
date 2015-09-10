@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DyS_project.iml" filepath="$PROJECT_DIR$/.idea/DyS_project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../MeasDataAnalysis/.idea/MeasDataAnalysis.iml" filepath="$PROJECT_DIR$/../../MeasDataAnalysis/.idea/MeasDataAnalysis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../_sandbox/.idea/_sandbox.iml" filepath="$PROJECT_DIR$/../_sandbox/.idea/_sandbox.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../dynamic_systems/.idea/dynamic_systems.iml" filepath="$PROJECT_DIR$/../dynamic_systems/.idea/dynamic_systems.iml" />
     </modules>
   </component>
 </project>

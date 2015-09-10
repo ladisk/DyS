@@ -205,7 +205,7 @@ class SolveODE(QObject):  # Thread, QObject
 
             # print "self.FLAG_contact =", self.FLAG_contact
             print "--------------------------------"
-            print "i =", self.step, "h =", h, "t =", t+h,
+            print "i =", self.step, "h =", h, "t =", t+h
             # print "t =", t
 
             K1 = h * self.ode_fun.create_dq(h, t, w)
@@ -419,6 +419,7 @@ class SolveODE(QObject):  # Thread, QObject
                         contact.check_for_AABB_AABB_overlap(q, contact.AABB_i, contact.AABB_j)
 
                         if contact.AABB_list_of_overlap_pairs != []:
+                            print "t =", t, "overlap"
                             status = contact.check_for_contact(q)
                             self.contact_status_list.append(status)
                         else:
@@ -477,7 +478,6 @@ class SolveODE(QObject):  # Thread, QObject
         """
         #    predefine zero array
         _energy = np.zeros(self.MBD_system.number_of_bodies)
-        
 
         for i, body in enumerate(self.MBD_system.bodies):
 

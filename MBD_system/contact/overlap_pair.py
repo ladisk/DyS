@@ -66,11 +66,8 @@ class Overlap_pair(object):
         self.edge_body = AABB_j._parent_body
         self.node_body = AABB_i._parent_body
 
-
         for node in AABB_i.nodes_GCS_in_AABB:
-
             for i, (node_j, normal_) in enumerate(zip(AABB_j.nodes_GCS_in_AABB, AABB_j.normals_GCS_in_AABB)):
-
                 if i < len(AABB_j.nodes_GCS_in_AABB) - 1:
                     _edge_node_1 = node_j
                     _edge_node_2 = AABB_j.nodes_GCS_in_AABB[i + 1]
@@ -88,7 +85,7 @@ class Overlap_pair(object):
         for body_id_ in self.body_id_list:
             #    assign body object from body list to new variable name
             body_ = bodies[body_id_]
-            body_.contact_geometry = ContactGeometry(parent=body_)
+            # body_.contact_geometry = ContactGeometry(parent=body_)
 
             #    add only geometry (triangles and nodes) that meet conditions
             for triangle in body_.geom.geom_data.triangles:

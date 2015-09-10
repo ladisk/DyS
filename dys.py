@@ -111,8 +111,7 @@ class MainWindow(QtGui.QMainWindow):
             MBD_folder_abs_path_ = os.getcwd()
             project_filename = "Model_1"
         else:
-            self._working_directory = os.path.join(os.getcwd(), "")
-            print "self._working_directory =", self._working_directory
+            self._working_directory = os.path.join(os.getcwd(), "..")
             self.MBD_file_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename)
 
             MBD_folder_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_)

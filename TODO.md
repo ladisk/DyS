@@ -1,7 +1,7 @@
 **DyS TODO list - tasks**
 
 *Check* 
-
+- [ ] attributes shat start with underscore are used to be modified before each simulation (probably using monte carlo simulation)
 - [ ] tangent contact force not 0 when coefficient of friction is 0 (ls)
 - [ ] contact point is only updated, it there is translation in contact is not detected???
 - [ ] Update AABB data (AABB frame, nodes in AABB) as function of R, theta (at)

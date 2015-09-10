@@ -51,11 +51,12 @@ class Contact(ContactItem):
             body_j - 
         '''
         self._parent = parent
+        #    contact type
         self._type = _type
+        self._type = "ACCF"  # "ACCF" or "ECF-N"
 
         #   contact geometry (profile) - list of object pairs
         self.contact_geometry_list = []
-
 
         #   position of contact in z direction
         self.z_dim = 0
@@ -65,10 +66,8 @@ class Contact(ContactItem):
         if self.properties is not []:
             self.add_additional_parameters(self.properties)
 
-
         #   solution file type, optional: .dat, .xlsx, .csv
         self._solution_filetype=".xlsx"
-
 
         #    numerical error when calculating distance (point to line)
         self.distance_TOL = 1.E-8
@@ -76,8 +75,7 @@ class Contact(ContactItem):
         #   contact model
 #         self.contact_model_type = "lankarani-nikravesh"
         self.contact_model = ContactModel(self.contact_model_type, coef_of_restitution = self.coef_of_restitution, parent=self)
-        
-        
+
         #    friction model
 #         self.friction_model_type = "friction"
         self._dq_t_TOL = 1E-3
@@ -86,8 +84,6 @@ class Contact(ContactItem):
 
         self.friction_model = FrictionModel(self.friction_model_type, coef_of_friction_dynamic=self.coef_of_friction_dynamic, coef_of_friction_static=self.coef_of_friction_static, parent=self)
 
-
-
         #    contact body ids
         self.body_id_i = body_id_i
         self.body_id_j = body_id_j
@@ -95,16 +91,11 @@ class Contact(ContactItem):
         self.body_list = []
         self.contact_geometry_list = []
 
-        #    contact type
-        self.type = type
-        self.type = "ACCF"  # "ACCF" or "ECF-N"
-
-
         #   set type properties
-        if self.type == "ACCF":
+        if self._type == "ACCF":
             self.__set_ACCF_parameters()
             
-        if self.type == "ECF-N":
+        if self._type == "ECF-N":
             self.__set_ECF_N_parameters()
 
         #    initialize a list of AABB
@@ -114,8 +105,6 @@ class Contact(ContactItem):
 
         #    initialize a list of contact pairs
         self.AABB_list_of_overlap_pairs = []
-        self._distance_list = []
-
 
         #   contact node-edge points to calculate contact properties
         self.node_LCS = None
@@ -131,14 +120,12 @@ class Contact(ContactItem):
         self.u_P_LCS = None
         self.u_P_list_LCS = []
 
-
         #    contact status attributes
         self.AABB_overlay_detected = False
         self.contact_detected = False  # True or False
         self.contact_distance_inside_tolerance = False
         self.initial_contact_velocity_calculated = False
         self._contact_point_found = False
-
 
         #   pair of contact force list
         self.contact_bodies_added_to_list = False
@@ -160,7 +147,6 @@ class Contact(ContactItem):
 
             self._parent._parent.bodies[body_id].forces.append(_Fn)
             self._parent._parent.bodies[body_id].forces.append(_Ft)
-
 
         self.list_of_contact_force_objects_constructed = True
         
@@ -274,20 +260,26 @@ class Contact(ContactItem):
             setattr(body_, "skin_thickness", 10 * self.distance_TOL)
 
             #   remove duplicate nodes
-            _nodes, _normals = body_.geom.geom_data.remove_duplicate_2D()
+            # _nodes, _normals = body_.geom.geom_data.remove_duplicate_2D()
 
             #   build contact geometry object and append it to lists (in contact and in body)
             _contact_area = self.properties[__body+".contact_area"]
-            _contact_geometry = ContactGeometry(_contact_area, body_, parent=self)
+            _contact_geometry_type = self.properties[__body+".contact_geometry_type"]
 
+            if _contact_geometry_type == "area":
+                pass
+            elif _contact_geometry_type == "edge":
+                pass
+            elif _contact_geometry_type == "body":
+                pass
 
+            _contact_geometry = ContactGeometry(_contact_geometry_type, body_, area=_contact_area, parent=self)
 
             self.contact_geometry_list.append(_contact_geometry)
             body_.contact_geometries.append(_contact_geometry)
 
             #    get nodes and normals from contact geometry object
             _nodes, _normals = _contact_geometry.get_data()
-
 
             #    if value is assigned to position_of_plane_in_z_direction only 2D nodes are put in argument
             if self.z_dim is not None:
@@ -309,8 +301,7 @@ class Contact(ContactItem):
         
                 if body_id == self.body_id_j and "body_j" in key:
                     setattr(body_.AABBtree, key[key.rindex('.') + 1:], self.properties[key])
-        
-        
+
             #    create AABBTree object with recursion
             body_.AABBtree.construct()
         
@@ -321,8 +312,7 @@ class Contact(ContactItem):
         #   is saved as different attribute for later calculations
         if self.body_id_list:
             self.AABB_i, self.AABB_j = self.AABB_list
-        
-        
+
         self.add_additional_parameters(self.properties)
 
 
@@ -371,6 +361,7 @@ class Contact(ContactItem):
             http://gamemath.com/2011/09/detecting-whether-two-boxes-overlap/
         """
         #    if parameter is defined (not None) overlap of AABB is checked in 2D else in 3D
+        #   2D overlap check
         if self.z_dim is not None:
             if AABB_i.x_max_GCS < AABB_j.x_min_GCS:  # 1 is left 2
                 return False
@@ -381,7 +372,7 @@ class Contact(ContactItem):
             if AABB_i.y_min_GCS > AABB_j.y_max_GCS:  # 1 is below 2
                 return False
             return True
-        
+        #   3D overlap check
         else:
             if AABB_i.x_max_GCS < AABB_j.x_min_GCS:  # 1 is left 2
                 return False
@@ -409,7 +400,6 @@ class Contact(ContactItem):
         for AABB, body_id in zip(self.AABB_update_list, self.body_id_list):
             q_i = q2q_body(q, body_id)
             AABB.update_frame_geometry(q_i)
-
 
         #    check for overlap of each AABB frame
         if self.__AABB_AABB_overlap(AABB_i, AABB_j):
@@ -441,14 +431,14 @@ class Contact(ContactItem):
         """
         Function check for contact between contact pair of AABBs
         """
-        # print "check_for_contact() - contact.py"
+        print "check_for_contact() - contact.py"
         #    predefine and reset to empty lists
-        self._distance_list_values = []
-        self._inside_list = []
-        self._distance_list = []
-        
+        _distance_list_values = []
+        _inside_list = []
+        _distance_list = []
 
         #    loop through list of overlapped AABB object pairs
+        print "pair =", self.AABB_list_of_overlap_pairs
         for overlap_pair_obj in self.AABB_list_of_overlap_pairs:
             #    check for contact of overlapped AABB pair (object)
             overlap_pair_obj.check_for_contact_2D(q)
@@ -457,25 +447,31 @@ class Contact(ContactItem):
             __distance_list_of_overlap_pair = overlap_pair_obj.distance_list
             
             #    append distance list from AABB overlap object to contact object attribute distance
-            self._distance_list.extend(__distance_list_of_overlap_pair)
-
-        
+            _distance_list.extend(__distance_list_of_overlap_pair)
+        print "_distance_list =", _distance_list
+        for _dist in _distance_list:
+            print "------------------------------"
+            print "_dist._distance =", _dist._distance
+            print "_dist._inside =", _dist._inside
+            print "edge body =", _dist.edge_body._name
+            print "node body =", _dist.node_body._name
+            pprint(vars(_dist))
+        time.sleep(100)
         #    predefine min distance attribute
-        self._distance = np.nan
-        self._distance_sign = np.nan
+        self._distance = None
+        self._distance_sign = None
 
+        _inside_list = [_dist._inside for _dist in _distance_list]
+        print "_inside_list =", _inside_list
+        for dist in _inside_list:
+            print "------------------------------"
+            dist
 
-        self._inside_list = [_dist._inside for _dist in self._distance_list]
-        # for dist in self._inside_list:
-        #     print "------------------------------"
-        #     dist
-
-
-        self._distance_list_values = np.array([_dist._distance for _dist in self._distance_list])
+        _distance_list_values = np.array([_dist._distance for _dist in _distance_list])
         
-        self._distance_sign_list_values = np.array([_dist._distance_sign for _dist in self._distance_list])
+        self._distance_sign_list_values = np.array([_dist._distance_sign for _dist in _distance_list])
         
-        self._distance = min(self._distance_list_values)
+        self._distance = min(_distance_list_values)
         
         self._distance_sign = min(self._distance_sign_list_values)
         
@@ -489,14 +485,14 @@ class Contact(ContactItem):
 
         #    all calculated distances are greater than minimum tolerance for contact
         #    returns value 1 - to divide time step
-        print "min(self._distance_list_values) =", min(self._distance_list_values)
-        if any(self._inside_list) and (self._distance_list_values > self.distance_TOL).all():
+        print "min(_distance_list_values) =", min(_distance_list_values)
+        if any(_inside_list) and (_distance_list_values > self.distance_TOL).all():
             self.contact_detected = True
             self.status = -1
             return self.status
         
         #    contact is detected
-        if (self._distance_list_values <= self.distance_TOL).any():
+        if (_distance_list_values <= self.distance_TOL).any():
             self.contact_detected = True
             self.contact_distance_inside_tolerance = True
             self.status = 1

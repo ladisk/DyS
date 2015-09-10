@@ -236,6 +236,15 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                         menu.addAction(show_AABB_action)
 
                     menu.addSeparator()
+
+                    for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
+                        _body = self.MBD_system._children[0].bodies[body_id]
+                        _AABB = _body.AABBtree
+
+                        properties_of_AABB_action = menu.addAction("Properties of AABB on body "+ID)
+                        properties_of_AABB_action.triggered.connect(_AABB._get_properties)
+
+                    menu.addSeparator()
                 except:
                     pass
 

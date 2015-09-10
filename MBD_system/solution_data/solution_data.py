@@ -27,7 +27,7 @@ class SolutionData(SolutionDataItem):
     '''
     __id = itertools.count(0)
 
-    def __init__(self, name, file=None, parent=None):
+    def __init__(self, name, _file=None, parent=None):
         super(SolutionData, self).__init__(name, parent)
         """
         Constructor of force class
@@ -43,7 +43,7 @@ class SolutionData(SolutionDataItem):
         self._parent = parent
 
         #   abs path to file
-        self._file = file
+        self._file = _file
         
         #    set file type: .dat, .xlsx, .csv
         self._filetype = ".dat" 
@@ -63,6 +63,16 @@ class SolutionData(SolutionDataItem):
             self._load_excel_file()
         elif self._filetype == ".csv":
             self._load_csv_file()
+        elif self._filetype == ".sol":
+            self._load_sol_file()
+
+
+    def _load_sol_file(self):
+        """
+
+        """
+        data = np.loadtxt(str(self._file), skiprows=2)
+        return data
 
 
     def _load_dat_file(self):
