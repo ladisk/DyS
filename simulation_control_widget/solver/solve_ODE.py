@@ -419,7 +419,7 @@ class SolveODE(QObject):  # Thread, QObject
                         contact.check_for_AABB_AABB_overlap(q, contact.AABB_i, contact.AABB_j)
 
                         if contact.AABB_list_of_overlap_pairs != []:
-                            print "t =", t, "overlap"
+                            # print "t =", t, "overlap"
                             status = contact.check_for_contact(q)
                             self.contact_status_list.append(status)
                         else:
@@ -440,7 +440,7 @@ class SolveODE(QObject):  # Thread, QObject
                     self.contact_status_list.append(status)
 
             self.contact_status_list = np.array(self.contact_status_list)
-            print "t =", t, "self.contact_status_list =", self.contact_status_list
+            # print "t =", t, "self.contact_status_list =", self.contact_status_list
 
             #    no contacts
             if (self.contact_status_list == 0).all():

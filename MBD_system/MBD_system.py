@@ -23,7 +23,6 @@ import joint.list_of_joints as list_of_joints
 import spring.list_of_springs as list_of_springs
 from MBD_system_items import *
 
-
 class MBDsystem(MBDsystemItem):
     '''
     classdocs
@@ -54,6 +53,9 @@ class MBDsystem(MBDsystemItem):
         #   extension of data files
         self._filetype = ".dat"
 
+        #   parameters - used for monte carlo simulations
+        self.parameters = AnalysisTreeItem(self._name)
+
         #   angle units, deg or rad
         self._angle_units = "deg"  #    deg or rad
         
@@ -62,7 +64,7 @@ class MBDsystem(MBDsystemItem):
         self._log_file = LOG_FILENAME
         self.loadSolutionFileWhenFinished = False
         self.updateEveryIthStep = 10
-        
+
 
         self._logger = logging.getLogger('DyS_logger')
 
@@ -164,29 +166,23 @@ class MBDsystem(MBDsystemItem):
         else:
             self.construct_MBD_system(MBD_file_abs_path=self.MBD_file_abs_path, MBD_folder_abs_path=self.MBD_folder_abs_path_, _name=self._name)
 
-    
-    def _list_parameters(self, item=None):
+    def list_parameters(self, item=None):
         """
         Function lists all parameters (attributes) of all objects in MBD system recursively
         """
-        if item == None:
+        if item is None:
             item = self
-        else:
-            item = item
-
 
         for child in item._children:
-            print "******************************"
-            print child._name
-
-            if child._typeInfo == "group"  or child._typeInfo == "MBDsystem" or child._typeInfo == "body":
+            if child._typeInfo == "body":
+            # if child._typeInfo == "group" or child._typeInfo == "MBDsystem" or child._typeInfo == "body":
                 for attr in child.__dict__:
                     if attr[0] is not "_":
                         print "%s = %s" % (attr, getattr(child, attr))
-            
-                
-                self._list_parameters(item=child)
-
+                        AnalysisTreeItem(attr, item=child, mean_value=getattr(child, attr), parent = self.parameters)
+                self.list_parameters(item=child)
+            else:
+                self.list_parameters(item=child)
 
     def __create_groups(self):
         for group_name in self.list_of_object_groups:
@@ -433,11 +429,10 @@ class MBDsystem(MBDsystemItem):
         self.q0_created = True
         
         return self.q0
-    
-    
+
     def _restore_initial_conditions(self):
         """
-        
+        Restore initial conditions
         """
         if not hasattr(self, "q0"):
             self.q0 = self.create_q0()
@@ -446,8 +441,6 @@ class MBDsystem(MBDsystemItem):
         for contact in self.contacts:
             contact._reset_to_initial_state()
 
-    
-    
     def update_coordinates_and_angles_of_all_bodies(self, q, step=None):
         """
 

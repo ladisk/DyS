@@ -36,7 +36,16 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+# define authorship information
+__authors__ = ['Luka Skrinjar', 'Ales Turel', 'Janko Slavic']
+__author__ = ','.join(__authors__)
+__credits__ = []
+__copyright__ = 'Copyright (c) 2011'
+__license__  = 'GPL'
 
+# maintanence information
+__maintainer__ = 'Luka Skrinjar'
+__email__  = 'skrinjar.luka@gmail.com'
 __version__ = "0.0.6"
 
 

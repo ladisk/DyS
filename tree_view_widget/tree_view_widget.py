@@ -23,6 +23,7 @@ from MBD_system.spring.spring_widget import SpringWidget
 from MBD_system.item_widget import ItemWidget
 from tree_model import TreeModel
 from MBD_system.MBD_system_items import SolutionDataItem
+from analysis.analysis_widget import AnalysisWidget
 
 class solutionFilenameSignal(QtCore.QObject):
     signal_filename = QtCore.pyqtSignal(str, name='')
@@ -105,14 +106,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         self._item = self.ui.treeView.model().getNode(indexes[0])
 
-
         if len(indexes) > 0:
             level = 0
             index = indexes[0]
             while index.parent().isValid():
                 index = index.parent()
                 level += 1
-
 
         if self._item._typeInfo == "group":
             createAction = menu.addAction("Create")
@@ -134,8 +133,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             deleteAction.triggered.connect(self._delete)
 
             menu.addSeparator()
-                
-                
+
         if self._item._typeInfo == "MBDsystem" or self._item._typeInfo == "settings":
             menu.addSeparator()
             show_GCS_Action = QtGui.QAction("Show GCS ", self, checkable=True, checked=self._parent.SimulationControlWidget.OpenGLWidget.LCS._visible)
@@ -157,12 +155,14 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 get_q_Action = menu.addAction("Get q")
                 get_q_Action.triggered.connect(self._get_q)
                 
-                list_parameters_Action = menu.addAction("List Parameters")
+                list_parameters_Action = menu.addAction("List parameters")
                 list_parameters_Action.triggered.connect(self._list_parameters)
-                
+
+                analysis_Action = menu.addAction("Analysis")
+                analysis_Action.triggered.connect(self._analysis)
+
                 menu.addSeparator()
-                
-                
+
         elif self._item._typeInfo == "solution":
             loadAction = menu.addAction("Load from File")
             loadAction.triggered.connect(self._load_solution_file_to_project)
@@ -175,8 +175,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
             propertiesAction = menu.addAction("Properties")
             propertiesAction.triggered.connect(self._properties)
-        
-        
+
 #         elif self._item._typeInfo == "solutiondata":
 #             
 #             openAction = menu.addAction("Open")
@@ -198,7 +197,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 show_marker_Action.triggered.connect(marker._show)
                 menu.addAction(show_marker_Action)
 
-
         elif self._item._typeInfo == "joint" or self._item._typeInfo == "spring":
             for force, ID in zip(self._item.force_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show force on Body "+ID, self, checkable=True, checked=force._visible)
@@ -210,8 +208,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 show_marker_Action = QtGui.QAction("Show u_P on body "+ID, self, checkable=True, checked=marker._visible)
                 show_marker_Action.triggered.connect(marker._show)
                 menu.addAction(show_marker_Action)
-        
-        
+
         elif self._item._typeInfo == "contact":
             for force, ID in zip(self._item._Fn_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show Fn on body "+ID, self, checkable=True, checked=force._visible)
@@ -226,27 +223,28 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
             menu.addSeparator()
             if self._item._type == "general":
-                try:
-                    for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
-                        _body = self.MBD_system._children[0].bodies[body_id]
-                        _AABB = _body.AABBtree
+                # try:
+                for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
+                    print "body_id =", body_id
+                    _body = self.MBD_system._children[0].bodies[body_id]
+                    _AABB = _body.AABBtree
 
-                        show_AABB_action = QtGui.QAction("Show AABB on body "+ID, self, checkable=True, checked=_AABB._visible)
-                        show_AABB_action.triggered.connect(_AABB._show_AABB)
-                        menu.addAction(show_AABB_action)
+                    show_AABB_action = QtGui.QAction("Show AABB on body "+ID, self, checkable=True, checked=_AABB._visible)
+                    show_AABB_action.triggered.connect(_AABB._show_AABB)
+                    menu.addAction(show_AABB_action)
 
-                    menu.addSeparator()
+                menu.addSeparator()
 
-                    for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
-                        _body = self.MBD_system._children[0].bodies[body_id]
-                        _AABB = _body.AABBtree
+                for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
+                    _body = self.MBD_system._children[0].bodies[body_id]
+                    _AABB = _body.AABBtree
 
-                        properties_of_AABB_action = menu.addAction("Properties of AABB on body "+ID)
-                        properties_of_AABB_action.triggered.connect(_AABB._get_properties)
+                    properties_of_AABB_action = menu.addAction("Properties of AABB on body "+ID)
+                    properties_of_AABB_action.triggered.connect(_AABB._get_properties)
 
-                    menu.addSeparator()
-                except:
-                    pass
+                menu.addSeparator()
+                # except:
+                #     pass
 
             try:
                 for contact_geometry, ID in zip(self._item.contact_geometry_list, ["i", "j"]):
@@ -259,7 +257,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             except:
                 pass
 
-
             contactForceAction = menu.addAction("Contact force")
             contactForceAction.triggered.connect(self._item.get_contact_force)
 
@@ -270,8 +267,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                     show_marker_Action = QtGui.QAction("Show Body "+ID+" joint center", self, checkable=True, checked=marker._visible)
                     show_marker_Action.triggered.connect(marker._show)
                     menu.addAction(show_marker_Action)
-
-            
 
         elif self._item._typeInfo == "body":
             if self._item._name == "Ground" or self._item.body_id == -1:
@@ -318,7 +313,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         self._item._list_parameters(item=self.MBD_system)
 
-    
+    def _analysis(self):
+        """
+        
+        """
+        self._widget = AnalysisWidget(self.MBD_system)
+
     def _load_group_items(self):
         """
         

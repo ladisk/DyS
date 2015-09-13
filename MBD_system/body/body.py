@@ -93,7 +93,6 @@ class Body(BodyItem):
         self.CM_CAD_LCS = CM_CAD_LCS
         self.CAD_LCS_GCS = CAD_LCS_GCS
 
-
         #    dynamic properties
         self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
         #    (initial) coordinates and angles (in degrees)
@@ -104,8 +103,7 @@ class Body(BodyItem):
 
         #    connected to ground
         self._connected_to_ground = connected_to_ground
-        
-        
+
         #   list of forces
         self.forces = []
         #   list for markers
@@ -117,7 +115,6 @@ class Body(BodyItem):
         self._visible = visible
         self.geom = None
         self.VBO_created = False
-
 
         #    AABB tree object assigned to body object as attribute if body is specified to be in contact with other body
         self.AABBtree = None
@@ -139,8 +136,6 @@ class Body(BodyItem):
 
         self.properties_file_with_extension = self._name + self.properties_file_extension
 
-
-
         #   opengl properties
         #   create coordinate systems
         #   local coordinate system at center of gravity of a body
@@ -155,9 +150,8 @@ class Body(BodyItem):
             self.transparent_GL = transparent_GL
             self.display_style = display_style
 
-
             #    contact properties
-            self.skin_thickness = None
+            self._max_penetration_depth = None
             self.uP_i_max = None
 
             #    if body is not ground read body properties data

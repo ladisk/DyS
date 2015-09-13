@@ -11,7 +11,7 @@ class Distance(object):
     """
     classdocs
     """
-    def __init__(self, n0, n1, n2=[], normal=[], node_body=None, edge_body=None, parent = None):
+    def __init__(self, n0, n1, n2=None, normal=None, node_body=None, edge_body=None, parent = None):
         """
         Constructor
         """
@@ -29,10 +29,14 @@ class Distance(object):
         self.node_body = node_body
         self.edge_body = edge_body
 
+        #   max penetration depth attribute assigned from body attribute
         if edge_body is not None:
             self._max_penetration_depth = edge_body._max_penetration_depth
+        else:
+            self._max_penetration_depth = 1E-3
 
-        if n2 == []:
+        #   evaluate distance
+        if n2 is None:
             self._distance = self.__vector_length(n0, n1)
         else:
             self.__evaluate_distance_2D(n0, n1, n2)
@@ -44,8 +48,19 @@ class Distance(object):
             n1 - start node of edge
             n2 - end node of edge 
         """
+        #   vector from start node of edge to free node
         n1n0 = n1 - n0
-        self.__tangent = n2n1 = n2 - n1
+        n2n0 = n2 - n0
+        #   edge vector from 2 to 1
+        n2n1 = n2 - n1
+
+        #   calculate angles
+        #   angle
+        fi_012 = self.angle(n1n0, -n2n1)
+        fi_021 = self.angle(n2n0, n2n1)
+
+        #   tangent
+        self.__tangent = n2n1
         self.tangent = n2n1_e = n2n1 / np.linalg.norm(n2n1)
 
         _distance_vector = (np.dot(n1n0, n2n1_e) * n2n1_e) - n1n0
@@ -55,7 +70,7 @@ class Distance(object):
         normal_plus_distance = self.normal + _distance_vector
 
         #   check if free node is inside (TF status)
-        if np.linalg.norm(normal_plus_distance) < np.linalg.norm(self.normal):
+        if (np.linalg.norm(normal_plus_distance) < np.linalg.norm(self.normal)) and (self._distance <= self._max_penetration_depth) and (fi_012 <= np.pi/2) and (fi_021 <= np.pi/2):
             self._inside = True
             self._distance_sign = -self._distance
         else:
@@ -72,14 +87,14 @@ class Distance(object):
         #   vector length
         _d = np.linalg.norm(_distance_vector, ord=2)
 
-
         #   calculate normal for revolute clearance joint
         self.normal = _distance_vector/_d
 
-
         self.tanget = None
-
         return _d
+
+    def angle(self, vec1, vec2):
+        return np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1, ord=2) * np.linalg.norm(vec2, ord=2)))
 
     def get_normal_2D(self):
         return self.normal[0:2]
@@ -129,13 +144,13 @@ if __name__ == "__main__":
 
     #   free node
     ax.plot(n0[0], n0[1], color="black", marker="o", linestyle = "-")
-    ax.text(n0[0]*1.01, n0[1]*1.01, "N0 ="+str(n0[0])+","+str(n0[1]), color='black')
+    ax.text(n0[0]*1.01, n0[1]*1.01, "N0 =["+str(n0[0])+","+str(n0[1])+"]", color='black')
 
     #   edge
     ax.arrow(n1[0], n1[1], n2[0]-n1[0], n2[1]-n1[1], width = 1E-4, head_width=4E-4, head_length=0.01, fc='k', ec='k')
     ax.plot([n1[0], n2[0]], [n1[1], n2[1]], color="black", marker="s", linestyle = "-")
-    ax.text(n1[0]*1.01, n1[1]*1.01, "N1 ="+str(n1[0])+","+str(n1[1]), color='black')
-    ax.text(n2[0]*1.01, n2[1]*1.01, "N2 ="+str(n2[0])+","+str(n2[1]), color='black')
+    ax.text(n1[0]*1.01, n1[1]*1.01, "N1 =["+str(n1[0])+","+str(n1[1])+"]", color='black')
+    ax.text(n2[0]*1.01, n2[1]*1.01, "N2 =["+str(n2[0])+","+str(n2[1])+"]", color='black')
     #   normal
     ax.arrow(n1[0], n1[1], normal[0]*1E-2, normal[1]*1E-2, width = 1E-4, head_width=4E-4, head_length=1E-4, fc='grey', ec='grey')
 

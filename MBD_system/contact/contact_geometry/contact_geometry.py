@@ -57,6 +57,9 @@ class ContactGeometry(object):
         #   in body coordinates
         self.z_dim_lcs = gcs2lcs_z_axis(body.R[2], self.z_dim)
 
+        #   max penetration depth
+        self._max_penetration_depth = self.body._max_penetration_depth
+
         if self._type == "area":
             self._area_contact_profile(area)
         if self._type == "edge":

@@ -26,9 +26,14 @@ class TreeModel(QtCore.QAbstractItemModel):
     def columnCount(self, parent):
         return 1
 
-    """INPUTS: QModelIndex, int"""
-    """OUTPUT: QVariant, strings are cast to QString which is a QVariant"""
     def data(self, index, role):
+        """
+        INPUTS: QModelIndex, int
+        QVariant, strings are cast to QString which is a QVariant
+        :param index:
+        :param role:
+        :return:
+        """
 
         if not index.isValid():
             return None

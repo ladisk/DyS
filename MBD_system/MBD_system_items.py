@@ -20,6 +20,7 @@ class TreeItem(object):
         self._comments = ""
         self._id = self.__id.next()
         self._constructed = True
+        self._selected = False
         if parent is not None:
             parent.addChild(self)
         
@@ -71,8 +72,33 @@ class TreeItem(object):
     
     def row(self):
         if self._parent is not None:
-            return self._parent._children.index(self) 
+            return self._parent._children.index(self)
 
+class ProjectItem(TreeItem):
+    def __init__(self, name, parent=None):
+        super(ProjectItem, self).__init__(name, parent)
+        self._type = "projectNode"
+
+class AnalysisTreeItem(TreeItem):
+    def __init__(self, name, item=None, mean_value=None, parent=None):
+        super(AnalysisTreeItem, self).__init__(name, parent)
+        self._type = "analysisNode"
+
+        self._item = item
+        #   attributes to build tree item object of each parameter of a MBD system for monte carlo simulation
+        self._mean_value = mean_value
+        self._min_value = None
+        self._max_value = None
+        self._random_value = None
+
+    def mean_value(self):
+        return self._mean_value
+
+    def min_value(self):
+        return self._min_value
+
+    def max_value(self):
+        return self._max_value
 
 class MBDsystemItem(TreeItem):
     def __init__(self, name, parent=None):

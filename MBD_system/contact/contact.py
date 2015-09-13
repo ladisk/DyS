@@ -12,7 +12,7 @@ from OpenGL.GL import *
 
 from MBD_system.MBD_system_items import ContactItem
 from MBD_system.force.force import Force
-from MBD_system.contact.bounding_box.bounding_box import AABBTree
+from MBD_system.contact.bounding_box.bounding_box import AABB
 from overlap_pair import Overlap_pair
 from evaluate_distance import evaluate_distance_2D
 from contact_C_matrix import *
@@ -53,7 +53,7 @@ class Contact(ContactItem):
         self._parent = parent
         #    contact type
         self._type = _type
-        self._type = "ACCF"  # "ACCF" or "ECF-N"
+        # self._type = "ACCF"  # "ACCF" or "ECF-N"
 
         #   contact geometry (profile) - list of object pairs
         self.contact_geometry_list = []
@@ -251,7 +251,6 @@ class Contact(ContactItem):
         """
         Create bounding box object for each body
         """
-        # self.body_id_list = []
         self.__body_list = ["body_i", "body_j"]
 
         for body_id, __body in zip(self.body_id_list, self.__body_list):
@@ -291,7 +290,9 @@ class Contact(ContactItem):
             body_.uP_i_max = np.linalg.norm(np.array(np.amax(_nodes, axis=0)), ord=2)
         
             #    head AABBTree object is constructed
-            body_.AABBtree = AABBTree(nodes_LCS=_nodes, normals_LCS=_normals, parent=self, parent_body=body_)
+            body_.AABBtree = AABB(nodes_LCS=_nodes, normals_LCS=_normals, parent=self, parent_body=body_)
+            # print "body_.AABBtree =", body_.AABBtree
+            # pprint(vars(body_.AABBtree))
             body_.AABBtree._visible = True
         
             #    is additional properties are defined, than they are assigned to AABB objects
@@ -309,8 +310,9 @@ class Contact(ContactItem):
             self.AABB_list.append(body_.AABBtree)
         
         #    after the list of AABBtree for the contact is created (filled with object-data) each AABBtree
-        #   is saved as different attribute for later calculations
-        if self.body_id_list:
+        #    is saved as different attribute for later calculations
+        # print "self.AABB_list =", self.AABB_list
+        if self.body_id_list is not []:
             self.AABB_i, self.AABB_j = self.AABB_list
 
         self.add_additional_parameters(self.properties)
@@ -431,14 +433,14 @@ class Contact(ContactItem):
         """
         Function check for contact between contact pair of AABBs
         """
-        print "check_for_contact() - contact.py"
+        # print "check_for_contact() - contact.py"
         #    predefine and reset to empty lists
         _distance_list_values = []
         _inside_list = []
         _distance_list = []
 
         #    loop through list of overlapped AABB object pairs
-        print "pair =", self.AABB_list_of_overlap_pairs
+        # print "pair =", self.AABB_list_of_overlap_pairs
         for overlap_pair_obj in self.AABB_list_of_overlap_pairs:
             #    check for contact of overlapped AABB pair (object)
             overlap_pair_obj.check_for_contact_2D(q)
@@ -448,24 +450,27 @@ class Contact(ContactItem):
             
             #    append distance list from AABB overlap object to contact object attribute distance
             _distance_list.extend(__distance_list_of_overlap_pair)
-        print "_distance_list =", _distance_list
-        for _dist in _distance_list:
-            print "------------------------------"
+        # print "_distance_list =", _distance_list
+        print "------------------------------"
+        for i, _dist in enumerate(_distance_list):
+        #     print "------------------------------"
             print "_dist._distance =", _dist._distance
-            print "_dist._inside =", _dist._inside
-            print "edge body =", _dist.edge_body._name
-            print "node body =", _dist.node_body._name
-            pprint(vars(_dist))
-        time.sleep(100)
+        #     print "_dist._inside =", _dist._inside
+        #     print "edge body =", _dist.edge_body._name
+        #     print "node body =", _dist.node_body._name
+        #     print i
+        #     pprint(vars(_dist))
+        print "d =", _distance_list[1]._distance
+        # time.sleep(100)
         #    predefine min distance attribute
         self._distance = None
         self._distance_sign = None
 
         _inside_list = [_dist._inside for _dist in _distance_list]
-        print "_inside_list =", _inside_list
-        for dist in _inside_list:
-            print "------------------------------"
-            dist
+        # print "_inside_list =", _inside_list
+        # for dist in _inside_list:
+        #     print "------------------------------"
+        #     dist
 
         _distance_list_values = np.array([_dist._distance for _dist in _distance_list])
         
@@ -485,7 +490,7 @@ class Contact(ContactItem):
 
         #    all calculated distances are greater than minimum tolerance for contact
         #    returns value 1 - to divide time step
-        print "min(_distance_list_values) =", min(_distance_list_values)
+        # print "min(_distance_list_values) =", min(_distance_list_values)
         if any(_inside_list) and (_distance_list_values > self.distance_TOL).all():
             self.contact_detected = True
             self.status = -1
@@ -505,8 +510,8 @@ class Contact(ContactItem):
         self._status_container = np.append(self._status_container, self.status)
         self.no_contact()
 
-        print "self.contact_detected =", self.contact_detected
-        print "self._distance =", self._distance
+        # print "self.contact_detected =", self.contact_detected
+        # print "self._distance =", self._distance
         return self.status
 
 
