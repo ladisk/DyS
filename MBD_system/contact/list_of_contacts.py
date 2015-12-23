@@ -13,6 +13,8 @@ import numpy as np
 
 from MBD_system.contact.contact import Contact
 from MBD_system.revolute_clearance_joint.revolute_clearance_joint import RevoluteClearanceJoint
+from MBD_system.contact.contact_sphere_sphere.contact_sphere_sphere import ContactSphereSphere
+from MBD_system.contact.contact_plane_sphere.contact_plane_sphere import ContactPlaneSphere
 
 
 def create_list(filename, parent=None):
@@ -45,7 +47,6 @@ def create_list(filename, parent=None):
                 if len(line.strip()) == 0 or line.startswith("#"):
                     pass
                 else:
-
                     #    continue with reading of the file
                     if line.startswith("CONTACTS FILE-START") or line.startswith("#"):
                         pass
@@ -59,41 +60,78 @@ def create_list(filename, parent=None):
                     else:
                         key = line[0:line.index("=")].strip()
 
-                        if key == "body_i" or key == "body_j":
-                            value = int(line[line.index('=') + 1:].strip())
+                        _val = line[line.index('=') + 1:].strip()
 
-                        elif key == "u_iP" or key == "u_jP" or "contact_area" in key:
-                            #   string to array
-                            _array = line[line.index('=') + 1:].strip()
-                            value = np.fromstring(_array, dtype=float, sep=',')
+                        if _val.lower() == "true":
+                            value = True
+                        elif _val.lower() == "false":
+                            value = False
+
                         else:
-                            value = line[line.index('=') + 1:].strip()
-                            try:
-                                #    string to integer
+                            if key == "body_i" or key == "body_j":
                                 value = int(line[line.index('=') + 1:].strip())
-                            except:
+
+                            elif key == "u_iP" or key == "u_jP" or "contact_area" in key or key == "n_i":
+                                #   string to array
+                                _array = line[line.index('=') + 1:].strip()
+                                value = np.fromstring(_array, dtype=float, sep=',')
+
+                            elif key == "K":
+                                value = float(line[line.index('=') + 1:].strip())
+
+                            else:
+                                value = line[line.index('=') + 1:].strip()
                                 try:
-                                    #    string to float
-                                    value = float(line[line.index('=') + 1:].strip())
+                                    #    string to integer
+                                    value = int(line[line.index('=') + 1:].strip())
                                 except:
-                                    value = line[line.index('=') + 1:].strip()
+                                    try:
+                                        #    string to float
+                                        value = float(line[line.index('=') + 1:].strip())
+                                    except:
+                                        value = line[line.index('=') + 1:].strip()
                         #    add dict item to dict with value
                         dict_[key] = value
 
                     if dict_.has_key("type") and dict_.has_key("all_attributes_read"):
                         if dict_["all_attributes_read"]:
-                            if (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_["type"]=="general"):
+
+                            #   general contact
+                            if (dict_["type"]=="general") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")):
                                 #    construct contact object and append it to list
-                                contact = Contact(dict_["body_i"], dict_["body_j"], dict_["type"], properties_dict=dict_, parent=parent)
+                                contact = Contact(dict_["type"], dict_["body_i"], dict_["body_j"], properties_dict=dict_, parent=parent)
                                 contacts.append(contact)
                                 #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
                                 dict_ = OrderedDict([])
-                            if (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("u_iP")) and (dict_.has_key("u_jP")) and (dict_.has_key("R_i")) and (dict_.has_key("R_j")) and (dict_["type"]=="revolute clearance joint"):
+                            #   revolute clearance joint
+                            elif (dict_["type"] == "revolute clearance joint") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("u_iP")) and (dict_.has_key("u_jP")) and (dict_.has_key("R0_i")) and (dict_.has_key("R0_j")):
                                 #    construct revolute clearance joint (contact type) and append it to list
-                                contact = RevoluteClearanceJoint(dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["R_i"], dict_["R_j"], dict_["type"], properties_dict=dict_, parent=parent)
+                                contact = RevoluteClearanceJoint(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["R0_i"], dict_["R0_j"], properties_dict=dict_, parent=parent)
                                 contacts.append(contact)
                                 #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
                                 dict_ = OrderedDict([])
+                            #   sphere-sphere contact
+                            elif (dict_["type"] == "contact sphere-sphere") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("R_i")) and (dict_.has_key("R_j")):
+                                contact = ContactSphereSphere(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["R_i"], dict_["R_j"], properties_dict=dict_, parent=parent)
+                                contacts.append(contact)
+                                #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
+                                dict_ = OrderedDict([])
+                            #   plane-sphere contact
+                            elif (dict_["type"] == "contact plane-sphere") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("R0_j")) and (dict_.has_key("n_i")):
+                                contact = ContactPlaneSphere(dict_["type"], dict_["body_i"], dict_["body_j"], u_iP=dict_["u_iP"], R0_j=dict_["R0_j"], n_i=dict_["n_i"], properties_dict=dict_, parent=parent)
+                                contacts.append(contact)
+                                #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
+                                dict_ = OrderedDict([])
+                            #   pin-slot clearance joint linear
+                            elif (dict_["type"]=="contact plane-linear"):
+                                print dict_["type"] + "Under construction!"
+                            elif (dict_["type"]=="contact plane-radial"):
+                                print dict_["type"] + "Under construction!"
+
+                            else:
+                                print dict_
+                                print "Contact not created!"
+                                # raise ValueError,
 
                     if __line.startswith("type="):
                         key = line[0:line.index("=")].strip()

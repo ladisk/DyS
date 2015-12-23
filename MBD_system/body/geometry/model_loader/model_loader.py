@@ -1,8 +1,8 @@
-'''
+"""
 Created on 16. nov. 2013
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import os
 import itertools
 import numpy as np
@@ -17,9 +17,9 @@ from MBD_system.body.geometry.edge.edge import Edge
 
 
 class ModelLoader(object):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self, file_):
         """
         loads a 3D file type .stl or .obj

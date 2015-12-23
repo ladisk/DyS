@@ -5,15 +5,44 @@ from PyQt4 import QtCore, QtGui
 
 
 class TreeModel(QtCore.QAbstractItemModel):
-
     """INPUTS: Node, QObject"""
     def __init__(self, root, parent=None):
         super(TreeModel, self).__init__(parent)
         self._rootNode = root
+        
+        self._editable_types = ["body", "force", "joint", "contact", "spring"]
 
-    """INPUTS: QModelIndex"""
-    """OUTPUT: int"""
+    def headerData(self, section, orientation, role):
+        """
+        INPUTS: int, Qt::Orientation, int
+        OUTPUT: QVariant, strings are cast to QString which is a QVariant
+        """
+        if role == QtCore.Qt.DisplayRole:
+            if section == 0:
+                return self._rootNode.name()
+            else:
+                return "Typeinfo"
+
+    def flags(self, index):
+        """
+
+        :param index: QModelIndex
+        :return flag: int
+        """
+        item = index.internalPointer()
+        
+        if item._typeInfo in self._editable_types and item._name != "Ground":
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+        #     if item._children == []:
+        #         return QtCore.Qt.ItemIsSelectable
+
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable  # | QtCore.Qt.ItemIsEditable
+
     def rowCount(self, parent):
+        """
+        INPUTS: QModelIndex
+        OUTPUT: int
+        """
         if not parent.isValid():
             parentNode = self._rootNode
         else:
@@ -21,25 +50,39 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return parentNode.childCount()
 
-    """INPUTS: QModelIndex"""
-    """OUTPUT: int"""
     def columnCount(self, parent):
+        """
+        Number of columns
+        :param parent:
+        :return:
+        INPUTS: QModelIndex
+        OUTPUT: int
+        """
         return 1
 
-    """INPUTS: QModelIndex, int"""
-    """OUTPUT: QVariant, strings are cast to QString which is a QVariant"""
     def data(self, index, role):
+        """
+        INPUTS: QModelIndex, int
+        QVariant, strings are cast to QString which is a QVariant
+        :param index:
+        :param role:
+        :return:
+        """
 
         if not index.isValid():
             return None
 
         node = index.internalPointer()
 
+        #   background color
+        # if role == QtCore.Qt.BackgroundRole:
+        #         return QtGui.QBrush(QtGui.QColor(240, 240, 240))
+
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             if index.column() == 0:
                 return node.name()
-            if index.column() == 1:
-                return node.typeInfo()
+            # if index.column() == 1:
+            #     return node.typeInfo()
 
         #     add icons here
         if role == QtCore.Qt.DecorationRole:
@@ -81,51 +124,37 @@ class TreeModel(QtCore.QAbstractItemModel):
 #                    return QtGui.QIcon(QtGui.QStyle.SP_DirClosedIcon)#(QtGui.QPixmap("c:/Users/reti-luka/Dropbox/DyS/src/V55/icons/folder.svg"))
 #                    QtGui.QStyle.SP_DirClosedIcon
 
-
-    """INPUTS: QModelIndex, QVariant, int (flag)"""
     def setData(self, index, value, role=QtCore.Qt.EditRole):
-
+        """
+        INPUTS: QModelIndex, QVariant, int (flag)
+        """
         if index.isValid():
-
             if role == QtCore.Qt.EditRole:
-
                 node = index.internalPointer()
                 node.setName(value)
-
                 return True
         return False
 
+    def index(self, row, column, parent):
+        """INPUTS: int, int, QModelIndex
+        OUTPUT: QModelIndex
+        Should return a QModelIndex that corresponds to the given row, column and parent node"""
+        parentNode = self.getNode(parent)
 
-    """INPUTS: int, Qt::Orientation, int"""
-    """OUTPUT: QVariant, strings are cast to QString which is a QVariant"""
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole:
-            if section == 0:
-                return self._rootNode.name()
-            else:
-                return "Typeinfo"
+        childItem = parentNode.child(row)
 
+        if childItem:
+            return self.createIndex(row, column, childItem)
+        else:
+            print QtCore.QModelIndex()
+            return QtCore.QModelIndex()
 
-
-    """INPUTS: QModelIndex"""
-    """OUTPUT: int (flag)"""
-    def flags(self, index):
-
-        item = index.internalPointer()
-
-        # if item._typeInfo == "solution":
-        #     if item._children == []:
-        #         return QtCore.Qt.ItemIsSelectable
-
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable  # | QtCore.Qt.ItemIsEditable
-
-
-
-    """INPUTS: QModelIndex"""
-    """OUTPUT: QModelIndex"""
-    """Should return the parent of the node with the given QModelIndex"""
     def parent(self, index):
-
+        """
+        Should return the parent of the node with the given QModelIndex
+        :param QModelIndex:
+        :return QModelIndex:
+        """
         node = self.getNode(index)
         parentNode = node.parent()
 
@@ -134,40 +163,21 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return self.createIndex(parentNode.row(), 0, parentNode)
 
-    """INPUTS: int, int, QModelIndex"""
-    """OUTPUT: QModelIndex"""
-    """Should return a QModelIndex that corresponds to the given row, column and parent node"""
-    def index(self, row, column, parent):
-
-        parentNode = self.getNode(parent)
-
-        childItem = parentNode.child(row)
-
-
-        if childItem:
-            return self.createIndex(row, column, childItem)
-        else:
-            print QtCore.QModelIndex()
-            return QtCore.QModelIndex()
-
-
-
-    """CUSTOM"""
-    """INPUTS: QModelIndex"""
     def getNode(self, index):
-#         print "index =", index
+        """
+        CUSTOM
+        INPUTS: QModelIndex
+        """
         if index.isValid():
             node = index.internalPointer()
             if node:
-#                 print "node =", node
                 return node
-
         return self._rootNode
 
-
-    """INPUTS: int, int, QModelIndex"""
     def insertRows(self, position, rows, parent=QtCore.QModelIndex()):
-
+        """
+        INPUTS: int, int, QModelIndex
+        """
         parentNode = self.getNode(parent)
 
         self.beginInsertRows(parent, position, position + rows - 1)
@@ -179,13 +189,15 @@ class TreeModel(QtCore.QAbstractItemModel):
             success = parentNode.insertChild(position, childNode)
 
         self.endInsertRows()
-
         return success
 
     def insertRow(self, position, child, parent=QtCore.QModelIndex()):
         """
 
         """
+        print "treeView.model().insertRow()"
+
+        print "child =", child, id(child)
         self.beginInsertRows(QtCore.QModelIndex(), parent.row() + len(parent._children), parent.row() + len(parent._children) + 1)
 
         success = parent.insertChild(QtCore.QModelIndex().row() + len(parent._children) + 1, child)
@@ -194,10 +206,10 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return success
 
-
-    """INPUTS: int, int, QModelIndex"""
     def removeRows(self, position, rows, parent=QtCore.QModelIndex()):
-
+        """
+        INPUTS: int, int, QModelIndex
+        """
         parentNode = self.getNode(parent)
         self.beginRemoveRows(parent, position, position + rows - 1)
 
@@ -207,9 +219,6 @@ class TreeModel(QtCore.QAbstractItemModel):
         self.endRemoveRows()
 
         return success
-
-
-
 #     def createGroups(self):
 #         print "EXE?"
 #         print self._rootNode.typeInfo()

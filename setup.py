@@ -12,11 +12,14 @@ with open('LICENSE') as f:
 setup(
     name='DyS',
     version='0.0.6',
-    description='Simulation of rigid multibody system dynamics',
+    description='Dynamics simulation software of rigid multibody systems',
     long_description=readme,
-    author='Kenneth Reitz',
+    author='Luka Skrinjar, Ales Turel, Janko Slavic',
     author_email='skrinjar.luka@gmail.com',
     url='https://github.com/jankoslavic/DyS',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
+
+
+

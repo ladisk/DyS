@@ -10,6 +10,14 @@ from A_inv import A_inv_matrix
 from A import A_matrix
 from cad2cm_lcs import cad2cm_lcs
 
+def uP_gcs2lcs(u_P, theta):
+    _u_P = np.dot(A_inv_matrix(theta), u_P)
+    return _u_P
+
+def uP_lcs2gcs(u_P, theta):
+    _u_P = np.dot(A_matrix(theta), u_P)
+    return _u_P
+
 def gcs2cm_lcs(r_P, R, theta):
     """
     Function calculates a coordinate of a point P in GCS - global coordinate system
@@ -22,7 +30,6 @@ def gcs2cm_lcs(r_P, R, theta):
     
     _u_P = np.dot(A_inv_matrix(theta), u_P)
     return _u_P
-
 
 def cm_lcs2gcs(_u_P, R, theta):
     """
@@ -42,7 +49,6 @@ def cm_lcs2gcs(_u_P, R, theta):
     r_P = R + u_P
     return r_P
 
-
 def gcs2lcs_z_axis(Rz_body, z_gcs):
     """
     Function tranforms z coordinates in global coordinate system to z coordinate in local coordinate system
@@ -53,7 +59,6 @@ def gcs2lcs_z_axis(Rz_body, z_gcs):
     """
     z_lcs = z_gcs - Rz_body
     return z_lcs
-
 
 def u_P_cad2cm_lcs(_body_id, body, _u_P):
     """

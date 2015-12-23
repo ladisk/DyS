@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>300</height>
+    <width>309</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,31 +21,29 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>200</width>
-    <height>300</height>
+    <width>309</width>
+    <height>370</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Tree View</string>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>-10</x>
-     <y>0</y>
-     <width>211</width>
-     <height>301</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
-     <widget class="QTreeView" name="treeView"/>
-    </item>
-   </layout>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QTreeView" name="treeView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

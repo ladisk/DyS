@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'tree_view_widget.ui'
 #
-# Created: Sat Jan 03 14:00:45 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,18 +26,24 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
         Form.setEnabled(True)
-        Form.resize(200, 300)
-        Form.setMinimumSize(QtCore.QSize(200, 300))
+        Form.resize(309, 370)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
+        Form.setSizePolicy(sizePolicy)
+        Form.setMinimumSize(QtCore.QSize(309, 370))
         self.gridLayout = QtGui.QGridLayout(Form)
-        self.gridLayout.setSpacing(0)
-        self.gridLayout.setMargin(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.treeView = QtGui.QTreeView(Form)  # QAbstractItemView, QTreeView
+        self.gridLayout_2 = QtGui.QGridLayout()
+        self.gridLayout_2.setSpacing(0)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.treeView = QtGui.QTreeView(Form)
+        self.treeView.setAlternatingRowColors(True)
         self.treeView.setObjectName(_fromUtf8("treeView"))
-        self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
-        
-        self.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
-        
+        self.gridLayout_2.addWidget(self.treeView, 0, 0, 1, 1)
+        self.gridLayout.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 

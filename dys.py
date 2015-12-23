@@ -1,16 +1,18 @@
-'''
+"""
 Created on 30. sep. 2013
 
 @author: lskrinjar
-'''
+"""
 import warnings
 import os
 import sys
+import inspect
 import time
 import numpy as np
 import ctypes
 from pprint import pprint
 from PyQt4 import QtCore, QtGui
+import subprocess
 
 
 from MBD_system.MBD_system import MBDsystem
@@ -36,7 +38,16 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+# define authorship information
+__authors__ = ['Luka Skrinjar', 'Ales Turel', 'Janko Slavic']
+__author__ = ','.join(__authors__)
+__credits__ = []
+__copyright__ = 'Copyright (c) 2015'
+__license__  = 'GPL'
 
+# maintenance information
+__maintainer__ = 'Luka Skrinjar'
+__email__  = 'skrinjar.luka@gmail.com'
 __version__ = "0.0.6"
 
 
@@ -48,24 +59,26 @@ warnings.filterwarnings("ignore")
 
 
 class MainWindow(QtGui.QMainWindow):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self):
-        '''
+        """
         Class constructor
-        '''
+
+        >>> 1 + 1
+        2
+        >>>
+        """
         super(MainWindow, self).__init__()
         
         #    minimum size
         self.setMinimumSize(500, 500)
+        
         #    location of window on screen
         self.window_offset_x = 250
         self.window_offset_y = 50
-        
-        #    move
-        self.move(self.window_offset_x, self.window_offset_y)
-        
+
         #    language settings
         self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
 
@@ -81,6 +94,15 @@ class MainWindow(QtGui.QMainWindow):
         __main_dir = current_working_directory
         self._working_directory = QtCore.QString(os.path.abspath(__main_dir).replace("/", "\\"))
 
+        #   get screen size
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        #    move
+        # self.move(self.window_offset_x, self.window_offset_y)
+        dy = .1*screen.height()
+
+        #   size of application
+        #   position main widget on screen
+        self.setGeometry(.25*screen.width(), dy, .5*screen.width(), .5*screen.height())
 
         #    MBD system
         MBD_folder_name_ = []
@@ -101,36 +123,42 @@ class MainWindow(QtGui.QMainWindow):
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_1"
 #         self.MBD_filename = "dys_0_7_0_2.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_2"
-#         self.MBD_filename = "dys_0_7_1.dprj"
-#         MBD_folder_name_ = "dynamic_systems\\0_7_1"
-        self.MBD_filename = "dys_0_7_3_0.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
+#         self.MBD_filename = "dys_0_7_2_revolute_clearence_joint.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_2_revolute_clearence_joint"
+#         self.MBD_filename = "0_7_3_0_contact_models.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models"
+        self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
 
+
+#         self.MBD_filename = "dys_0_7_3_0.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
+        
+        # self.MBD_filename = "0_7_3_0_plane_sphere.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_0_plane_sphere"
 
         if MBD_folder_name_ == []:
             MBD_folder_abs_path_ = os.getcwd()
             project_filename = "Model_1"
         else:
-            self._working_directory = os.path.join(os.getcwd(), "")
-            print "self._working_directory =", self._working_directory
-            self.MBD_file_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename)
+            self._working_directory = os.path.join(os.getcwd(), "..")
+            self.MBD_file_abs_path_ = os.path.abspath(os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename))
 
             MBD_folder_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_)
             project_filename = os.path.basename(MBD_folder_abs_path_)
-
 
         projectNode = MBD_system_items.MBDsystemItem("projectNode")
 
 
         self.MBD_system = MBDsystem(MBD_file_abs_path=self.MBD_file_abs_path_, MBD_folder_name=MBD_folder_name_, MBD_folder_abs_path=MBD_folder_abs_path_, MBD_filename=project_filename, parent=projectNode)
 
-
-        #    tree view widget
+        #   tree view widget
         self.TreeViewWidget = TreeViewWidget(projectNode, parent=self)
         self.TreeViewWidget.setWindowFlags(self.flags)
         self.TreeViewWidget.show()
         #    move
-        self.TreeViewWidget.move(self.window_offset_x - self.TreeViewWidget.frameGeometry().width(), self.window_offset_y)
+        self.TreeViewWidget.move(.25*screen.width() - self.TreeViewWidget.frameGeometry().width(), dy)#self.frameGeometry().width(), self.frameGeometry().height())
+        # self.TreeViewWidget.move(self.window_offset_x - self.TreeViewWidget.frameGeometry().width(), self.window_offset_y)
 
         
         #    simulation control widget
@@ -139,8 +167,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.SimulationControlWidget.OpenGLWidget)
         self.SimulationControlWidget.show()
         #    move
-        self.SimulationControlWidget.move(self.window_offset_x + self.minimumSize().width() + (self.frameGeometry().width() - self.geometry().width()), self.window_offset_y)
-        
+        self.SimulationControlWidget.move(.25*screen.width() + self.geometry().width(), dy)
+
         #    output widget
         #    maybe put in new thread? if output will be large
 #         self.OutputWidget = OutputWidget(parent=self)
@@ -185,8 +213,11 @@ class MainWindow(QtGui.QMainWindow):
         self.SimulationControlWidget.solver.solveODE.energy_signal.signal_energy.connect(self.update_statusbar_text1)
         self.SimulationControlWidget.energy_signal.signal_energy.connect(self.update_statusbar_text1)
 
-        
     def create_actions(self):
+        """
+        Actions
+        :return:
+        """
         #    file - menu
         #    new
         self.newAction = QtGui.QAction('New', self, shortcut='Ctrl+N', statusTip='Create new')
@@ -268,11 +299,10 @@ class MainWindow(QtGui.QMainWindow):
         #    about
         self.aboutAction = QtGui.QAction(self.tr("&About"), self, statusTip='Information about the application for simulation of multibody dynamics.')
         self.aboutAction.triggered.connect(self.about)
-    
-    
+
     def keyPressEvent(self, event):
         """
-
+        User key pressed events
         """
         if type(event) == QtGui.QKeyEvent:
             if event.key() == QtCore.Qt.Key_Right:
@@ -280,12 +310,11 @@ class MainWindow(QtGui.QMainWindow):
             
             if event.key() == QtCore.Qt.Key_Left:
                 self.SimulationControlWidget.animation_backward()
-        
-    
+
     def create_menus(self):
         """
-
-        :return:
+        Create menus
+        :return None:
         """
         #    file menu
         self.fileMenu = QtGui.QMenu(self.tr("&File"), self)
@@ -363,20 +392,17 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.settingsMenu)
         self.menuBar().addMenu(self.windowMenu)
         self.menuBar().addMenu(self.helpMenu)
-        
-        
+
     def newFile(self):
         a = 1
-    
-    
+
     def update_data(self):
         """
         
         """
         self.SimulationControlWidget.OpenGLWidget.update_data(self.MBD_system.bodies)
         self.SimulationControlWidget.OpenGLWidget.repaintGL()
-    
-    
+
     def showOpenFileDialog(self):
 
         _open_file_ = QtGui.QFileDialog()
@@ -405,8 +431,6 @@ class MainWindow(QtGui.QMainWindow):
 #            project_folder_name = os.path.basename(project_folder_abs_path)
 #
         self.MBD_system.construct_MBD_system(MBD_file_abs_path=filename, _name=filename)
-        
-           
 
     def showSaveAsFileDialog(self):
         """
@@ -421,37 +445,35 @@ class MainWindow(QtGui.QMainWindow):
 #        f.write(filedata)
 #        f.close() 
 
- 
     def createNewProject(self):
         """
         
         """
-    
-    
+
     def closeProjectFile(self):
         """
         
         """
         self.MBD_system.delete_MBD_system()
         self.TreeViewWidget.repaint()
-    
-    
+
     def saveFile(self):
         """
         
         """
         filename = QtGui.QFileDialog.getSaveFileNameAndFilter(self)
-        
 
-    
     def show_change_background_color_dialog(self):
         color = QtGui.QColorDialog.getColor()
         if color.isValid():
             self.SimulationControlWidget.OpenGLWidget.qglClearColor(color)
             self.SimulationControlWidget.OpenGLWidget.updateGL()
-            
-    
+
     def show_control_panel(self):
+        """
+        Function shows control panel when hidden and selecte by user to be displayed
+        :return:
+        """
         self.SimulationControlWidget.move(self.window_offset_x + self.SimulationControlWidget.OpenGLWidget.initial_window_width + 10, 6)
         self.SimulationControlWidget.show()
         
@@ -478,7 +500,6 @@ class MainWindow(QtGui.QMainWindow):
         abs_save_file_path.replace("/", "\\")
         captured_figure.save(abs_save_file_path, 'png')
 
-
     def create_status_bar(self):
         """
         Status bar widget       
@@ -494,15 +515,12 @@ class MainWindow(QtGui.QMainWindow):
         self.infoText2.setText("Step No.: " + str(self.SimulationControlWidget.solver.solveODE.step))
         self.infoText3.setText("Status: Ready")
         self.repaint()
-        
-    
+
     def update_statusbar_text1(self, energy, energy_delta):
         self.infoText1.setText("Energy (delta): %4.3E"%energy+" (%4.3E"%energy_delta+")")
-            
-            
+
     def update_statusbar_text2(self, value):
         self.infoText2.setText("Step No.: " + str(value))
-
 
     def update_statusbar_text3(self, simulation_status_string):
         # print "simulation_status_string =", simulation_status_string
@@ -523,9 +541,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.infoText3.setText("Status: " + QtCore.QString(simulation_status_string))
 
-
-   
-    
     def about(self):
         QtGui.QMessageBox.about(self, self.tr("About Visualization Engine"), self.tr(
               "<b>Visualization Engine</b> version: %s <br><br> " 
@@ -535,10 +550,8 @@ class MainWindow(QtGui.QMainWindow):
               "<b>Translate</b>: Middle mouse button + CTRL and mouse motion.<br><br>"
               "Visualization engine was designed for simulate dynamic motion of bodies from STL files." % (__version__)))
 
-        
     def view(self):
         QtGui.QWidget()
-    
 
     def close(self):
         QtGui.qApp.quit()
@@ -562,7 +575,7 @@ if __name__ == '__main__':
     #    path to icon
     myappid = ":/application.png"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    
+
     win = MainWindow()
     win.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     win.show()

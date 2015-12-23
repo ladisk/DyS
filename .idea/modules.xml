@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DyS_project.iml" filepath="$PROJECT_DIR$/.idea/DyS_project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../_sandbox/.idea/_sandbox.iml" filepath="$PROJECT_DIR$/../_sandbox/.idea/_sandbox.iml" />
     </modules>
   </component>
 </project>

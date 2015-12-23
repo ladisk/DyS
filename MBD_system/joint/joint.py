@@ -10,40 +10,36 @@ from pprint import pprint
 
 import numpy as np
 
-try:
-    from ..MBD_system_items import JointItem
-    from ..Ai_ui_P import Ai_ui_P_vector
-    from ..Ai_theta_ui_P import Ai_theta_ui_P_vector
-    from ..Ai_hi import Ai_hi
-    from ..Ai_theta_hi import Ai_theta_hi
-    from ..hi_Ai_theta_ui_P import hi_Ai_theta_ui_P_constant
-    from ..r_ij_P_Ai_theta_hi import r_ij_P_Ai_theta_hi_constant
-    from ..u_P_cad2cm_lcs import u_P_cad2cm_lcs
-    from .joint_C_q_matrix import Joint_C_q_matrix
-    from .joint_Q_d_vector import Joint_Q_d_vector
-    from ..q2dtheta_i import q2dtheta_i
-    from ..q2theta_i import q2theta_i
-    from ..q2R_i import q2R_i
-    from ..q2dR_i import q2dR_i
-    from ..r_ij_P import r_ij_P
-except:
-    pass
 
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
+from MBD_system.Ai_theta_ui_P import Ai_theta_ui_P_vector
+from MBD_system.Ai_hi import Ai_hi
+from MBD_system.Ai_theta_hi import Ai_theta_hi
+from MBD_system.hi_Ai_theta_ui_P import hi_Ai_theta_ui_P_constant
+from MBD_system.r_ij_P_Ai_theta_hi import r_ij_P_Ai_theta_hi_constant
+from MBD_system.u_P_cad2cm_lcs import u_P_cad2cm_lcs
+from MBD_system.q2dtheta_i import q2dtheta_i
+from MBD_system.q2R_i import q2R_i
+from MBD_system.q2dR_i import q2dR_i
+from MBD_system.r_ij_P import r_ij_P
+from MBD_system.MBD_system_items import JointItem
 from MBD_system.q2theta_i import q2theta_i
 from MBD_system.force.force import Force
+from MBD_system.joint.joint_C_q_matrix import Joint_C_q_matrix
+from MBD_system.joint.joint_Q_d_vector import Joint_Q_d_vector
 from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 
 class Joint(JointItem):
-    '''
+    """
     classdocs
-    '''
+    """
     __id = itertools.count(0)
 
     def __init__(self, joint_type, body_id_i, body_id_j, u_iP_CAD = np.array([0, 0]), u_jP_CAD=np.array([0, 0]),
                  u_iQ=np.array([0, 0]), parent=None):
         super(Joint, self).__init__(joint_type, parent)
-        '''
+        """
         creates a joint object between 2 bodies
         in:
             body_i = body_id
@@ -51,7 +47,7 @@ class Joint(JointItem):
             type (string) - fixed, revolute, prismatic
             u_iP_CAD - in CAD LCS of a body
             u_jP_CAD - in CAD LCS of a body
-        '''
+        """
         #    number
         self.joint_id = self.__id.next()  # len(joints_list) + 1
         self._parent = parent
@@ -78,7 +74,6 @@ class Joint(JointItem):
 
         else:
             raise ValueError, "Joint type not correct!"
-
 
         # swap body_id that if body is connected to ground that ground is always the last item in list
         if body_id_i == "ground":

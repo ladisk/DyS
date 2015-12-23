@@ -23,26 +23,23 @@ from MBD_system.spring.spring_widget import SpringWidget
 from MBD_system.item_widget import ItemWidget
 from tree_model import TreeModel
 from MBD_system.MBD_system_items import SolutionDataItem
+from analysis.analysis_widget import AnalysisWidget
+from MBD_system.MBD_system_widget import MBDSystemWidget
 
 class solutionFilenameSignal(QtCore.QObject):
     signal_filename = QtCore.pyqtSignal(str, name='')
 
-
 class loadSolutionFile(QtCore.QObject):
     signal_loadSolutionFile = QtCore.pyqtSignal()
-    
-
 
 class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView 
-    '''
+    """
     classdocs
-    '''
-
-
+    """
     def __init__(self, MBD_system_=None, parent=None, flags=0):
-        '''
+        """
         Constructor
-        '''
+        """
         super(TreeViewWidget, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
@@ -55,31 +52,31 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self.MBD_system = MBD_system_
         # _model = MBD_system.TreeModel(self.MBD_system)
         _model = TreeModel(self.MBD_system)
+
         self.ui.treeView.setModel(_model)
         
         self.ui.treeView.setRootIsDecorated(True)
         self.ui.treeView.setHeaderHidden(True)
         self.ui.treeView.expandAll()
 
-        # we want our listview to have a context menu taken from the actions on this widget
+        # we want our listview to have a context self.menu taken from the actions on this widget
         # those actions will be to delete an item :)
         self.ui.treeView.customContextMenuRequested.connect(self.contextMenuEvent)
         QtCore.QObject.connect(self.ui.treeView, QtCore.SIGNAL("clicked (QModelIndex)"),self.row_clicked)
  
         self._widget = ItemWidget(parent=self)
- 
- 
+
     def row_clicked(self, index):
-        '''
+        """
         when a row is clicked... show the name
-        '''
-        None
-    
+        """
 
     def setWindowFlags(self, flags):
+        """
+
+        """
         super(TreeViewWidget, self).setWindowFlags(flags)
 
-    
     @pyqtSlot()
     def onTriggered(self, event):
         """
@@ -90,21 +87,26 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
   
 #         self.model().removeRows(self.currentIndex().row(), 1)
     def create_action(self, event):
+        """
+
+        """
         print event.pos()
 
-
     def setSelection(self, current, old):
+        """
 
+        """
         current = self._proxyModel.mapToSource(current)
 
-
     def contextMenuEvent(self, event):
-        menu = QtGui.QMenu(self)
+        """
+        Context menu
+        """
+        self.menu = QtGui.QMenu(self)
 
         indexes = self.ui.treeView.selectedIndexes()
 
         self._item = self.ui.treeView.model().getNode(indexes[0])
-
 
         if len(indexes) > 0:
             level = 0
@@ -113,156 +115,160 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 index = index.parent()
                 level += 1
 
-
         if self._item._typeInfo == "group":
-            createAction = menu.addAction("Create")
+            createAction = self.menu.addAction("Create")
             createAction.triggered.connect(self._create)
             
-            menu.addSeparator()
+            self.menu.addSeparator()
             
-            loadGroupItemsAction = menu.addAction("Load items from file")
+            loadGroupItemsAction = self.menu.addAction("Load items from file")
             loadGroupItemsAction.triggered.connect(self._load_group_items)
         
-            menu.addSeparator()
+            self.menu.addSeparator()
             
         if self._item._typeInfo != "group" or self._item._typeInfo != "solution":# or self._item._name.lower() != "solution":
-            editAction = menu.addAction("Edit")
+            editAction = self.menu.addAction("Edit")
             editAction.triggered.connect(self._edit)
 
-            deleteAction = menu.addAction("Delete (Under Construction!)")
-            deleteAction.setEnabled(False)
+            deleteAction = self.menu.addAction("Delete")
+            deleteAction.setEnabled(True)
             deleteAction.triggered.connect(self._delete)
 
-            menu.addSeparator()
-                
-                
-        if self._item._typeInfo == "MBDsystem" or self._item._typeInfo == "settings":
-            menu.addSeparator()
-            show_GCS_Action = QtGui.QAction("Show GCS ", self, checkable=True, checked=self._parent.SimulationControlWidget.OpenGLWidget.LCS._visible)
-            show_GCS_Action.triggered.connect(self._parent.SimulationControlWidget.OpenGLWidget.LCS._show)
-            menu.addAction(show_GCS_Action)
+            self.menu.addSeparator()
 
-            propertiesAction = menu.addAction("Properties")
+        if self._item._typeInfo == "MBDsystem" or self._item._typeInfo == "settings":
+            self.menu.addSeparator()
+            show_GCS_Action = QtGui.QAction("Show GCS ", self, checkable=True, checked=self._parent.SimulationControlWidget.OpenGLWidget.GCS._visible)
+            show_GCS_Action.triggered.connect(self._parent.SimulationControlWidget.OpenGLWidget.GCS._show)
+            self.menu.addAction(show_GCS_Action)
+
+            propertiesAction = self.menu.addAction("Properties")
             propertiesAction.triggered.connect(self._properties)
             
-            menu.addSeparator()
+            self.menu.addSeparator()
             
-            getDOFsAction = menu.addAction("DOF")
+            getDOFsAction = self.menu.addAction("DOF")
             getDOFsAction.triggered.connect(self.__getDOF)
 
             if self._item._typeInfo == "MBDsystem":
-                evaluate_C_Action = menu.addAction("C(q, t)")
+                evaluate_C_Action = self.menu.addAction("C(q, t)")
                 evaluate_C_Action.triggered.connect(self._evaluate_C)
 
-                get_q_Action = menu.addAction("Get q")
+                get_q_Action = self.menu.addAction("Get q")
                 get_q_Action.triggered.connect(self._get_q)
                 
-                list_parameters_Action = menu.addAction("List Parameters")
+                list_parameters_Action = self.menu.addAction("List parameters")
                 list_parameters_Action.triggered.connect(self._list_parameters)
-                
-                menu.addSeparator()
-                
-                
+
+                analysis_Action = self.menu.addAction("Analysis")
+                analysis_Action.triggered.connect(self._analysis)
+                analysis_Action.setShortcut(QtGui.QKeySequence("Alt+A"))
+
+                self.menu.addSeparator()
+
         elif self._item._typeInfo == "solution":
-            loadAction = menu.addAction("Load from File")
+            loadAction = self.menu.addAction("Load from File")
             loadAction.triggered.connect(self._load_solution_file_to_project)
 
         elif self._item._typeInfo == "solutiondata":
-            loadAction = menu.addAction("Load solution")
+            loadAction = self.menu.addAction("Load solution")
             loadAction.triggered.connect(self._load_solution_data)
+
+            propertiesAction = self.menu.addAction("Properties")
+            propertiesAction.triggered.connect(self.solution_properties)
 
         elif self._item._typeInfo == "group":
 
-            propertiesAction = menu.addAction("Properties")
+            propertiesAction = self.menu.addAction("Properties")
             propertiesAction.triggered.connect(self._properties)
-        
-        
+
 #         elif self._item._typeInfo == "solutiondata":
 #             
-#             openAction = menu.addAction("Open")
+#             openAction = self.menu.addAction("Open")
 #             openAction.triggered.connect(self._open)
 #             
-#             menu.addSeparator()
+#             self.menu.addSeparator()
 # 
-#             deleteAction = menu.addAction("Delete")
+#             deleteAction = self.menu.addAction("Delete")
 #             deleteAction.triggered.connect(self._delete)
             
         elif self._item._typeInfo == "force":
             show_force_Action = QtGui.QAction("Show force ", self, checkable=True, checked=self._item._visible)
             show_force_Action.triggered.connect(self._item._show_force)
-            menu.addAction(show_force_Action)
+            self.menu.addAction(show_force_Action)
 
-            menu.addSeparator()
+            self.menu.addSeparator()
             for marker in self._item.markers:
                 show_marker_Action = QtGui.QAction("Show u_P on Body "+str(self._item.body_id), self, checkable=True, checked=marker._visible)
                 show_marker_Action.triggered.connect(marker._show)
-                menu.addAction(show_marker_Action)
-
+                self.menu.addAction(show_marker_Action)
 
         elif self._item._typeInfo == "joint" or self._item._typeInfo == "spring":
             for force, ID in zip(self._item.force_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show force on Body "+ID, self, checkable=True, checked=force._visible)
                 show_force_Action.triggered.connect(force._show_force)
-                menu.addAction(show_force_Action)
+                self.menu.addAction(show_force_Action)
 
-            menu.addSeparator()
+            self.menu.addSeparator()
             for marker, ID in  zip(self._item.markers, ["i", "j"]):
                 show_marker_Action = QtGui.QAction("Show u_P on body "+ID, self, checkable=True, checked=marker._visible)
                 show_marker_Action.triggered.connect(marker._show)
-                menu.addAction(show_marker_Action)
-        
-        
+                self.menu.addAction(show_marker_Action)
+
         elif self._item._typeInfo == "contact":
             for force, ID in zip(self._item._Fn_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show Fn on body "+ID, self, checkable=True, checked=force._visible)
                 show_force_Action.triggered.connect(force._show_force)
-                menu.addAction(show_force_Action)
+                self.menu.addAction(show_force_Action)
 
-            menu.addSeparator()
+            self.menu.addSeparator()
             for force, ID in zip(self._item._Ft_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show Ft on body "+ID, self, checkable=True, checked=force._visible)
                 show_force_Action.triggered.connect(force._show_force)
-                menu.addAction(show_force_Action)
+                self.menu.addAction(show_force_Action)
 
-            menu.addSeparator()
+            self.menu.addSeparator()
             if self._item._type == "general":
-                try:
-                    for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
-                        _body = self.MBD_system._children[0].bodies[body_id]
-                        _AABB = _body.AABBtree
+                # try:
+                for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
+                    _body = self.MBD_system._children[0].bodies[body_id]
+                    _AABB = _body.AABBtree
 
-                        show_AABB_action = QtGui.QAction("Show AABB on body "+ID, self, checkable=True, checked=_AABB._visible)
-                        show_AABB_action.triggered.connect(_AABB._show_AABB)
-                        menu.addAction(show_AABB_action)
+                    show_AABB_action = QtGui.QAction("Show AABB on body "+ID, self, checkable=True, checked=_AABB._visible)
+                    show_AABB_action.triggered.connect(_AABB._show_AABB)
+                    self.menu.addAction(show_AABB_action)
 
-                    menu.addSeparator()
-                except:
-                    pass
+                self.menu.addSeparator()
 
+                for body_id, ID in zip(self._item.body_id_list, ["i", "j"]):
+                    _body = self.MBD_system._children[0].bodies[body_id]
+                    _AABB = _body.AABBtree
+
+                    properties_of_AABB_action = self.menu.addAction("Properties of AABB on body "+ID)
+                    properties_of_AABB_action.triggered.connect(_AABB._get_properties)
+
+                self.menu.addSeparator()
+                # except:
+                #     pass
             try:
                 for contact_geometry, ID in zip(self._item.contact_geometry_list, ["i", "j"]):
                     # get_nodes_action = QtGui.QAction("Get contact nodes "+ID, self, checkable=True, checked=_AABB._visible)
-                    get_nodes_action = menu.addAction("Get contact nodes "+ID)
+                    get_nodes_action = self.menu.addAction("Get contact nodes "+ID)
                     get_nodes_action.triggered.connect(contact_geometry.get_nodes)
-                    print contact_geometry
-                    pprint(vars(contact_geometry))
-                    # menu.addAction(get_nodes_action)
+                    # self.menu.addAction(get_nodes_action)
             except:
                 pass
 
-
-            contactForceAction = menu.addAction("Contact force")
+            contactForceAction = self.menu.addAction("Contact force")
             contactForceAction.triggered.connect(self._item.get_contact_force)
 
-            menu.addSeparator()
+            self.menu.addSeparator()
 
             if self._item._type == "Revolute Clearance Joint":
                 for marker in self._item.markers:
                     show_marker_Action = QtGui.QAction("Show Body "+ID+" joint center", self, checkable=True, checked=marker._visible)
                     show_marker_Action.triggered.connect(marker._show)
-                    menu.addAction(show_marker_Action)
-
-            
+                    self.menu.addAction(show_marker_Action)
 
         elif self._item._typeInfo == "body":
             if self._item._name == "Ground" or self._item.body_id == -1:
@@ -270,31 +276,29 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             else:
                 show_body_Action = QtGui.QAction("Show Body", self, checkable=True, checked=self._item._visible)
                 show_body_Action.triggered.connect(self._item._show)
-                menu.addAction(show_body_Action)
+                self.menu.addAction(show_body_Action)
 
                 show_LCS_Action = QtGui.QAction("Show LCS", self, checkable=True, checked=self._item.LCS._visible)
                 show_LCS_Action.triggered.connect(self._item.LCS._show)
-                menu.addAction(show_LCS_Action)
+                self.menu.addAction(show_LCS_Action)
 
                 show_CAD_CS_Action = QtGui.QAction("Show CAD CS", self, checkable=True, checked=self._item.CAD_CS._visible)
                 show_CAD_CS_Action.triggered.connect(self._item.CAD_CS._show)
-                menu.addAction(show_CAD_CS_Action)
-                menu.addSeparator()
+                self.menu.addAction(show_CAD_CS_Action)
+                self.menu.addSeparator()
 
-                getBody_q_Action = menu.addAction("Get body q")
+                getBody_q_Action = self.menu.addAction("Get body q")
                 getBody_q_Action.triggered.connect(self._item.get_q)
 
-                getBody_dq_Action = menu.addAction("Get body dq")
+                getBody_dq_Action = self.menu.addAction("Get body dq")
                 getBody_dq_Action.triggered.connect(self._item.get_dq)
 
-                getBody_qdq_Action = menu.addAction("Get body [q dq]")
+                getBody_qdq_Action = self.menu.addAction("Get body [q dq]")
                 getBody_qdq_Action.triggered.connect(self._item.get_qdq)
-                menu.addSeparator()
+                self.menu.addSeparator()
 
-
-        menu.exec_(event.globalPos())
+        self.menu.exec_(event.globalPos())
         self._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
-
 
     def closeEvent(self, event):
         """
@@ -302,20 +306,24 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         self._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
 
-
     def _list_parameters(self):
         """
         
         """
         self._item._list_parameters(item=self.MBD_system)
 
-    
+    def _analysis(self):
+        """
+        
+        """
+        self._widget = AnalysisWidget(self.MBD_system)
+        self._widget.show()
+
     def _load_group_items(self):
         """
         
         """
         print "Under construction!", os.path.realpath(__file__)
-
 
     def _load_solution_data(self):
         """
@@ -324,7 +332,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         #   this has to be put in a thread
         data = self._item._load_dat_file()
         self._parent.SimulationControlWidget.load_solution_file(filename = self._item._name, solution_data=data)
-
 
     def _load_solution_file_to_project(self):
         """
@@ -358,33 +365,35 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         #   add solution data object item to treeview
         self.ui.treeView.model().insertRow(len(self._item._children), _solution, self._item)
 
-
     def _open(self):
         """
         
         """
         subprocess.call(['notepad.exe', str(self.__filename)])
-    
-    
-    def add_solution_data(self, filename):
+
+    def add_solution_data(self, solution_data_object_ID=None, filename=None):
         """
-        
+        Function adds created solution object item in tree view in folder solutions
         """
+        print "solution_data_object_ID =", solution_data_object_ID
+        print "filename =", filename
         #   root index
         root_index = self.ui.treeView.rootIndex()
 
         #   get root node with root index
         self._item = self.ui.treeView.model().getNode(root_index)
         MBD_system_item = self._item._children[0]
-        
-        #    solution item
+        # pprint(vars(MBD_system_item))
+        #    solutions (group) item
         _solution_group_item = MBD_system_item._children[6]
 
         #    add child (solution data) to solution item
         pos = len(_solution_group_item._children)
-        self._childNode = SolutionData(filename)
-        self.ui.treeView.model().insertRow(pos, self._childNode, _solution_group_item)
+        _childNode = MBD_system_item.solutions[-1]
+        self.ui.treeView.model().insertRow(pos, _childNode, _solution_group_item)
 
+    def solution_properties(self):
+        pprint(vars(self._item))
 
     def _create(self, index):
         """
@@ -393,7 +402,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self._parentNode = self._item
         self._childNode = None
         if self._item._typeInfo == "group":
-            
             if self._item._name.lower() == "bodies":
                 self._widget = BodyWidget(self._parentNode, parent=self)
 
@@ -410,8 +418,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 self._widget = SpringWidget(self._parentNode, parent=self)
                 # self._childNode = MBD_system_items.SpringItem("Spring_" + str(len(self._parentNode._children)))
 
-
-
             # if self._childNode is not None:
             #     print "created =", self._childNode
             #     if len(self._parentNode._children) == 0:
@@ -420,23 +426,19 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             #         pos = len(self._parentNode._children)
             #     self.ui.treeView.model().insertRow(pos, self._childNode, self._parentNode)
     
-    
     def _insertTreeItem(self):
         """
         
         """
-        print "????"
         pos = len(self._parentNode._children)
         self._childNode = self._widget.item
         self.ui.treeView.model().insertRow(pos, self._childNode, self._parentNode)
-    
 
     def __getDOF(self):
         """
         
         """
         C_q, C_qT = self._parent.SimulationControlWidget.solver.solveODE.ode_fun.getDOF()
-
 
     def _get_q(self):
         """
@@ -446,7 +448,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         print "q ="
         print q
 
-
     def _evaluate_C(self):
         """
 
@@ -455,7 +456,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         q_ = self.MBD_system._children[0].get_q()
         print "C(q, t)"
         print self._parent.SimulationControlWidget.solver.solveODE.ode_fun.create_C(t, q_)
-
 
     def _edit(self, index):
         """
@@ -478,11 +478,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         if self._item._typeInfo.lower() == "spring":
             self._widget = SpringWidget(self._parentNode, parent=self)
 
-        try:
-            self._widget._edit(self._item)
-        except:
-            pass
+        # if self._item._typeInfo.lower() == "MBDsystem":
+        #     self._widget = MBDSystemWidget(self._item)
 
+        self._widget._edit(self._item)
+        # except:
+        #     raise ValueError, "edit() not completed"
 
     def _delete(self):
         """
@@ -492,12 +493,13 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self._item._parent.removeChild(pos)
         del(self._item)
 
-
     def _properties(self, index):
-        print "_properties()"
-        pprint(vars(self._item))
-        
-    
+        """
+        Open properties window
+        """
+        _widget = MBDSystemWidget(self._item, parent=self)
+        _widget._edit(self._item)
+
     def _save_contact_solution(self, index):
         """
         

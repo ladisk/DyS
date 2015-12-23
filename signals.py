@@ -25,3 +25,10 @@ class SaveSignal(QtCore.QObject):
 
 class ErrorTimeIntegrationSignal(QtCore.QObject):
     signal_time_integration_error = QtCore.pyqtSignal()
+
+class SolutionSignal(QtCore.QObject):
+    """
+    :param int(long):   ID of solution data object
+    :param str:         solution data filename
+    """
+    solution_data = QtCore.pyqtSignal(int, str)

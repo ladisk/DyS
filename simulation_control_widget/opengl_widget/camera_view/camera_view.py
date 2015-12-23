@@ -21,7 +21,6 @@ class View(object):
         self.current_PROJECTION_matrix = glLoadIdentity()
         self.reset()
         
-        
     def reset(self):
         glPushMatrix()
         glLoadIdentity()
@@ -34,8 +33,7 @@ class View(object):
         glTranslatef(tx, ty, tz)
         glMultMatrixf(self.current_MODELVIEW_matrix)
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
-        glPopMatrix()        
-
+        glPopMatrix()
 
     def rotate(self, rx, ry, rz):
         glPushMatrix()
@@ -45,7 +43,6 @@ class View(object):
         glMultMatrixf(self.current_MODELVIEW_matrix)
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
-
 
     def zoom(self, aspect, left_GL, right_GL, bottom_GL, top_GL, near_GL, far_GL, zoom):
         """
@@ -81,7 +78,6 @@ class View(object):
 
         glMatrixMode(GL_MODELVIEW)
 
-
     def _orthoGL(self):
 
         glOrtho(self._left_GL,
@@ -91,21 +87,18 @@ class View(object):
                 self._near_GL,
                 self._far_GL)
 
-
     def front(self):
         glPushMatrix()
         glLoadIdentity()
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()  
-        
-        
+
     def back(self):
         glPushMatrix()
         glLoadIdentity()
         glRotatef(180, 0, 1, 0)
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
-
 
     def left(self):
         glPushMatrix()
@@ -114,14 +107,12 @@ class View(object):
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
 
-
     def right(self):
         glPushMatrix()
         glLoadIdentity()
         glRotatef(+90, 0, 1, 0)
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
-
 
     def bottom(self):
         glPushMatrix()
@@ -130,7 +121,6 @@ class View(object):
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
 
-
     def top(self):
         glPushMatrix()
         glLoadIdentity()
@@ -138,11 +128,9 @@ class View(object):
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
 
-
     def isometric(self):
         glPushMatrix()
         glLoadIdentity()
         glRotatef(+45, 1, -0.783, -0.217)
         self.current_MODELVIEW_matrix = glGetFloatv(GL_MODELVIEW_MATRIX)
         glPopMatrix()
-

@@ -1,9 +1,9 @@
-'''
+"""
 Created on 22. maj 2015
 
 @author: lskrinjar
+"""
 
-'''
 import math
 
 def convert_size(size_in_bytes):
@@ -13,7 +13,6 @@ def convert_size(size_in_bytes):
         size_in_bytes - integer in units of bytes
     """
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    
 
     i = int(math.floor(math.log(size_in_bytes, 1024)))
     p = math.pow(1024, i)

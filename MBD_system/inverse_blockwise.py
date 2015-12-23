@@ -38,14 +38,12 @@ def inverse_blockwise(A_inv, B, C, D, Adim):
     _matrix_12 = reduce(np.dot, [-A_inv, B, D_C_A_inv_B__inv])
     _matrix_22 = D_C_A_inv_B__inv
 
-
     #    is submatrix D is zero matrix (when Cs=0), the submatrix _matrix21 equals the transpose of _matrix12*(-1)
     if np.count_nonzero(D) == 0:
         _matrix_21 = -1 * _matrix_12.T
     else:
         _matrix_21 = reduce(np.dot, [-D_C_A_inv_B__inv, C, -A_inv])
-          
-          
+
     #    insert calculated inverse submatrices in predefined zero matrix
     _matrix = np.empty([np.shape(A_inv)[1] + np.shape(B)[1], np.shape(A_inv)[0] + np.shape(C)[0]])
     
@@ -53,8 +51,7 @@ def inverse_blockwise(A_inv, B, C, D, Adim):
     _matrix[0:Adim, Adim:] = _matrix_12
     _matrix[Adim:, 0:Adim] = _matrix_21
     _matrix[Adim:, Adim:] = _matrix_22
-    
-    
+
     return _matrix
 
     
@@ -77,5 +74,3 @@ if __name__ == "__main__":
 #    a = np.linalg.inv(m)
     print "time =", time.time() - t0
     print a
-    
-    

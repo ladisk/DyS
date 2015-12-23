@@ -15,7 +15,6 @@ from pprint import pprint
 import ctypes
 from OpenGL import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.vertex_buffer_object import *
 from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 from dxfwrite import DXFEngine as dxf
@@ -25,7 +24,6 @@ try:
     from ...q2R_i import q2R_i
     from ...q2theta_i import q2theta_i
     from ...MBD_system_items import AABBItem
-    from ...Ai_ui_P import Ai_ui_P_vector
     from ...A import A_matrix
 except:
     pass
@@ -34,18 +32,17 @@ from MBD_system.MBD_system_items import AABBItem
 from MBD_system.transform_cs import gcs2lcs_z_axis
 from MBD_system.q2R_i import q2R_i
 from MBD_system.q2theta_i import q2theta_i
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
 
 np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, suppress=False, nanstr=None, infstr=None)
 
 
-class AABBTree(object):  # AABBItem or object - for testing
+class AABB(object):  # AABBItem or object - for testing
     '''
     classdocs
     '''
     __level = 1
     __id = itertools.count(1)
-    
-    
     def __init__(self, nodes_LCS=[], normals_LCS=[], min_LCS=None, max_LCS=None, z_dim=None, parent_body=None, id_sub=1, parent=None, visibility=False, _type=None):
         # super(AABBItem, self).__init__(name="AABB" + parent._name + "_body=", parent=parent)
         '''
@@ -67,16 +64,13 @@ class AABBTree(object):  # AABBItem or object - for testing
         self.children = []
         self._typeInfo = "aabb"
         self._parent_body = parent_body
-        
-        
+
         self.id_sub = id_sub
         self.id = self.__id.next()
         self._type = _type
 
-
         #    nodes in AABB as empty list - predefined empty list
         self.len_nodes, self.nD = np.shape(nodes_LCS)
-
 
         if self.nD != 3:
             #    add zeros to third column - z component
@@ -88,22 +82,18 @@ class AABBTree(object):  # AABBItem or object - for testing
         else:
             self.nodes_LCS = nodes_LCS
             self.normals_LCS = normals_LCS
-        
-        
+
         self.min_LCS = min_LCS
         self.max_LCS = max_LCS
-
 
         self.nodes_LCS_in_AABB = []        
         self.normals_LCS_in_AABB = []
         self.nodes_GCS_in_AABB = []
         self.normals_GCS_in_AABB = []
-        
-        
+
         self._visible = False
         self._VBO_created = False
-        
-        
+
         #    this if is only for the example with matplotlib display of AABB
         if self._parent == None and self._parent_body == None:
             self.level = self.__level
@@ -136,8 +126,7 @@ class AABBTree(object):  # AABBItem or object - for testing
             # print "self.z_dim =", self.z_dim
             np.savetxt(self._parent_body._name+"_LCS_2D.txt", self.nodes_LCS)
 
-             
-            
+
         #   when building AABBtree from contact - each step after first in recursion
         elif self._parent._typeInfo == "aabb" and self._parent_body == None:
             self.level = self._parent.level + 1
@@ -168,8 +157,7 @@ class AABBTree(object):  # AABBItem or object - for testing
             pass
         else:
             self.construct()
-    
-        
+
     def add_additional_parameters(self, key, value):
         """
         Args:
@@ -177,12 +165,23 @@ class AABBTree(object):  # AABBItem or object - for testing
             value - value of parameter name (num or str)
         """
         setattr(self, key, value)
-    
-    
+
+
+    def _get_properties(self):
+        """
+
+        :return:
+        """
+        print "---------------------"
+        print "body :", self._parent_body._name
+        pprint(vars(self))
+
+
     def construct(self):
         """
         Function creates AABB object
         """
+        # print "construct()"
         #    opengl properties
         #    AABB frame color
         self.color_GL = np.array([1.0, 0.0, 0.0], dtype="float32")
@@ -192,7 +191,7 @@ class AABBTree(object):  # AABBItem or object - for testing
         self._VBO_created = False
 
 
-        if self._parent == None or self._parent_body == None:
+        if self._parent is None or self._parent_body is None:
             #    R(x, y)
             self.R = np.zeros(3)
             #    theta
@@ -214,18 +213,16 @@ class AABBTree(object):  # AABBItem or object - for testing
             
         #    construct frame geometry (points array, indices array for VBO and IBO)
         self._frame_geometry()
-        
-        
+
+        #   status
         self.constructed = True
         #    this is part of the the recursion to subdivide nodes and create
-        if (len(self.nodes_LCS) <= self.max_nodes_LCS_in_AABB) or (self._dimensions < self.min_dimensions_of_AABB).any() or (self.level == self.max_level):
+        if (len(self.nodes_LCS) <= self.max_nodes_LCS_in_AABB) or (self._dimensions < self.min_dimensions_of_AABB).any() or (self.level == self.max_level) or (self.level == 1):
             self.nodes_LCS_in_AABB = np.array(self.nodes_LCS)
             self.normals_LCS_in_AABB = np.array(self.normals_LCS)
             self.phi = []
-
         else:
             self._subdivide(nodes=self.nodes_LCS, normals=self.normals_LCS)
-
 
     def _subdivide(self, nodes, normals):
         """
@@ -312,12 +309,10 @@ class AABBTree(object):  # AABBItem or object - for testing
                 data_containter = DataContainerAABB(_id=__id, _nodes=_sub_nodes, _normals=_sub_normals, x_min=_x_min, x_max=_x_max, y_min=_y_min, y_max=_y_max, _type = __type)
                 self.sub_data_list.append(data_containter)
 
-                
         #    initiate 2 children
         for sub_data_obj in self.sub_data_list:
             sub_AABB = AABBTree(nodes_LCS=sub_data_obj._nodes, normals_LCS=sub_data_obj._normals, min_LCS=sub_data_obj._min, max_LCS=sub_data_obj._max, id_sub=sub_data_obj._id, parent=self, _type = sub_data_obj._type)
             self.children.append(sub_AABB)
-
 
     def _check_ratio(self, x_min, x_max, y_min, y_max):
         """
@@ -334,36 +329,42 @@ class AABBTree(object):  # AABBItem or object - for testing
         if _ratio < _factor:
             #    modify x dimension. if x dimension is too small
             if x_dim < _factor * y_dim:
-    
+                _y_min = y_min
+                _y_max = y_max
                 dx = _factor * y_dim
     
                 if x_min == 0:
-                    x_min = -0.5 * dx
+                    _x_min = -0.5 * dx
                 else:
-                    x_min = x_min - np.sign(x_min) * dx
+                    _x_min = x_min - np.sign(x_min) * dx
                     
                 if x_max == 0:
-                    x_max = +0.5 * dx
+                    _x_max = +0.5 * dx
                 else:
-                    x_max = x_max + np.sign(x_max) * dx
-                
-        
+                    _x_max = x_max + np.sign(x_max) * dx
+
             #    modify y dimension, if y dimension is too small
             if y_dim < _factor * x_dim:
-                dy = _factor * x_dim                
+                _x_min = x_min
+                _x_max = x_max
+                dy = _factor * x_dim
                 
                 if y_min == 0:
-                    y_min = -0.5 * dy
+                    _y_min = -0.5 * dy
                 else:
-                    y_min = y_min - np.sign(y_min) * dy
+                    if np.sign(y_min) == 1:
+                        _y_min = y_min - dy
+                    if np.sign(y_min) == -1:
+                        _y_min = y_min - dy
                     
                 if y_max == 0:
-                    y_max = +0.5 * dy
+                    _y_max = +0.5 * dy
                 else:
-                    y_max = y_max + np.sign(y_max) * dy
-        
-        
-        return x_min, x_max, y_min, y_max
+                    if np.sign(y_max) == 1:
+                        _y_max = y_max + dy
+                    if np.sign(y_max) == -1:
+                        _y_max = y_max + dy
+        return _x_min, _x_max, _y_min, _y_max
 
 
     def __sub_normals(self, normals, sub_nodes_TF):
@@ -377,17 +378,16 @@ class AABBTree(object):  # AABBItem or object - for testing
             
         return _sub_normals
 
-
     def _boundary(self, _nodes, _max=None, _min=None):
         """
         Construct boundary frame
         """
-        if _min == None:
+        if _min is None:
             self._min = np.array(_nodes).min(axis=0)
         else:
             self._min = _min
 
-        if _max == None:
+        if _max is None:
             self._max = np.array(_nodes).max(axis=0)
         else:
             self._max = _max
@@ -411,15 +411,11 @@ class AABBTree(object):  # AABBItem or object - for testing
 
         #    check x/y to height dimension ratio
         self.x_min, self.x_max, self.y_min, self.y_max = self._check_ratio(self.x_min, self.x_max, self.y_min, self.y_max)
-
-
         #    calculate dimensions of a AABB frame
         self._frame_dimensions(self.x_min, self.x_max, self.y_min, self.y_max)
-        
-        
+
         #    frame center
         self._center(_nodes)
-
 
         #    get divide node - node nearest to the center    
         self._divide_node(_nodes)
@@ -465,18 +461,16 @@ class AABBTree(object):  # AABBItem or object - for testing
         self.center = np.sum(_nodes, axis=0) / len(_nodes)
         #   get components (x,y,z)
         self.x_center, self.y_center, self.z_center = self.center
-        
 
-        [self.x_center_GCS, self.y_center_GCS, self.z_center_GCS] = [self.x_center, self.y_center, self.z_center]
-    
-    
+        #   coordinates in GCS
+        [self.x_center_GCS, self.y_center_GCS, self.z_center_GCS] = self.R + Ai_ui_P_vector(self.center, self.theta[2])#[self.x_center, self.y_center, self.z_center]
+
     def _divide_node(self, _array):
         """
         Function calculates (selects) divide node, that is the node that is nearest
         to the center
         """
         self.divide_node = _array[(np.abs(_array[:, self.divide_direction] - self.center[self.divide_direction])).argmin()]
-        
 
     def _lcs2gcs(self):
         """
@@ -484,7 +478,6 @@ class AABBTree(object):  # AABBItem or object - for testing
         """
         [self.x_min_GCS, self.y_min_GCS, self.z_min_GCS] = [self.x_min, self.y_min, self.z_min] + self.R  # add theta
         [self.x_max_GCS, self.y_max_GCS, self.z_max_GCS] = [self.x_max, self.y_max, self.z_max] + self.R  # add theta
-
 
     def _frame_geometry(self):
         """
@@ -523,10 +516,8 @@ class AABBTree(object):  # AABBItem or object - for testing
                                     0, 4, 1, 5, 2, 6, 3, 7], dtype='int32')
         else:
             self.frame_indx = self._parent.frame_indx
-            
 
         self._lcs2gcs()
-
 
     def _create_VBO(self):
         """
@@ -550,8 +541,7 @@ class AABBTree(object):  # AABBItem or object - for testing
         data_size_in_bytes = arrays.ArrayDatatype.arrayByteCount(self.VBO_data)
         glBufferData(GL_ARRAY_BUFFER, data_size_in_bytes, self.VBO_data, GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
-        
-        
+
     def _create_IBO(self):
         """
         Create IBO - index buffer object
@@ -574,7 +564,6 @@ class AABBTree(object):  # AABBItem or object - for testing
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_size_in_bytes, self.frame_indx, GL_STATIC_DRAW)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-
     def create_VBO(self):
         """
         
@@ -583,7 +572,6 @@ class AABBTree(object):  # AABBItem or object - for testing
             #    only one IBO - index buffer object for an AABB tree
             self._create_IBO()
         self._create_VBO()
-
 
     def paintGL_VBO(self):
         """
@@ -691,6 +679,7 @@ class AABBTree(object):  # AABBItem or object - for testing
         Function updates frame geometry to use it with contact detection - AABB overlap on CPU.
         q_i - body q vector q = [Rx, Ry, theta]
         """
+        # print "update_frame_geometry()"
         R = q_i[0:2]
         theta = q_i[2]
 
@@ -925,7 +914,7 @@ def remove_duplicate_nodes(body):
 class AABBlist(object):
     def __init__(self, filename):
         self.nodes_ = np.loadtxt(filename, delimiter='\t')  # nodes_cube_problem, nodes_cube, nodes_cube_problem_nok, nodes_cube_problem_ok, nodes_cube_problem_ok
-        self.tree = AABBTree(nodes_LCS=self.nodes_)
+        self.tree = AABB(nodes_LCS=self.nodes_)
         self.tree.max_level = 4
         self.tree.construct()
 

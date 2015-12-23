@@ -1,19 +1,20 @@
-'''
+"""
 Created on 22. nov. 2013
 
 @author: lskrinjar
-'''
+"""
+
 
 class Window(object):
-    '''
+    """
     classdocs
-    '''
+    """
 
 
     def __init__(self, width, height, left_GL, right_GL, bottom_GL, top_GL, near_GL, far_GL, zoom, scale_factor_Translation, scale_factor_Rotation):
-        '''
+        """
         Constructor
-        '''
+        """
         self.width = width
         self.height = height
         self.aspect = float(self.width) / self.height
