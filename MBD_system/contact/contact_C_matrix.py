@@ -6,9 +6,9 @@ Created on 20. apr. 2015
 from pprint import pprint
 import itertools
 import numpy as np
-from ..A import A_matrix
-from ..A_2theta import A_2theta_matrix
-from ..A_theta import A_theta_matrix
+from MBD_system.A import A_matrix
+from MBD_system.A_2theta import A_2theta_matrix
+from MBD_system.A_theta import A_theta_matrix
 from d_ds import d_ds
 from d2_ds2 import d2_ds2
 

@@ -1,30 +1,40 @@
 __author__ = 'lskrinjar'
+import numpy as np
 from pprint import pprint
 from PyQt4 import QtCore, QtGui
 from tree_view_widget.tree_model import TreeModel
 from MBD_system.MBD_system_items import AnalysisTreeItem
 
 
-class AnalysisTreeModel(TreeModel):
+class AnalysisTableModel(QtCore.QAbstractTableModel):#QtCore.QAbstractTableModel, TreeModel, QtCore.QAbstractListModel
 
     """INPUTS: Node, QObject"""
-    def __init__(self, MBD_system, parent=None):
-        super(AnalysisTreeModel, self).__init__(parent)
-        self._rootNode = MBD_system
+    def __init__(self, data, parent=None):
+        super(AnalysisTableModel, self).__init__(parent)
+        self._parent = parent
+        self._data = data
+        print "self._data =", self._data
 
         # #   list through all parameters
         # for i in range(0, 10):
         #     AnalysisTreeItem("mass", 1, parent=self._rootNode)
 
+        self.headers = ["Simulation name", "Simulation status", "Solution filename"]
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, column, orientation, role):
         """
         INPUTS: int, Qt::Orientation, int
         OUTPUT: QVariant, strings are cast to QString which is a QVariant
         """
-        self.headers = ["Parameter", "Item", "Mean value", "Min", "Max"]
+        # print "column =", column, "orientation =", orientation, "role =", role
         if role == QtCore.Qt.DisplayRole:
-            return self.headers[section]
+            #    column headers
+            if orientation == QtCore.Qt.Horizontal:
+                return self.headers[column]
+            #    row headers
+            if orientation == QtCore.Qt.Vertical:
+                # self.setRowHeight(column, 10)
+                return column
             # # if section == 0:
             # #     return "Selected"
             # if section == 0:
@@ -45,22 +55,24 @@ class AnalysisTreeModel(TreeModel):
         item = index.internalPointer()
         #   non editable paramater name and object reference
         if index.column() == 0 or index.column() == 1:
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         #   editable parameter mean, min, max values
         else:
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-
-    """INPUTS: QModelIndex"""
-    """OUTPUT: int"""
     def columnCount(self, parent):
         """
         Number of columns
-        :param parent:
-        :return:
+        :param parent: QModelIndex
+        :return: int
         """
-        return 5
+        return len(self.headers)
 
+    def rowCount(self, parent):
+        """
+        
+        """
+        return int(float(self._parent.ui.number_of_simulations.text()))
 
     def data(self, index, role):
         """
@@ -70,17 +82,18 @@ class AnalysisTreeModel(TreeModel):
         :param role:
         :return:
         """
-
         if not index.isValid():
             return None
 
         item = index.internalPointer()
+        # print "item =", item
+#         pprint(vars(item))
 
         # brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
         # brush.setStyle(QtCore.Qt.SolidPattern)
         # item.setBackground(brush)
 
-        #   backgrund color
+        #   background color
         if role == QtCore.Qt.BackgroundRole:
             if index.row() % 2 == 0:
                 return QtGui.QBrush(QtGui.QColor(240, 240, 240))
@@ -93,28 +106,36 @@ class AnalysisTreeModel(TreeModel):
         #     return QtCore.QVariant(QtCore.Qt.Checked)
 
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            #   parameter name
+            #   row number
             if index.column() == 0:
-                return item.name()
-            #   object
+                return QtCore.QVariant(self._data[index.row()]._name)
             if index.column() == 1:
-                return item.typeInfo()
-            #   mean(nominal) value
+                return QtCore.QVariant(self._data[index.row()].simulation_status)
             if index.column() == 2:
-                return str(item.mean_value())
-            #   min limit value
-            if index.column() == 3:
-                return str(item.min_value())
-            #   max limit value
-            if index.column() == 4:
-                return str(item.max_value())
+                return QtCore.QVariant(self._data[index.row()]._file)
+            #   object
+            # if index.column() == 1:
+            #     try:
+            #         return item._item.name()
+            #     except:
+            #         return None
+            # #   mean(nominal) value
+            # if index.column() == 2:
+            #     return str(item.mean_value())
+            # #   min limit value
+            # if index.column() == 3:
+            #     return str(item.min_value())
+            # #   max limit value
+            # if index.column() == 4:
+            #     return str(item.max_value())
 
-        if role == QtCore.Qt.CheckStateRole:
-            if index.column() == 0:
-                if item._selected:
-                    return QtCore.Qt.Checked
-                else:
-                    return QtCore.Qt.Unchecked
+        # if role == QtCore.Qt.CheckStateRole:
+        #     if index.column() == 0:
+        #         # print "item._selected =", item._selected
+        #         if item._selected:
+        #             return QtCore.Qt.Checked
+        #         else:
+        #             return QtCore.Qt.Unchecked
 
         # if role == Qt.CheckStateRole:
         #     row = index.row()

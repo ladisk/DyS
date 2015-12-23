@@ -12,6 +12,10 @@ def A_matrix(theta):
 
     :param theta: angle in rad
     :return:
+    :rtype:
+    >>> 1+1
+    2
+    >>>
     """
     matrix = np.array([[np.cos(theta), -np.sin(theta)],
                        [np.sin(theta), np.cos(theta)]])

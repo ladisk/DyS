@@ -36,12 +36,12 @@ class ODEfun(QObject):
         self._parent = parent
         self.MBD_system = MBD_system
 
-        
+        #    gravity
+        self.gravity = MBD_system.gravity * MBD_system.gravity_vector
 
     def __C_q_size(self):
         self.cols_C_q = 3 * self.MBD_system.number_of_bodies
         self.rows_C_q = self.MBD_system.C_q_number_of_rows
-
 
     def create_M(self):
         """
@@ -50,15 +50,8 @@ class ODEfun(QObject):
         self.M_dim = 3 * self.MBD_system.number_of_bodies
         self.q_dim = 6 * self.MBD_system.number_of_bodies
 
-
         self.__C_q_size()
 
-
-        #    gravity
-        self.g_val = 9.81
-        self.gravity = self.g_val * np.array([0, -1, 0])
-        
-        
         #    predefine mass matrix size
         M = np.zeros([self.M_dim, self.M_dim])
 
@@ -69,14 +62,12 @@ class ODEfun(QObject):
                                     [0, 0, body.J_zz]])
 
             M[3 * i:3 * i + 3, 3 * i:3 * i + 3] = body_matrix
-            
 
         self.M = M
         self.M_created = True
         
         #    inverse mass matrix
         self.M_inv = np.linalg.inv(self.M)
-
 
     def getDOF(self):
         """
@@ -98,7 +89,6 @@ class ODEfun(QObject):
         
         return C_q, C_qT
 
-        
     def create_C_q(self, t_, q_):
         """
         Evaluate matrix C_q
@@ -132,7 +122,6 @@ class ODEfun(QObject):
         self.__C_q_size()
         C_q = np.zeros([self.rows_C_q, self.cols_C_q])  # self.rows_C_q depends on joint number and type
 
-
         for joint in self.MBD_system.joints:
 
             #    creates a C_q matrix of a joint based on joint's properties (type, geometry, etc.)
@@ -154,7 +143,6 @@ class ODEfun(QObject):
                     C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
                     C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
 
-
             #    C_q matrix for joint type: revolute
             elif joint.joint_type == "revolute":
 
@@ -170,7 +158,6 @@ class ODEfun(QObject):
                 #    add matrix of body i to Cq matrix
                 elif joint.body_id_j == "ground":
                     C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
-
 
             #    C_q matrix for joint type: prismatic
             elif joint.joint_type == "prismatic":
@@ -188,10 +175,8 @@ class ODEfun(QObject):
                 elif joint.body_id_j == "ground":
                     C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
 
-
             else:
                 raise Exception, "C_q matrix not constructed. Unknown joint type!"
-        
 
         #    matrix C_q transposed
         C_q_trans = C_q.T
@@ -199,7 +184,6 @@ class ODEfun(QObject):
         [self.rows_C_q, self.col_C_q] = C_q.shape
         
         return C_q, C_q_trans
-        
         
     def create_Q_d(self, q_=[], dq_=[], t=0):
         """
@@ -246,32 +230,33 @@ class ODEfun(QObject):
             raise ValueError, "Vector Q_d not correct size."
         return Q_d
             
-            
     def create_Q_e(self, t, q_):
         """
         
         """
+        # print "create_Q_e()"
+        # print "t =", t
+        if self._parent.FLAG_contact == 1:
+            self.solve_contacts(t, q_)
         # print "********************************************"
         # print "t =", t
         # print "q(in) =", q_
         #    vector of generalised external forces
         Q_e = np.zeros(3 * self.MBD_system.number_of_bodies)
         
-        if not self.g_val == 0:
+        #    add gravity forces
+        if (self.gravity != np.zeros(3)).any():
             for body in self.MBD_system.bodies:
                 M_b = np.array([body.mass, body.mass, body.J_zz])
                 Q_e_b = M_b * self.gravity
                 Q_e[3 * body.body_id:3 * body.body_id + 3] = Q_e_b
-
 
         for force in self.MBD_system.forces:
             Q_e_f = force.create_force_Q_e_vector(t, q_)
 
             Q_e[3 * force.body_id:3 * force.body_id + 3] = Q_e[3 * force.body_id:3 * force.body_id + 3] + Q_e_f
 
-
         for spring in self.MBD_system.springs:
-
             Q_i, Q_j = spring.create_spring_force_Q_e_vector(q=q_)
 
 #             self.Q_list = [Q_i, Q_j]
@@ -286,10 +271,8 @@ class ODEfun(QObject):
                 Q_e[3 * spring.body_id_i:3 * spring.body_id_i + 3] = Q_e[3 * spring.body_id_i:3 * spring.body_id_i + 3] + Q_i
             if spring.body_id_j != "ground":
                 Q_e[3 * spring.body_id_j:3 * spring.body_id_j + 3] = Q_e[3 * spring.body_id_j:3 * spring.body_id_j + 3] + Q_j
-
         # print "Q_e =", Q_e
         return Q_e
-
 
     def create_C_s(self, q):
         """
@@ -298,7 +281,6 @@ class ODEfun(QObject):
         #    predefine C_q matrix size
         self.cols_C_s = 2
         C_s = np.zeros([self.rows_C_q_contacts, self.cols_C_s * self.active_contacts])
-
 
         #    create C_s matrix
         for i, contact in enumerate(self.MBD_system.contacts):
@@ -324,7 +306,6 @@ class ODEfun(QObject):
         #    matrix C_q transposed
         C_s_trans = C_s.T
         return C_s, C_s_trans
-
 
     def create_C(self, t, q_):
         """
@@ -352,7 +333,6 @@ class ODEfun(QObject):
 
         return C
 
-
     def create_dC(self, C_q, q):
         """
 
@@ -361,11 +341,11 @@ class ODEfun(QObject):
         dC = np.dot(C_q, dq)
         return dC
 
-         
     def create_dq(self, h, t, q):
         """
         
         """
+        # print "t(sub) = ", t
         #    construct Cq matrix
         self.C_q, self.C_qT = self.create_C_q(t, q)
         
@@ -379,11 +359,9 @@ class ODEfun(QObject):
         rows = self.M_dim + self.rows_C_q
         cols = self.M_dim + self.rows_C_q
 
-      
         #    construct vector of external and constraint forces
         _vector = np.empty([rows])
-        
-        
+
         #    vector of external forces
         Q_e = self.create_Q_e(t, q)
         _vector[0:self.M_dim] = Q_e
@@ -403,58 +381,45 @@ class ODEfun(QObject):
 
         _vector[self.M_dim:rows] = Q_d
 
-
         B = np.zeros([self.col_C_q, self.rows_C_q])
         B = self.C_qT
-
 
         C = np.zeros([self.rows_C_q, self.col_C_q])
         C = self.C_q
 
-
         D = np.zeros([self.rows_C_q, self.rows_C_q])
-        
-        
+
         #    inverse matrix block-wise
         _matrix_inverse = inverse_blockwise.inverse_blockwise(self.M_inv, B, C, D, self.M_dim)
 
-        
         #    solve system of equations
         _sol_vector = np.dot(_matrix_inverse, _vector)
-        
 
         #    accelerations vector
         ddq = _sol_vector[0:self.M_dim]
-        
-        
+
         #    vector of lagrange multipliers
         L = _sol_vector[self.M_dim + self.cols_C_s:rows]
-        
 
         #    generalized reaction forces associated with C_q matrix
         Q_c = -np.dot(self.C_qT, L)
-
 
         #    the dq vector in constructed from vector ddq and the second part of the input vector q
         dq = np.append(q[0.5 * self.q_dim:], ddq)
         return dq
 
-        
     def solve_contacts(self, t, q):
         """
         
         """
-        print "solve_contacts@ODE_fun.py"
-
         #   loop through all contacts
         for contact in self.MBD_system.contacts:
-            print "contact.contact_detected =", contact.contact_detected
-            print "contact.contact_distance_inside_tolerance =", contact.contact_distance_inside_tolerance
-
+            # print "contact.contact_detected =", contact.contact_detected
+            # print "contact.contact_distance_inside_tolerance =", contact.contact_distance_inside_tolerance
             #   check if contact is detected and calculated contact distance is inside the tolerance, then contact is present
-            if contact.contact_detected and contact.contact_distance_inside_tolerance:
-                #   get contact force
-                contact.solve(t, q, self.MBD_system.bodies)
+            if contact.contact_detected:#and contact.contact_distance_inside_tolerance
+                #   get contact forces
+                contact.solve(t, q)
 
                 # if not contact.list_of_contact_force_objects_constructed:
                 #     for body_id, u_P in zip(contact.body_id_list, contact.u_P_list):

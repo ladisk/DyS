@@ -5,7 +5,7 @@ Created on 12. avg. 2014
 
 '''
 import os
-import ast
+from string2array import string2array
 
 def dprj_file_read(filename):
     """
@@ -19,8 +19,8 @@ def dprj_file_read(filename):
     """
     #    predefine empty dictionary
     dict_ = {}
-    
 
+    #    open file to read lines
     with open(filename, 'r') as file_:
     #    'r' - read
     #    'w' - write
@@ -35,9 +35,17 @@ def dprj_file_read(filename):
                 file_.closed
 
             else:
+                if "#" in line:
+                    line = line[:line.index("#")].strip()
+
                 #    Add a new item to dictionary dict_
                 try:
-                    value_ = float(line[line.index('=') + 1:].strip())
+                    #    convert to array
+                    if "," in line[line.index('=') + 1:].strip():
+                        value_ = string2array(line[line.index('=') + 1:].strip())
+                    else:
+                        #    else, to float
+                        value_ = float(line[line.index('=') + 1:].strip())
 
                 except:
                     value_ = str(line[line.index('=') + 1:].strip())
@@ -52,12 +60,10 @@ def dprj_file_read(filename):
         
         return dict_
 
-    
-    
+
 def dprj_file_write():
     
     return None
-
 
 if __name__ == "__main__":
     _dynamic_system = "dynamic_system_0_6_1"

@@ -21,3 +21,5 @@ pyuic4.bat joint.ui > joint_ui.py
 pyuic4.bat spring.ui > spring_ui.py
 
 pyuic4.bat analysis.ui > analysis_ui.py
+
+pyuic4.bat MBD_system.ui > MBD_system_ui.py

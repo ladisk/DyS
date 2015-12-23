@@ -20,11 +20,11 @@ import vertices_offset.vertices_offset as vertices_offset
 
 
 class Geometry(object):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self, filename, parent=None):
-        '''
+        """
         Constructor
         Class constructor for OpenGL VBO
         in:
@@ -35,13 +35,12 @@ class Geometry(object):
             transparent_GL - a transparency factor of a body between 0 and 1
         out:
             VBO interleaved array of data saved to GPU memory
-        '''
+        """
         self._parent = parent
 
         self.filename = filename
 
         self._filename, self._file_extension = os.path.splitext(filename)
-
 
         #    read geom data from stl (geometry) geom_file with model_loader
         if os.path.isfile(filename):
@@ -53,10 +52,9 @@ class Geometry(object):
         #   shift vertices that body center of mass is the origin
         self.geom_data.vertices = vertices_offset.offset(self.geom_data.vertices, parent.CM_CAD_LCS)
 
-
     def create_VBO(self):
         """
-        
+        Method creates a Vertex Buffer Object and writes it to VRAM on GPU
         """
         #    generate a new VBO and get the associated vbo_id
         num_of_VBOs = 1
@@ -64,7 +62,6 @@ class Geometry(object):
         #    create buffer name
         self.vbo_id = GLuint()
         self.vbo_id = glGenBuffers(num_of_VBOs)
-        
 
         #    bind name to buffer
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
@@ -74,8 +71,7 @@ class Geometry(object):
         else:
             self.VBO_created = False
             raise Error, "VBO not created!"
-        
-        
+
         #    number of vertices
         self.N_vertices = len(self.geom_data.vertices)
 
@@ -94,26 +90,23 @@ class Geometry(object):
         
         #    VBO_data size in bytes
         self.VBO_data_size_in_bytes = arrays.ArrayDatatype.arrayByteCount(self.VBO_data)
-        
-        
+
         #    allocate space and upload the data from CPU to GPU
         #    bind data to buffer
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
         #    add VBO data to buffer
         glBufferData(GL_ARRAY_BUFFER, self.VBO_data_size_in_bytes, self.VBO_data, GL_DYNAMIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
-        
-    
+
     def __del__(self):
         """
         Delete opengl object VBO from VRAM
         """
         glDeleteBuffers(1, int(self.vbo_id))
-        
-        
+
     def _update_VBO_color(self, color, transparent):
         """
-        
+        Update color of VBO object
         """
         #   color array of each vertex
         _color = np.array([np.append(color, transparent)], dtype='float32').flatten()

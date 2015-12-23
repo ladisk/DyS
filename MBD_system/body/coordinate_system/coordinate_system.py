@@ -17,15 +17,15 @@ from OpenGL.GLU import *
 
 
 class CoordinateSystem(object):
-    '''
+    """
     classdocs
-    '''
+    """
     __id = itertools.count(-1)
 
     def __init__(self, parent=None):
-        '''
+        """
         Class constructor of VBO 
-        '''
+        """
         self._parent = parent
 
         self.scale = 1E-2
@@ -35,8 +35,7 @@ class CoordinateSystem(object):
         self.x_axis = self.scale*np.array([1, 0, 0])
         self.y_axis = self.scale*np.array([0, 1, 0])
         self.z_axis = self.scale*np.array([0, 0, 1])
-         
-         
+
         #    colors
         #    red
         self.x_color = np.array([[1, 0, 0]])
@@ -44,7 +43,6 @@ class CoordinateSystem(object):
         self.y_color = np.array([[0, 1, 0]])
         #    blue
         self.z_color = np.array([[0, 0, 1]])
-
 
         #   colors vector for ewery node
         x_colors = np.repeat(self.x_color, repeats=3, axis=0)
@@ -70,7 +68,6 @@ class CoordinateSystem(object):
         #   vbo array to use with opengl library
         self.vbo_array = np.array(_vbo_array, dtype='float32')
 
-        
     def _create_VBO(self):
         """
         Function creates VBO of coordinate system
@@ -102,7 +99,6 @@ class CoordinateSystem(object):
         #    add VBO data to buffer
         glBufferData(GL_ARRAY_BUFFER, self.VBO_data_size_in_bytes, self.vbo_array, GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
-
 
     def _paintGL_VBO_CS(self):
         """

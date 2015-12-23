@@ -16,32 +16,33 @@ from OpenGL.GLU import *
 
 
 class Marker(object):
-    '''
+    """
     classdocs
-    '''
-    __id = itertools.count(-1)
+    """
+    __id = itertools.count(0)
 
-    def __init__(self, node, visible = True, scale = 2E-3, parent=None):
-        '''
+    def __init__(self, node, visible=True, scale=2E-3, parent=None):
+        """
         Class constructor of VBO marker
         :param node:
-        '''
+        """
         self._parent = parent
         self._visible = visible
         self._VBO_created = False
         self.scale = scale
 
+        #   marker id
+        self.marker_id = self.__id.next()
+
+        #   node vector (x, y, z)
         self.node = node
 
         #   create colors array - color vector for every vertex
         self._colors()
 
-
-
         axis = self._geometry(node)
         #   number of elements - nodes axis attribute
         self.N_axis = len(axis)
-
 
         #   flatten vbo array
         _vbo_array = np.hstack((axis, self.colors)).flatten()
@@ -49,6 +50,13 @@ class Marker(object):
         #   vbo array to use with opengl library
         self.vbo_array = np.array(_vbo_array, dtype='float32')
 
+    def _setParent(self, parent):
+        """
+
+        :param parent:
+        :return:
+        """
+        self._parent = parent
 
     def _geometry(self, node):
         #    points
@@ -61,11 +69,9 @@ class Marker(object):
         _y_axis = np.array([node, self.y_axis, node])
         _z_axis = np.array([node, self.z_axis, node])
 
-
         #   axis matrix
         axis = np.vstack((_x_axis, _y_axis, _z_axis))
         return axis
-
 
     def _show(self):
         """
@@ -75,8 +81,7 @@ class Marker(object):
             self._visible = False
         else:
             self._visible = True
-        
-        
+
     def _colors(self):
         """
 
@@ -89,7 +94,6 @@ class Marker(object):
         #    blue
         self.z_color = np.array([[0, 0, 1]])
 
-
         #   colors vector for ewery node
         x_colors = np.repeat(self.x_color, repeats=3, axis=0)
         y_colors = np.repeat(self.y_color, repeats=3, axis=0)
@@ -98,47 +102,49 @@ class Marker(object):
         #   colors matrix
         self.colors = np.vstack((x_colors, y_colors, z_colors))
 
-
-        
     def _create_VBO(self):
         """
         Function creates VBO of coordinate system
         """
-        self.__v_pointer = ctypes.c_void_p(0)
-        self.__c_pointer = ctypes.c_void_p(12)
-        
-        #    generate a new VBO and get the associated vbo_id
-        num_of_VBOs = 1
-        
-        
-        #    create buffer name
-        self.vbo_id = GLuint()
-        self.vbo_id = glGenBuffers(num_of_VBOs)
-        
-        #    bind name to buffer
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
-        
-        
-        #    VBO_data size in bytes
-        self.VBO_data_size_in_bytes = arrays.ArrayDatatype.arrayByteCount(self.vbo_array)
-        
-        
-        #    allocate space and upload the data from CPU to GPU
-        #    bind data to buffer
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
-        
-        
-        #    add VBO data to buffer
-        glBufferData(GL_ARRAY_BUFFER, self.VBO_data_size_in_bytes, self.vbo_array, GL_DYNAMIC_DRAW)
-        self._VBO_created = True
+        if not self._VBO_created:
+            # print "-----------------------------------------"
+            # print "marker.py create VBO()"
+            # print "self.node =", self.node
+            self.__v_pointer = ctypes.c_void_p(0)
+            self.__c_pointer = ctypes.c_void_p(12)
 
+            #    generate a new VBO and get the associated vbo_id
+            num_of_VBOs = 1
+
+            #    create buffer name
+            self.vbo_id = GLuint()
+            # print "self.vbo_id =", self.vbo_id
+            self.vbo_id = glGenBuffers(num_of_VBOs)
+
+            #    bind name to buffer
+            glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
+
+            #    VBO_data size in bytes
+            self.VBO_data_size_in_bytes = arrays.ArrayDatatype.arrayByteCount(self.vbo_array)
+
+            #    allocate space and upload the data from CPU to GPU
+            #    bind data to buffer
+            glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
+            #    add VBO data to buffer
+            # print "self.VBO_data_size_in_bytes =", self.VBO_data_size_in_bytes
+            glBufferData(GL_ARRAY_BUFFER, self.VBO_data_size_in_bytes, self.vbo_array, GL_DYNAMIC_DRAW)
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
+            self._VBO_created = True
+
+            # print "self._VBO_created =", self._VBO_created
+            # print "-----------------------------------------"
 
     def _paintGL_VBO(self):
         """
         Paint local coordinate system VBO
         """
-        if self._visible and self._VBO_created:
 
+        if self._visible and self._VBO_created:
             #   bind buffer to id
             glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
             
@@ -149,21 +155,13 @@ class Marker(object):
             glVertexPointer(3, GL_FLOAT, stride_in_bits, self.__v_pointer)
             glColorPointer(3, GL_FLOAT, stride_in_bits, self.__c_pointer)
             glDisable(GL_LIGHTING)
-    
-            
-            #   draw lines - opengl
-#             print glGetError()
-#             GLerror
-#             print glGetString(GLerror)
-#             print GL_NO_ERROR
 
+            #   draw lines - opengl
             glDrawArrays(GL_LINES, 0, self.N_axis)
     
             glEnable(GL_LIGHTING)
             
             glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-
 
     def _update_node(self, node):
         """

@@ -25,7 +25,7 @@ except AttributeError:
         return s
 
 
-class BodyWidget(QtGui.QDialog):
+class BodyWidget(QtGui.QWidget):#QtGui.QDialog
     """
     control panel interface
     """
@@ -37,11 +37,16 @@ class BodyWidget(QtGui.QDialog):
         super(BodyWidget, self).__init__(parent=parent)
         self._parent = parent
 
-
         self.ui = Ui_Form()
         self.ui.setupUi(self)
 
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # self.setFocusPolicy(QtCore.Qt.NoFocus)#self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint) #self.setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.Window)
+        self.setParent(self._parent)
+        self.setWindowModality(QtCore.Qt.WindowModal)
+        # widget.show()
 
         self.group_item = group_item
         self.item = None
@@ -56,8 +61,7 @@ class BodyWidget(QtGui.QDialog):
         
         #    body id
         self.ui.bodyID_lineEdit.setValidator(__validator_int)
-        
-        
+
         #    signals
         self.ui.cancel_pushButton.clicked.connect(self._cancel)
         self.ui.save_pushButton.clicked.connect(self._save)
@@ -73,9 +77,9 @@ class BodyWidget(QtGui.QDialog):
         self._move()
 
         #    show widget
+        self.raise_()
         self.show()
         
-
     def closeEvent(self, event):
         """
 
@@ -83,7 +87,6 @@ class BodyWidget(QtGui.QDialog):
         :return:
         """
         self._parent._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
-
 
     def _move(self):
         """
@@ -95,14 +98,12 @@ class BodyWidget(QtGui.QDialog):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-
     def _cancel(self):
         """
         
         """
         self.close()
 
-    
     def _save(self):
         """
         
@@ -159,7 +160,6 @@ class BodyWidget(QtGui.QDialog):
 #                 QtGui.QMessageBox.Cancel, QtGui.QMessageBox.NoButton,
 #                 QtGui.QMessageBox.NoButton)
 
-
     def _load_stl_file(self):
         """
 
@@ -168,7 +168,6 @@ class BodyWidget(QtGui.QDialog):
         self._load_file_ = QtGui.QFileDialog()
         self._load_file_.setDirectory(os.path.curdir)
         self.stl_filename, self.file_type = self._load_file_.getOpenFileNameAndFilter(self, 'Open file', os.path.curdir, ("STL (*.stl)"))
-
 
     def _load_dat_file(self):
         """
@@ -179,17 +178,19 @@ class BodyWidget(QtGui.QDialog):
         self._load_file_.setDirectory(os.path.curdir)
         self.dat_filename, self.file_type = self._load_file_.getOpenFileNameAndFilter(self, 'Open file', os.path.curdir, ("dat (*.dat)"))
         
-
     def _edit(self, item):
         """
-
+        Set object data to display in qwidget elements
         :return:
         """
         self.item = item
         pprint(vars(item))
-        
-        
-        self.ui.name_lineEdit.setText(item._name)
+
+        #   check if attribute is type QVariant and change it to string
+        if type(item._name) == QtCore.QVariant:
+            self.ui.name_lineEdit.setText(item._name.toString())
+        else:
+            self.ui.name_lineEdit.setText(item._name)
 
         self.ui.bodyID_lineEdit.setText(str(item.body_id))
 

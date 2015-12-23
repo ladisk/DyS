@@ -1,16 +1,18 @@
-'''
+"""
 Created on 30. sep. 2013
 
 @author: lskrinjar
-'''
+"""
 import warnings
 import os
 import sys
+import inspect
 import time
 import numpy as np
 import ctypes
 from pprint import pprint
 from PyQt4 import QtCore, QtGui
+import subprocess
 
 
 from MBD_system.MBD_system import MBDsystem
@@ -40,10 +42,10 @@ except AttributeError:
 __authors__ = ['Luka Skrinjar', 'Ales Turel', 'Janko Slavic']
 __author__ = ','.join(__authors__)
 __credits__ = []
-__copyright__ = 'Copyright (c) 2011'
+__copyright__ = 'Copyright (c) 2015'
 __license__  = 'GPL'
 
-# maintanence information
+# maintenance information
 __maintainer__ = 'Luka Skrinjar'
 __email__  = 'skrinjar.luka@gmail.com'
 __version__ = "0.0.6"
@@ -57,17 +59,22 @@ warnings.filterwarnings("ignore")
 
 
 class MainWindow(QtGui.QMainWindow):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self):
-        '''
+        """
         Class constructor
-        '''
+
+        >>> 1 + 1
+        2
+        >>>
+        """
         super(MainWindow, self).__init__()
         
         #    minimum size
         self.setMinimumSize(500, 500)
+        
         #    location of window on screen
         self.window_offset_x = 250
         self.window_offset_y = 50
@@ -110,22 +117,25 @@ class MainWindow(QtGui.QMainWindow):
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_1"
 #         self.MBD_filename = "dys_0_7_0_2.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_2"
-#         self.MBD_filename = "dys_0_7_1.dprj"
-#         MBD_folder_name_ = "dynamic_systems\\0_7_1"
-        self.MBD_filename = "dys_0_7_3_0.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
-
+#         self.MBD_filename = "dys_0_7_2_revolute_clearence_joint.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_2_revolute_clearence_joint"
+        self.MBD_filename = "0_7_3_0_contact_models.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models"
+#         self.MBD_filename = "dys_0_7_3_0.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
+        
+        # self.MBD_filename = "0_7_3_0_plane_sphere.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_0_plane_sphere"
 
         if MBD_folder_name_ == []:
             MBD_folder_abs_path_ = os.getcwd()
             project_filename = "Model_1"
         else:
             self._working_directory = os.path.join(os.getcwd(), "..")
-            self.MBD_file_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename)
+            self.MBD_file_abs_path_ = os.path.abspath(os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename))
 
             MBD_folder_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_)
             project_filename = os.path.basename(MBD_folder_abs_path_)
-
 
         projectNode = MBD_system_items.MBDsystemItem("projectNode")
 
@@ -506,11 +516,9 @@ class MainWindow(QtGui.QMainWindow):
     
     def update_statusbar_text1(self, energy, energy_delta):
         self.infoText1.setText("Energy (delta): %4.3E"%energy+" (%4.3E"%energy_delta+")")
-            
-            
+
     def update_statusbar_text2(self, value):
         self.infoText2.setText("Step No.: " + str(value))
-
 
     def update_statusbar_text3(self, simulation_status_string):
         # print "simulation_status_string =", simulation_status_string
@@ -531,9 +539,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.infoText3.setText("Status: " + QtCore.QString(simulation_status_string))
 
-
-   
-    
     def about(self):
         QtGui.QMessageBox.about(self, self.tr("About Visualization Engine"), self.tr(
               "<b>Visualization Engine</b> version: %s <br><br> " 
@@ -543,10 +548,8 @@ class MainWindow(QtGui.QMainWindow):
               "<b>Translate</b>: Middle mouse button + CTRL and mouse motion.<br><br>"
               "Visualization engine was designed for simulate dynamic motion of bodies from STL files." % (__version__)))
 
-        
     def view(self):
         QtGui.QWidget()
-    
 
     def close(self):
         QtGui.qApp.quit()

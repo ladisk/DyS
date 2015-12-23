@@ -16,16 +16,16 @@ def Ai_ui_P_vector(u_P, theta):
     Function calculates vector of point P in LCS
     Args:
         u_P (in CM LCS) - 
-        theta - angle of rotation
+        theta - angle of rotation (in radians)
     Returns:
         vector_ - position of point P in CS LCS of a body
     """
     if len(u_P) == 2:
-        A_matrix_ = A_matrix(theta)
+        matrix_ = A_matrix(theta)
     if len(u_P) == 3:
-        A_matrix_ = A_3D_matrix(theta)
+        matrix_ = A_3D_matrix(theta)
     #    if u_P is only a vector of one point
-    vector_ = np.dot(A_matrix_, u_P)
+    vector_ = np.dot(matrix_, u_P)
     return vector_
     #
     # #    if u_P is a matrix of points

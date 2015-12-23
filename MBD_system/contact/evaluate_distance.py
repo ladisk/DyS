@@ -21,12 +21,10 @@ def evaluate_distance_2D(n0, n1, n, t):
     #    distance value
     d = np.linalg.norm(distance_vector, ord=2)
 
-    
     #    check if node is inside or outside of an edge with normal n
     if np.sign(np.dot(n1n0, n)) <= -1:
         inside = False
     else:
         inside = True
-
 
     return d, inside
