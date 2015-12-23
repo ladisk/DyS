@@ -30,15 +30,15 @@ from coordinate_system.coordinate_system import CoordinateSystem
 
 
 class OpenGLWidget(QtOpenGL.QGLWidget):
-    '''
+    """
     classdocs
     Angle units in opengl are always deg
-    '''
+    """
 
     def __init__(self, MBD_system=None, parent=None):
-        '''
+        """
         Constructor
-        '''
+        """
         self.parent = parent
         QtOpenGL.QGLWidget.__init__(self, parent)
         #    main data file
@@ -67,42 +67,35 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.initial_window_height = 500.
         self.resize_factor_width = 1
         self.resize_factor_height = 1
-    
-    
+
         #    coordinate system
-        self.LCS = CoordinateSystem()
-        
-    
+        self.GCS = CoordinateSystem()
+
         # core profile
         glformat = QtOpenGL.QGLFormat()
         glformat.setVersion(4, 1)
         glformat.setProfile(QtOpenGL.QGLFormat.CoreProfile)
         glformat.setSampleBuffers(True)
-    
-        
+
         #    context menu properties
         self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # NoContextMenu, CustomContextMenu
-        
-        
+
     def update_data(self, bodies):
         """
         
         """
         #    main data file
         self.MBD_system.bodies = bodies
-        
-    
+
     def initializeOverlayGL(self):
         """
         
         """
-    
 
     def initializeGL(self):
         """
         Initialize OpenGL, VBOs, upload data on the GPU, etc.
         """
-
         #    background color - default color
         glClearColor(0, 0, 0, 1)
         
@@ -129,7 +122,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #         print "GL Extensions:", glGetString(GL_EXTENSIONS)
 #         print "---------------------------------------------------------"
 
-         
         #    lights
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
         glEnable(GL_LIGHT0)
@@ -144,7 +136,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.geometry()
 
         #   create VBO of GCS
-        self.LCS._create_VBO()
+        self.GCS._create_VBO()
 
         #    display window
         self.display_window = display_window.Window(width=self.initial_window_width, height=self.initial_window_height, left_GL=self.left_GL, right_GL=self.right_GL, bottom_GL=self.bottom_GL, top_GL=self.top_GL, near_GL=self.near_GL, far_GL=self.far_GL, zoom=self.zoom, scale_factor_Translation=self.scale_factor_Translation, scale_factor_Rotation=self.scale_factor_Rotation)
@@ -155,8 +147,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.shader_program.addShaderFromSourceFile(QGLShader.Fragment, os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders", "shader.frag"))
         self.shader_program.log()
         self.shader_program.link()
-        
-    
+
     def paintGL(self):
         """
         Display geometry
@@ -171,12 +162,17 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    modelview matrix
         glMatrixMode(GL_MODELVIEW)
 
-
-        if self.LCS._visible:
-            try:
-                self.LCS._paintGL_VBO()
-            except:
-                pass
+        #   display GCS in main window
+        # if self.MBD_system.GCS_visible:
+            #   plot markers in ground
+            # pprint(vars(self.MBD_system.ground))
+        # self.MBD_system.ground.paintGL_VBO()
+        # if self.GCS._visible:
+        #     self.GCS._paintGL_VBO()
+                # try:
+                #     self.GCS._paintGL_VBO()
+                # except:
+                #     pass
             # display_CS_main.display(self, self.camera.current_MODELVIEW_matrix, int(self.display_window.width), int(self.display_window.height))
         
         glViewport(0, 0, int(self.display_window.width), int(self.display_window.height))
@@ -190,21 +186,27 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         glEnd()
         glLineWidth(1.2)
 
+        # self.MBD_system.ground.paintGL_VBO()
+
+
         glEnableClientState(GL_VERTEX_ARRAY)
-        glEnableClientState(GL_NORMAL_ARRAY)
         glEnableClientState(GL_COLOR_ARRAY)
 
+        #   display main CS (GCS) as coordinate system VBO does not have normals it has
+        #   to be displayed before normals are enabled in OpenGL
+        if self.GCS._visible:
+            self.GCS._paintGL_VBO()
+
+        glEnableClientState(GL_NORMAL_ARRAY)
+
+
+
         #    display main GCS
-#         if self.LCS._visible:
-#             self.LCS._paintGL_VBO()
-
-        #   plot markers in ground
-        self.MBD_system.ground.paintGL_VBO()
-
+#         if self.GCS._visible:
+#             self.GCS._paintGL_VBO()
 
         self.MBD_system.bodies.sort(key=lambda body: body.transparent_GL, reverse=True)
 
-        
         for body in self.MBD_system.bodies:
             glUseProgram(0)
             # if body._visible:# and body.VBO_created:
@@ -212,10 +214,10 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
             glPushMatrix()
 
             #   paint VBO of global coordinate system
-            try:
-                self.LCS._paintGL_VBO()
-            except:
-                pass
+            # try:
+            # self.GCS._paintGL_VBO()
+            # except:
+            #     pass
 
             #   paint body geometry
             body.paintGL_VBO(self.step, self.shader_program)
@@ -244,7 +246,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.gl_matrix.update_modelview_matrix(glGetDoublev(GL_MODELVIEW_MATRIX))
         self.gl_matrix.update_modelview_matrix_CS(self.camera_CS.current_MODELVIEW_matrix)
         
-        
         #    display CS symbol in lower left corner
         try:
             display_CS.display(self, self.gl_matrix, self.CS_window, self.CS_window)
@@ -261,7 +262,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    display text
         paint_text.text(self, self.resize_factor_width, self.resize_factor_height, filename=self.MBD_system._name, simulation_time=self.MBD_system.time, simulation_step_number=self.MBD_system.step_num)
     
-    
     def repaintGL(self, step = None):
         """
         Repaint - update opengl
@@ -269,35 +269,31 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.step = step
         self.updateGL()
     
-    
     def geometry(self):
         """
         Create MBD System (MBD_system) geometry
         """
         if glGetError() == GL_NO_ERROR:
-            if not self.LCS._VBO_created:
-                self.LCS._create_VBO()
-
+            if not self.GCS._VBO_created:
+                self.GCS._create_VBO()
 
             for body in self.MBD_system.bodies:
                 #    create VBO of each body
-                if body.VBO_created == False:
+                if not body.VBO_created and body._name != "ground":
                     body.create_VBO()
 
-            # for force in self.MBD_system.forces:
-            #     for marker in force.markers:
-            #         if not marker._VBO_created:
-            #             marker._create_VBO()
+            for force in self.MBD_system.forces:
+                for marker in force.markers:
+                    if not marker._VBO_created:
+                        marker._create_VBO()
 
-   
     def takeSnapShot(self):
         """
         
         """
         screen_shot = self.grabFrameBuffer(withAlpha=True)
         return screen_shot
-        
-        
+
     def resizeGL(self, width, height):
         """
         Resize
@@ -323,8 +319,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.camera.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
 
         glMatrixMode(GL_MODELVIEW)
-        
-    
+
     def mouseReleaseEvent(self, event):
         """
         
@@ -340,7 +335,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         else:
             self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
 
-    
     def mousePressEvent(self, event):
         """
         
@@ -348,13 +342,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.last_pos = QtCore.QPoint(event.pos())
         self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
 
-
     def _repaintGL(self):
         """
         
         """
         self.repaintGL()
-
 
     def contextMenuEvent(self, event):
         """
@@ -370,13 +362,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         popMenu.addMenu(self.viewSubMenu())
 
         popMenu.addSeparator()
-        _show_GCSAction = QtGui.QAction("Show GCS", self, checkable=True, checked=self.LCS._visible)
-        _show_GCSAction.triggered.connect(self.LCS._show)
+        _show_GCSAction = QtGui.QAction("Show GCS", self, checkable=True, checked=self.GCS._visible)
+        _show_GCSAction.triggered.connect(self.GCS._show)
         popMenu.addAction(_show_GCSAction)
 
-
         popMenu.exec_(event.globalPos())
-
 
     def mouseMoveEvent(self, event):
         """
@@ -406,8 +396,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
             self.updateGL()
             self.last_pos = event.posF()
-
-
     
     def wheelEvent(self, event):
         """
@@ -424,7 +412,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         self.updateGL()
 
-        
     def viewSubMenu(self):
         viewDirectionSubmenu = QtGui.QMenu(parent=self)
         
@@ -453,13 +440,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         return viewDirectionSubmenu
 
-
     @QtCore.pyqtSlot()
     def viewFront(self):
         self.camera.front()
         self.camera_CS.front()
         self.updateGL()
-
 
     @QtCore.pyqtSlot()
     def viewBack(self):
@@ -467,13 +452,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.camera_CS.back()
         self.updateGL()
 
-
     @QtCore.pyqtSlot()
     def viewBottom(self):
         self.camera.bottom()
         self.camera_CS.bottom()
         self.updateGL()
-
 
     @QtCore.pyqtSlot()
     def viewTop(self):
@@ -481,20 +464,17 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.camera_CS.top()
         self.updateGL()
 
-
     @QtCore.pyqtSlot()
     def viewRight(self):
         self.camera.left()
         self.camera_CS.left()
         self.updateGL()
 
-
     @QtCore.pyqtSlot()
     def viewLeft(self):
         self.camera.right()
         self.camera_CS.right()
         self.updateGL()
-
 
     @QtCore.pyqtSlot()
     def viewIsometric(self):

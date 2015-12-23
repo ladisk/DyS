@@ -1,9 +1,8 @@
-
-'''
+"""
 Created on 10. maj 2013
 
 @author: lskrinjar
-'''
+"""
 import numpy as np
 import platform
 import sys
@@ -65,6 +64,9 @@ print QT_VERSION_STR
 from OpenGL import __version__ as OpenGL_version
 print "OpenGL_version =", OpenGL_version
 
+from OpenGL_accelerate import __version__
+print "OpenGL_accelerate_version =", __version__
+
 # from OpenGL_accelerate import __version__ as OpenGLaccl_version
 # print "OpenGLaccl_version =", OpenGLaccl_version
 
@@ -78,3 +80,6 @@ print "OpenGL_version =", OpenGL_version
 # # wglMakeCurrent
 # glutInit()
 # print glGetString(GL_VERSION)
+
+import ctypes
+print ctypes.sizeof(ctypes.c_voidp)

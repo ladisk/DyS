@@ -8,6 +8,7 @@ import copy
 import logging
 import datetime
 import os
+import inspect
 from pprint import pprint
 import sys
 import time
@@ -25,7 +26,11 @@ from MBD_system.q2dR_i import q2dR_i
 from MBD_system.q2dtheta_i import q2dtheta_i
 from MBD_system.q2R_i import q2R_i
 from MBD_system import convert_bytes_to_
+from MBD_system.check_filename import check_filename
+from MBD_system.solution_data.solution_data import SolutionData
+
 from signals import ErrorTimeIntegrationSignal
+
 
 class stepSignal(QtCore.QObject):
     signal_step = QtCore.pyqtSignal(int, name='signal_step')
@@ -73,17 +78,15 @@ class SolveODE(QObject):  # Thread, QObject
 
         
         self.MBD_system = MBD_system
-        #    copy MBD objec
+        #    copy MBD object
         self._MBD_system = copy.copy(self.MBD_system)
         #    ode fun object
         self.ode_fun = ODEfun(MBD_system=self._MBD_system, parent=self)
 
 
-        self.FLAG_contact = 0
-        self.simulation_id = 0
 
         #    simulation settings - properties
-        self.integrationMethod = "RKF"  #    self.MBD_system.integrationMethod
+        # self.integrationMethod = "RKF"  #    self.MBD_system.integrationMethod
         
         
         #    update opengl widget every N-th step
@@ -93,8 +96,7 @@ class SolveODE(QObject):  # Thread, QObject
         
         self.save_screenshot_step_count = 0
         self.save_screenshot_every_Nth_step = 2 * self.update_opengl_widget_every_Nth_step
-        
-        
+
         #    info properties
         self.start_time_simulation_info_in_sec_UTC = []
         self.start_time_simulation_info = []
@@ -104,8 +106,21 @@ class SolveODE(QObject):  # Thread, QObject
         self.simulation_time_info = []
         self.stop_time_simulation_info_in_sec_UTC = []
         self.stop_time_simulation_info = []
-    
-        
+
+    def _solution_containers(self):
+        """
+
+        :return:
+        """
+        #    solution container variable
+        q0 = self.initial_conditions()
+        self.q_sol_matrix = np.array([q0])
+        self.t_vector = np.array([[0]])
+        self.R_vector = np.array([0])
+        self.step_counter = np.array([0])
+        self.step_size = np.array([self._MBD_system.Hmax])
+        self.energy_data = np.array([self._mechanical_energy(q0)])
+
     def solve_ODE(self):
         """
         Solves system of ode with dormand-prince order 5 method with runge-kutta algorithm
@@ -133,19 +148,91 @@ class SolveODE(QObject):  # Thread, QObject
             
         q0 = self.initial_conditions()
 
-        if self.integrationMethod == "RKF":
+        #   solution containers
+        self._solution_containers()
 
-            self.solve_ODE_RKF(t_0=self._MBD_system.t_0, t_n=self._MBD_system.t_n, q0=q0, absTol=self._MBD_system.absTol, relTol=self._MBD_system.relTol, Hmax=self._MBD_system.Hmax, Hmin=self._MBD_system.Hmin)
+        self.simulation_id = 0
+        self.FLAG = 1
+        self.FLAG_contact = 0  #    0 - no contact
+                               #    1 - contact detected
+                               #    -1 - contact already happened - reduce integration step
+        self.step = 0
+        self.h_contact = 1E-8
 
-        elif self.integrationMethod == "ABAM":
-            print "SELECTED METHOD: ABAM" 
-        elif self.integrationMethod == "Newton-Rhapson":
-            print "SELECTED METHOD: Newton-Rhapson" 
+        if self.MBD_system.integrationMethod.title() == "ABAM":
+            pass
+
+        elif self.MBD_system.integrationMethod.title() == "Newton-Rhapson":
+            pass
+
+        elif self.MBD_system.integrationMethod.title() == "Runge-Kutta":
+            self.solve_ODE_RK(t_0=self._MBD_system.t_0, t_n=self._MBD_system.t_n, q0=q0, absTol=self._MBD_system.absTol, relTol=self._MBD_system.relTol, Hmax=self._MBD_system.Hmax, Hmin=self._MBD_system.Hmin)
+
+        elif self.MBD_system.integrationMethod.title() == "Euler":
+            self.solve_ODE_Euler(t_0=self._MBD_system.t_0, t_n=self._MBD_system.t_n, q0=q0, Hmax=self._MBD_system.Hmax)
+
         else:
-            None
+            raise ValueError, "Selected integration method not supported! Method: %s"%self.MBD_system.integrationMethod
 
+    def solve_ODE_Euler(self, t_0, t_n, q0, Hmax):
+        """
 
-    def solve_ODE_RKF(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
+        :param t_0:
+        :param t_n:
+        :param q0:
+        :param h:
+        :return:
+        """
+        self.t_0 = t_0
+        self.t_n = t_n
+        t = t_0
+        w = q0
+
+        self.Hmax = h = Hmax
+        self.R = 0
+
+        while self.FLAG == 1:
+
+            if self.stopped:
+                self.update_GL_(t=t, q=w)
+                self.stop_solve()
+                self.FLAG = 0
+
+            if t >= self.t_n:
+                self.FLAG = 0
+                self.finished = True
+                self.update_GL_(t=t, q=w)
+
+            self.t = t = t + h
+            print "-------------------------------------"
+            print "t =", t, "step =", self.step
+            w = w + h * self.ode_fun.create_dq(h, t, w)
+            # print "q =", w
+            #    solve contacts here
+            # time.sleep(100)
+            self.FLAG_contact = self.__evaluate_contacts(t, w)
+            # print "self.FLAG_contact =", self.FLAG_contact
+            #   evaluate mechanical energy of system
+            self._energy_t = self._mechanical_energy(w)
+            #   evaluate difference of mechanical energy of a system between this and prevouis time step
+            self._energy_delta = self._energy_t - self.energy_data[-1]
+
+            # self.__evaluate_contacts(h, t, w)
+
+            h, t, w = self.__track_data(h, t, w)
+
+            self.__info(t, w)
+
+            #   check time step
+            h = self.check_time_step(h, w)
+
+        if self.finished or self.failed:
+            self.finished_solve()
+
+        #    save data to file
+        self.write_simulation_solution_to_file()
+
+    def solve_ODE_RK(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
         """
         RKF - Runge-Kutta-Fehlberg 
         Based on Numerical Analysis 9th ed Burden & Faires
@@ -165,49 +252,37 @@ class SolveODE(QObject):  # Thread, QObject
 #         logging.getLogger("DyS_logger").info("Size of MBD system in bytes %s" % sys.getsizeof(self.MBD_system))
         logging.getLogger("DyS_logger").info("Simulation started with initial conditions q0:\n%s" % q0)
 
+        self.Hmax = Hmax
+        self.Hmin = Hmin
 
         h = Hmax
-        h_contact = 1E-5
+        h_contact = self.h_contact
         self._t_FLAG1 = Hmax
 
-        self.FLAG = 1
-        self.FLAG_contact = 0  #    0 - no contact
-                                #    1 - contact detected
-                                #    -1 - contact already happened - reduce integration step
-        
-        #    solution container variable
-        q_sol_matrix = np.array([w])
-        t_vector = np.array([[0]])
-        R_vector = np.array([0])
-        step_counter = np.array([0])
-        step_size = np.array([h])
-        energy_data = np.array([self.__mechanical_energy(q0)])
-        
-        
+
+
 #        print "absTol =", absTol
 #        self.update_opengl_widget_every_Nth_step = 1*((t_n - t_0)/Hmax)
 #        print "self.update_opengl_widget_every_Nth_step =", self.update_opengl_widget_every_Nth_step
 
-        self.step = step_num = 0
         self.save_updated_GL_screenshot_to_file(self.t_0)
         np.set_printoptions(precision=20, threshold=1000, edgeitems=True, linewidth=1000, suppress=False, formatter={'float': '{: 10.9e}'.format})
 
-
         while self.FLAG == 1:
-            # print "h =", h
+            print "-------------------------------------"
+            print "t =", t
             if self.stopped:
                 self.update_GL_(t=t, q=w)
                 self.stop_solve()
-                break
+                self.FLAG = 0
 
             if self.FLAG_contact == 1:
                 h = h_contact
+            elif self.FLAG_contact == 0:
+                h = Hmax
 
             # print "self.FLAG_contact =", self.FLAG_contact
-            print "--------------------------------"
-            print "i =", self.step, "h =", h, "t =", t+h,
-            # print "t =", t
-
+            # print "--------------------------------"
             K1 = h * self.ode_fun.create_dq(h, t, w)
             K2 = h * self.ode_fun.create_dq(h, t + (1 / 4.) * h, w + (1 / 4.) * K1)
             K3 = h * self.ode_fun.create_dq(h, t + (3 / 8.) * h, w + (3 / 32.) * K1 + (9 / 32.) * K2)
@@ -215,13 +290,12 @@ class SolveODE(QObject):  # Thread, QObject
             K5 = h * self.ode_fun.create_dq(h, t + h, w + (439 / 216.) * K1 - 8 * K2 + (3680 / 513.) * K3 - (845 / 4104.) * K4)
             K6 = h * self.ode_fun.create_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 - (1859 / 4104.) * K4 - (11 / 40.) * K5)
             
-            R = (1 / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
-            R = absTol
-            # R_ = np.linalg.norm(R, ord=2)
-            # print "R =", R_
+            self.R = (1 / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
+            self.R = absTol
             #    if calculated difference is less the absTolerance limit accept the calculated solution 
-            if R <= absTol or self.FLAG_contact == 1:
+            if self.R <= absTol or self.FLAG_contact == 1:
                 self.t = t = t + h
+                print "i =", self.step, "t =", t
                 # self._parent.ui.simulation_progressBar.setValue(int(1/self.t))
                 # print "t =", t, "h =", h,
                 w = w + (25. / 216.) * K1 + (1408. / 2565.) * K3 + (2197. / 4104.) * K4 - (1. / 5.) * K5
@@ -238,70 +312,23 @@ class SolveODE(QObject):  # Thread, QObject
 #                 np.set_printoptions(**__print_options)
                 
                 #    solve contacts here
-#                 print "t(solve_ODE.py) =", t
-                w = self.solve_contacts(t, w)
-
+                # print "t =", t
+                # time.sleep(100)
+                self.FLAG_contact = self.__evaluate_contacts(t, w)
+                print "self.FLAG_contact =", self.FLAG_contact
                 #   evaluate mechanical energy of system
-                _energy = self.__mechanical_energy(w)
+                self._energy_t = self._mechanical_energy(w)
+                self._energy_delta = self._energy_t - self.energy_data[-1]
+
+                h = self.__track_data(h, t, w)
 
                 #   evaluate difference of mechanical energy of a system between this and prevouis time step
-                _energy_delta = _energy - energy_data[-1]
-                
-                #    save values at next time step to matrix of solution (q_matrix)
-                if self.FLAG_contact == 0 or self.FLAG_contact == 1:
-#                     print self.step, t, R_,
 
-                    self.q_sol = q_sol_matrix = np.vstack((q_sol_matrix, np.array(w)))
-                    
-                    step_size = np.vstack((step_size, h))
-                    self.step += 1
-                    step_num = self.step
-                    # print "i =", step_num,
+                self.__info(t, w)
 
+                #   check time step
+                h = self.check_time_step(h, w)
 
-                    step_counter = np.append(step_counter, self.step)
-                    #    add to vector
-                    self.t_sol = t_vector = np.vstack((t_vector, t))
-                    R_vector = np.vstack((R_vector, R))
-                    
-                    
-                    energy_data = np.append(energy_data, _energy)
-                    
-                #    reduce step size and continue integration from previous step
-                elif self.FLAG_contact == -1:
-                    #    go to one before last solution
-                    w = q_sol_matrix[-1, :]
-                    #    store time that is too large
-                    self._t_FLAG1 = t
-                    t = t_vector[-1, 0]  # , 0
-                    
-                    #    reduce step size
-                    h = 0.5 * h
-                    # self.step -= 1
-                    # step_num  = self.step
-                    # step_counter[-1] = self.step
-                    
-                    energy_data[-1] = _energy
-                    
-                #    update coordinates and angles of all bodies
-                self.__update_coordinates_and_angles_of_all_bodies(w)
-
-                #    update opengl display
-                self.update_GL_(t, w)
-
-                # self.step += 1
-                # step_counter = np.append(step_counter, self.step)
-                
-                self.update_opengl_widget_step_count += 1
-                self.save_screenshot_step_count += 1
-
-                #    step number signal
-                self.step_signal.signal_step.emit(self.step)
-                
-                #    energy data signal
-                self.energy_signal.signal_energy.emit(_energy, _energy_delta)
-
-            
             #    evaluate error and change step size if needed
             # delta = 0.84 * (absTol / R) ** (1 / 4.)
             #
@@ -327,54 +354,107 @@ class SolveODE(QObject):  # Thread, QObject
             #         h = (self._t_FLAG1 - t)/2
             #     # print "h =", h
             #
-            #    if end time is reached stop/break integration process
+            #   if end time is reached stop/break integration process
             if t >= self.t_n:
                 self.FLAG = 0
                 self.finished = True
                 self.update_GL_(t=t, q=w)
-
-            #    reduce step size to get to final time t_n
-            elif t + h > t_n:
-                h = t_n - t
-            
-            #    break integration as minimum step size is exceeded
-            elif h < Hmin and R > absTol:
-                self.failed = True
-                self.FLAG = 0
-                print "t =", t
-                print "absTol =", absTol
-                print "R =", R
-                print "h =", h
-                h = Hmin
-                self.error_time_integration_signal.signal_time_integration_error.emit()
-
-                print "Hmin exceeded! Procedure failed!"
+            #
+            # #    reduce step size to get to final time t_n
+            # elif t + h > t_n:
+            #     h = t_n - t
+            #
+            # #    break integration as minimum step size is exceeded
+            # elif h < Hmin and R > absTol:
+            #     self.failed = True
+            #     self.FLAG = 0
+            #     print "t =", t
+            #     print "absTol =", absTol
+            #     print "R =", R
+            #     print "h =", h
+            #     h = Hmin
+            #     self.error_time_integration_signal.signal_time_integration_error.emit()
+            #
+            #     print "Hmin exceeded! Procedure failed!"
             #    time step after contact is constant and very small value
             if self.FLAG_contact == 1:
-                h = 1E-6
+                h = self.Hmin
                 # if h_after_contact < 10 * Hmin:
                 #     h = 10 * Hmin
                 # else:
                 #     h = Hmax
-                
-        
+
         #    integration finished - end time reached successfully
         if self.finished or self.failed:
             self.finished_solve()
 
-        self.R_vector = R_vector
-        self.t_sol = t_vector
-        self.q_sol = q_sol_matrix
-        self.step_size = step_size
-        self.step = step_counter
-        self.energy_data = energy_data
-
-
         #    save data to file
         self.write_simulation_solution_to_file()
 
+    def __info(self, t, w):
+        """
 
-    def solve_contacts(self, t, q):
+        :return:
+        """
+        #    update coordinates and angles of all bodies
+        self.__update_coordinates_and_angles_of_all_bodies(w)
+
+        #    update opengl display
+        self.update_GL_(t, w)
+
+        # self.step += 1
+        # step_counter = np.append(step_counter, self.step)
+
+        self.update_opengl_widget_step_count += 1
+        self.save_screenshot_step_count += 1
+
+        #    step number signal
+        self.step_signal.signal_step.emit(self.step)
+
+        #    energy data signal
+        self.energy_signal.signal_energy.emit(self._energy_t, self._energy_delta)
+
+    def __track_data(self, h, t, q):
+        """
+
+        :return:
+        """
+        #    save values at next time step to matrix of solution (q_matrix)
+        if self.FLAG_contact == 0 or self.FLAG_contact == 1:
+            #   append solution at i-th time to solution matrix
+            self.q_sol = self.q_sol_matrix = np.vstack((self.q_sol_matrix, np.array(q)))
+
+            self.step_size = np.vstack((self.step_size, h))
+            self.step += 1
+            step_num = self.step
+
+            #   append current step number to step counter history array
+            self.step_counter = np.append(self.step_counter, self.step)
+            #    add to vector
+            self.t_vector = np.vstack((self.t_vector, t))
+            self.R_vector = np.vstack((self.R_vector, self.R))
+            #   append current mechanical energy to array
+            self.energy_data = np.append(self.energy_data, self._energy_t)
+
+        #    reduce step size and continue integration from previous step
+        elif self.FLAG_contact == -1:
+            #    go to one before last solution
+            q = self.q_sol_matrix[-1, :]
+            #    store time that is too large
+            self._t_FLAG1 = t
+            t = self.t_vector[-1, 0]  # , 0
+
+            #    reduce step size
+            h = 0.5 * h
+            # self.step -= 1
+            # step_num  = self.step
+            # step_counter[-1] = self.step
+
+            self.energy_data[-1] = self._energy_t
+
+        return h, t, q
+
+    def __evaluate_contacts(self, t, q):
         """
         Function solves contacts. Finds overlap pairs of (sub)AABB and calculates actual distances between node 
         and line (edge). If distance is below userdefined limit contact is present and contact equations are solved.
@@ -394,11 +474,12 @@ class SolveODE(QObject):  # Thread, QObject
         self.contact_status_list = []
         # print t, self.step
         #    check for contacts
-        if self.MBD_system.contacts != []:
+        if self.MBD_system.contacts is not []:
             
             #    check for contact of every contact pair
             for contact in self.MBD_system.contacts:
                 contact.data_tracker(t, self.step)
+                # print "contact._contact_point_found =",contact._contact_point_found
                 if not contact._contact_point_found:
                     #    function recursively loops through all potential AABB objects in AABB tree of each body
                     #    and if two AABB objects overlap, a new overlap object is created
@@ -406,49 +487,66 @@ class SolveODE(QObject):  # Thread, QObject
 
                     #    adds simulation data to contact object as this is not possible in the next line because of the recursion
 #                     __step_num = self.step+0
-
                     # contact.data_tracker(t, self.step)
-
                     #   general contact
-                    if contact.AABB_i is not None and contact.AABB_j is not None:
-                        # #    adds simulation data to contact object as this is not possible in the next line because of the recursion
+                    if contact._type == "General":
+                        #    adds simulation data to contact object
                         # __step_num = self.step+0
                         # contact.data_tracker(t, __step_num)
 
+                        #   reset to empty list a contact object attribute of list of overlap pairs,
+                        #   as this is not possible in the next line (function) due to the recursion
                         contact.AABB_list_of_overlap_pairs = []
-                        contact.check_for_AABB_AABB_overlap(q, contact.AABB_i, contact.AABB_j)
+                        #   check for overlap and if overlap is present build a overlap pair object
+                        contact.check_for_overlap(q, contact.AABB_i, contact.AABB_j)
 
-                        if contact.AABB_list_of_overlap_pairs != []:
+                        #   if list of overlap object pairs is not empty, check for contact
+                        if contact.AABB_list_of_overlap_pairs is not []:
                             status = contact.check_for_contact(q)
                             self.contact_status_list.append(status)
                         else:
                             contact.no_overlap()
 
                     #   revolute clearance joint contact
-                    elif contact.u_iP is not None and contact.u_jP is not None:
-                        # print "contact.check_for_contact()"
+                    elif contact._type == "Revolute Clearance Joint" or contact._type == "Contact Sphere-Sphere" or contact._type == "Contact Plane-Sphere":
                         status = contact.check_for_contact(q)
+                        # print "status(check_for_contact) =", status
                         self.contact_status_list.append(status)
-                        # print "status =", status
 
+                    else:
+                        self.FLAG = 0
+                        QtGui.QMessageBox.critical(self._parent, "Error!", "Contact type not correct: %s"%contact._type+". \nDefine correct contact type!", QtGui.QMessageBox.Ok)
+                        raise ValueError, "Contact type not correct: %s"%contact._type, "\n Define correct contact type!"
                 else:
                     #    adds simulation data to contact object as this is not possible in the next line because of the recursion
                     # print "contact.update_status()"
+                    # print "contact_update() @ solve_ODE"
                     status = contact.contact_update(self.step, t, q)
                     # print "status (from contact_update) =", status
                     self.contact_status_list.append(status)
 
             self.contact_status_list = np.array(self.contact_status_list)
-            print "t =", t, "self.contact_status_list =", self.contact_status_list
+            # print "self.contact_status_list =", self.contact_status_list
 
             #    no contacts
             if (self.contact_status_list == 0).all():
-                self.FLAG_contact = 0
-                return q
+                FLAG_contact = 0
+
+                callerframerecord = inspect.stack()[0]      # 0 represents this line
+                                                            # 1 represents line at caller
+                frame = callerframerecord[0]
+                # print "NO CONTACT"
+                # print "simulation sleep"
+
+                info = inspect.getframeinfo(frame)
+                # print "file:", info.filename
+                # print "function:", info.function+"()"
+                # time.sleep(100)
+                return FLAG_contact
             
             #    contact
             if (self.contact_status_list == 1).any():
-                self.FLAG_contact = 1
+                FLAG_contact = 1
                 # logging.getLogger("DyS_logger").info("Contact detected at simulation time:%s \nbody_i=%s \nbody_j=%s", t, self.MBD_system.bodies[contact.body_id_i]._name, self.MBD_system.bodies[contact.body_id_j]._name)
                 # logging.getLogger("DyS_logger").info("Contact detected at simulation time:%s "%t)
                 #   repaint opengl widget
@@ -456,80 +554,96 @@ class SolveODE(QObject):  # Thread, QObject
 #                 self.repaintGL_signal.signal_repaintGL.emit()
 
                 #   solve contacts - construct contact forces
-                self.ode_fun.solve_contacts(t, q)
+                # self.ode_fun.solve_contacts(t, q)
 
                 # logging.getLogger("DyS_logger").info("Contact calculation finished")
-                return q
+                return FLAG_contact
             
             #    contact has already happened - reduce time step
             if (self.contact_status_list == -1).any():
-                self.FLAG_contact = -1  # 0-no contact, 1-contact has already happened - reduce time step
-                return q
+                FLAG_contact = -1  # 0-no contact, 1-contact has already happened - reduce time step
+                return FLAG_contact
         
         else:
-            self.FLAG_contact = 0
-            return q
+            FLAG_contact = 0
+            return FLAG_contact
 
-
-    def __mechanical_energy(self, q):
+    def _mechanical_energy(self, q):
         """
         
         """
         #    predefine zero array
         _energy = np.zeros(self.MBD_system.number_of_bodies)
-        
 
+        #   energy of all bodies
         for i, body in enumerate(self.MBD_system.bodies):
-
             _q = q2R_i(q, body.body_id)
-            _dq = np.linalg.norm(q2dR_i(q, body.body_id), ord=2)
-            _omega = q2dtheta_i(q, body.body_id)
-            
-            body_energy = 0.5 * (body.mass * (_dq**2) + body.J_zz * (_omega**2)) + (body.mass * self.MBD_system.gravity * _q[1]) 
+            _dq = np.append(q2dR_i(q, body.body_id), q2dtheta_i(q, body.body_id))
 
+            #   body energy
+            # body_energy = 0.5 * (body.mass * (_dq**2) + body.J_zz * (_omega**2)) + (body.mass * self.MBD_system.gravity * _q[1])
+            body_energy = body.mechanical_energy(q=_q, dq=_dq, gravity=self.MBD_system.gravity)
             _energy[i] = body_energy
-        
-        energy = np.sum(_energy)
+
+        #   energy of normal contact forces
+        _energy_of_contacts = np.zeros(len(self.MBD_system.contacts))
+        # for i, contact in enumerate(self.MBD_system.contacts):
+        #     _energy_of_contacts[i] = contact.mechanical_energy()
+
+        #   total mechanical energy
+        energy = np.sum(_energy) + np.sum(_energy_of_contacts)
         
         return energy
- 
 
-    def check_time_step(self, t, q):
+    def check_time_step(self, h, q):
         """
         
         """
-        _t_max = []
-        for contact in self.MBD_system.contacts:
-            if contact.AABB_list_of_overlap_pairs != []:
-                for body_id in contact.contact_body_id_list:
-                     
-                    _t = self.MBD_system.bodies[body_id].skin_thickness / np.linalg.norm(q2dR_i(q, body_id) + q2dtheta_i(q, body_id) * self.MBD_system.bodies[body_id].uP_i_max, ord=2)
-                    _t_max.append(_t)
-        
-                t_max = min(_t_max)
-                if t > t_max:
-                    return t_max
-                else:
-                    return t
-            else:
-                return t
+        # _t_max = []
+        # for contact in self.MBD_system.contacts:
+        #     if contact.AABB_list_of_overlap_pairs != []:
+        #         for body_id in contact.contact_body_id_list:
+        #
+        #             _t = self.MBD_system.bodies[body_id].skin_thickness / np.linalg.norm(q2dR_i(q, body_id) + q2dtheta_i(q, body_id) * self.MBD_system.bodies[body_id].uP_i_max, ord=2)
+        #             _t_max.append(_t)
+        #
+        #         t_max = min(_t_max)
+        #         if t > t_max:
+        #             return t_max
+        #         else:
+        #             return t
+        #     else:
+        #         return t
+        # if h < self.Hmin:
+        #     h = self.Hmin
+        if self.FLAG_contact == 1:
+            h = self.h_contact
+        elif self.FLAG_contact == -1:
+            h = h
+        else:
+            h = self.Hmax
 
+        return h
 
     def write_simulation_solution_to_file(self):
         """
-            Function writes solution_data to txt file and saves it.
+        Function writes solution_data to txt file and saves it.
         """
-        _step = np.array([self.step]).T
+        _step = np.array([self.step_counter]).T
 
         _energy_data = np.array([self.energy_data]).T
 
+        # for vec in [_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol]:
+        #     print "len =", len(vec)
 
-        self.solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_sol, self.q_sol))
-
+        self.solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol))
 
         print "self.MBD_system._solution_filetype =", self.MBD_system._solution_filetype
         print "self.simulation_id =", self.simulation_id
         self.solution_filename = 'solution_data_%02d'%self.simulation_id+self.MBD_system._solution_filetype
+
+        self.solution_filename = check_filename(self.solution_filename)
+
         #    order of columns: step number, energy, time, q
         __frmt = ['%5i']+['%20.16f']+['%20.16f']+['%20.16f']+['%20.16f']+['%.10E']*len(self.initial_conditions())
 
@@ -553,15 +667,13 @@ class SolveODE(QObject):  # Thread, QObject
 
         np.savetxt(self.solution_filename, self.solution_data, fmt=__frmt, delimiter='\t', header = __header, comments = __comments)
 
-
         logging.getLogger("DyS_logger").info("Solution data saved to file: %s. Size is %s", self.solution_filename, convert_bytes_to_.convert_size(os.path.getsize(self.solution_filename)))
 
         self.filename_signal.signal_filename.emit(self.solution_filename)
 
-
-        # for contact in self.MBD_system.contacts:
-        #     contact.save_solution_data()
-
+        for contact in self.MBD_system.contacts:
+            if contact.save_to_file:
+                contact.save_solution_data()
 
     def start_solve(self):
         """
@@ -573,7 +685,6 @@ class SolveODE(QObject):  # Thread, QObject
         self.running = True
         self.stopped = False
         self.finished = False
-
 
     def stop_solve(self):
         """
@@ -587,7 +698,6 @@ class SolveODE(QObject):  # Thread, QObject
 
         logging.getLogger("DyS_logger").info("Simulation stopped by user at simulation time:%s", self.t)
 
-
     def finished_solve(self):
         self.finished = True
         self.running = False
@@ -596,7 +706,6 @@ class SolveODE(QObject):  # Thread, QObject
         
         logging.getLogger("DyS_logger").info("Simulation finished successfully!")
 
-    
     def load_simulation_solution_from_file(self, filename):
         '''
         Function load solution_data from file.
@@ -605,15 +714,13 @@ class SolveODE(QObject):  # Thread, QObject
         if os.path.exists(filename):
             self.solution_data = np.loadtxt(str(filename), skiprows=2)
             return self.solution_data
-    
-    
+
     def __update_coordinates_and_angles_of_all_bodies(self, q):
         '''
         Function updates MBD_system data before display
         '''
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(q)
-    
-    
+
     def update_GL_(self, t, q):
         """
         Update opengl widget at preset time steps
@@ -633,10 +740,8 @@ class SolveODE(QObject):  # Thread, QObject
             
             self.update_opengl_widget_step_count = 0
 
-
         return None
-    
-    
+
     def save_updated_GL_screenshot_to_file(self, t):
         """
         
@@ -648,13 +753,11 @@ class SolveODE(QObject):  # Thread, QObject
                 self.save_screenshot_signal.signal_saveScreenshot.emit()
                 self.save_screenshot_step_count = 0
 
-
     def initial_conditions(self):
         #    create array of initial conditions for differential equations
         self.q0 = self._MBD_system.create_q0()
         return self.q0
-    
-    
+
     def restore_initial_condition(self):
         """
         Function restores initial conditions and displays it with opengl widget.

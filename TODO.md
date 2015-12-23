@@ -1,11 +1,20 @@
 **DyS TODO list - tasks**
 
+
+*Info*
+
+- [ ] distance: positive value-separation, negative value-indentation
+- [ ] If relative normal velocity of contact point is positive, than the bodies are approaching, which
+corresponds to the compression phase, and if the relative normal velocity of contact point is
+negative the bodies are separating, which corresponds to the restitution phase.
+
 *Check* 
 
+- [ ] revolute joint type: ideal (default), clearance, real, with friction (ls)
+- [ ] attributes shat start with underscore are used to be modified before each simulation (probably using monte carlo simulation)
 - [ ] tangent contact force not 0 when coefficient of friction is 0 (ls)
 - [ ] contact point is only updated, it there is translation in contact is not detected???
 - [ ] Update AABB data (AABB frame, nodes in AABB) as function of R, theta (at)
-- [ ] revolute joint type: ideal (default), clearance, real, with friction (ls)
 - [ ] File/Close treeview (modelview) still displays data from closed file
 - [ ] Save/load with dill (or pickle)
 
@@ -18,17 +27,17 @@
 - [ ] pause simulation
 - [ ] increase time step after contact has happened
 - [ ] write predictor corrector method (variable order of numerical method)
-- [ ] euler method
 - [ ] Menu to edit (create, delete) in tree model view and automatic update in opengl widget
 - [ ] Graphical representation of springs (translational, torsional)
 - [ ] kinematic motors (drives) – df/dt = ?
 - [ ] calculate mass moment of inertia (volume) from cloud of triangles – stl file
-- [ ] use package [OOC](http://www.pythonocc.org/) for 3D visualization as it also has support for 3D modeling, neutral formats: step, igess
+- [ ] use package [OOC](http://www.pythonocc.org/) for 3D visualization as it also has support for 3D modeling, neutral formats: step, iges
 - [ ] visualize parameterized (with lines) geometry models
 - [ ] dynamics 2D to 3D
 
 *Done*
 
+- [x] euler method
 - [x] add dq_t - relative tangential contact velocity
 - [x] Display LCS of a body
 - [x] numerical error of each time step added to solution data file

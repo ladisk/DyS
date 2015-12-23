@@ -26,7 +26,7 @@ class stoppedSignal(QtCore.QObject):
 
 class Solver(QtCore.QThread):
     """
-    
+    Solver thread as object
     """
     def __init__(self, MBD_system, parent=None):
         QThread.__init__(self)
@@ -41,18 +41,15 @@ class Solver(QtCore.QThread):
         self.MBD_system = MBD_system
         
         self.solveODE = SolveODE(MBD_system=self.MBD_system, parent=self._parent)
-    
-    
+
     def start_solver(self):
         """
-        
+        Method that starts the ODE solver (integrtor)
         """
         self.running_signal.signal_running.emit("Running")
-
 
         while self.solveODE.running and not self.solveODE.stopped:
             self.solveODE.solve_ODE()
 
-                
     def stop_solver(self):
         self.stopped_signal.signal_stopped.emit("Stopped")

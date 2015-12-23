@@ -28,14 +28,14 @@ from MBD_system.MBD_system_items import BodyItem
 
 
 class Body(BodyItem):
-    '''
+    """
     classdocs
-    '''
+    """
     __id = itertools.count(0)
 
     def __init__(self, body_name, MBD_folder_abs_path=None, density=0, volume=0, mass=0, J_zz=0, CM_CAD_LCS=np.zeros(3), CAD_LCS_GCS=np.zeros(3), theta=np.zeros(3), dR=np.zeros(3), dtheta=np.zeros(3), color_GL=np.ones(3), transparent_GL=1, visible=True, display_style="filled", connected_to_ground = False, parent=None):
         super(Body, self).__init__(body_name, parent)
-        '''
+        """
         Constructor of body class
         Args:
             _name - body name as string
@@ -55,7 +55,7 @@ class Body(BodyItem):
         Returns:
             body object with its properties
             OpenGL object - VBO
-        '''
+        """
         self._parent = parent
 
         #    set working directory
@@ -93,7 +93,6 @@ class Body(BodyItem):
         self.CM_CAD_LCS = CM_CAD_LCS
         self.CAD_LCS_GCS = CAD_LCS_GCS
 
-
         #    dynamic properties
         self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
         #    (initial) coordinates and angles (in degrees)
@@ -104,8 +103,7 @@ class Body(BodyItem):
 
         #    connected to ground
         self._connected_to_ground = connected_to_ground
-        
-        
+
         #   list of forces
         self.forces = []
         #   list for markers
@@ -118,7 +116,6 @@ class Body(BodyItem):
         self.geom = None
         self.VBO_created = False
 
-
         #    AABB tree object assigned to body object as attribute if body is specified to be in contact with other body
         self.AABBtree = None
         self.AABBtree_created = False
@@ -126,27 +123,23 @@ class Body(BodyItem):
         #    file properties
         if hasattr(self._parent, "_typeInfo"):  # == 
             if self._parent._typeInfo == "MBDsystem":  #    ground body object has parent MBD system
-                self.properties_file_extension = self._parent._filetype
+                self.properties_file_extension = self._parent._project_filetype
             
             elif hasattr(self._parent._parent, "_typeInfo"):
                 if self._parent._typeInfo == "group":  #    ground body object has parent MBD system
-                    self.properties_file_extension = self._parent._parent._filetype
+                    self.properties_file_extension = self._parent._parent._data_filetype
         else:
             print 'Data file not found for body %s' % self._name
-
 
         self.geometry_file_extension = ".stl"
 
         self.properties_file_with_extension = self._name + self.properties_file_extension
-
-
 
         #   opengl properties
         #   create coordinate systems
         #   local coordinate system at center of gravity of a body
         self.LCS = CoordinateSystem(parent=self)
         self.LCS._visible = False
-
 
         if body_name.lower() == "ground":
             pass
@@ -155,9 +148,8 @@ class Body(BodyItem):
             self.transparent_GL = transparent_GL
             self.display_style = display_style
 
-
             #    contact properties
-            self.skin_thickness = None
+            self.max_penetration_depth = 1E-7
             self.uP_i_max = None
 
             #    if body is not ground read body properties data
@@ -171,7 +163,6 @@ class Body(BodyItem):
                     _dict = read_body_data_file.read_data(self.properties_file_with_extension)
                     self.add_attributes_from_dict(_dict)
 
-
                     #    check if both files exist
                     if not os.path.isfile(self.properties_file_with_extension):
                         raise IOError, "Properties file not found!"
@@ -179,10 +170,8 @@ class Body(BodyItem):
                     if not os.path.isfile(self.geometry_filename):
                         raise IOError, "Geometry file %s not found!"%self.geometry_filename
 
-
             self.CM_CAD_LCS_ = self.CM_CAD_LCS
             self.CM_CAD_LCS[0:2] = Ai_ui_P_vector(self.CM_CAD_LCS[0:2], self.theta[2])  # np.deg2rad(self.theta[2])
-
 
             self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
 
@@ -198,20 +187,18 @@ class Body(BodyItem):
             else:
                 print "Body geometry file not found! Attribute self.geom not created."
 
-
         #    construct and display body geometry from stl data file
-        if body_name != "ground":
-            #    check if opengl is running without errors and creates VBOs
-            try:
-                if glGetError() == GL_NO_ERROR:
-                    self.create_VBO()
-
-            except:
-                self.create_VBO()
-                ValueError
-                logging.getLogger("DyS_logger").error("OpenGL error - is geometry created and displayed?")
-                raise
-
+        # if body_name != "ground":
+        #     #    check if opengl is running without errors and creates VBOs
+        #     try:
+        #         #if glGetError() == GL_NO_ERROR:
+        #         self.create_VBO()
+        #
+        #     except:
+        #         self.create_VBO()
+        #         ValueError
+        #         logging.getLogger("DyS_logger").error("OpenGL error - is geometry created and displayed?")
+        #         raise
 
     def add_attributes_from_dict(self, dict):
         """
@@ -225,7 +212,6 @@ class Body(BodyItem):
 
             setattr(self, key, val)
 
-    
     def _show(self):
         """
         
@@ -234,7 +220,6 @@ class Body(BodyItem):
             self._visible = False
         else:
             self._visible = True
-
 
     def _show_AABB(self):
         """
@@ -246,14 +231,12 @@ class Body(BodyItem):
         else:
             self.AABBtree._visible = True
 
-
     def get_q(self):
         """
 
         :return:
         """
         print np.append(self.R[0:2], self.theta[2])
-
 
     def get_dq(self):
         """
@@ -262,7 +245,6 @@ class Body(BodyItem):
         """
         print np.append(self.dR[0:2], self.dtheta[2])
 
-
     def get_qdq(self):
         """
 
@@ -270,18 +252,18 @@ class Body(BodyItem):
         """
         print np.array([np.append(self.R[0:2], self.theta[2]), np.append(self.dR[0:2], self.dtheta[2])]).flatten()
 
-
     def _update_VBO(self):
         """
         
         """
         self.geom._update_VBO_color(self.color_GL, self.transparent_GL)
 
-
     def create_VBO(self):
         """
         Method is called after the opengl is initialised for each body to construct opengl VBO.
         """
+        # print "=================================="
+        # print "create_VBO() =", self._name, "id =", self.body_id
         #    construct a body shape OpenGL object - VBO
         if self.geom is not None:
             self.geom.create_VBO()
@@ -289,25 +271,28 @@ class Body(BodyItem):
             self.VBO_created = True
             #   create body LCS as vbo
             self.LCS._create_VBO()
-            #    create body CAD LCS vbo
+            # #    create body CAD LCS vbo
             self.CAD_CS._create_VBO()
 
-
-        for marker in self.markers:
-            marker._create_VBO()
-
+        # print "self.markers =", self.markers
+        # for marker in self.markers:
+            # pprint(vars(marker))
+            # marker._create_VBO()
+            # print "node =", marker.node
+        # marker = self.markers[1]
+        # if self.body_id == 0:
+        #     print "node =", marker.node
+        #     marker._create_VBO()
 
         for contact_geometry in self.contact_geometries:
             contact_geometry.create_VBO()
-
-        
+        #
         if not self.AABBtree_created and self.AABBtree is not None:
             self.AABBtree.create_VBO_tree()
             self.AABBtree_created = True
             self.AABBtree._visible = False
-#            self.AABBtree.create_VBO()
-    
-    
+            self.AABBtree.create_VBO()
+
     def _paintGL_VBO_AABBtree(self, shader_program):
         """
         
@@ -319,7 +304,6 @@ class Body(BodyItem):
             self.AABBtree.paintGL_VBO_tree()
 
         glUseProgram(0)
-            
 
     def paintGL_VBO(self, step=None, shader=None):
         """
@@ -331,7 +315,6 @@ class Body(BodyItem):
         glRotatef(np.rad2deg(self.theta[1]), 0, 1, 0)
 
         self._paintGL_VBO_AABBtree(shader)
-        
         
         for contact_geometry in self.contact_geometries:
             contact_geometry.paintGL_VBO()
@@ -375,7 +358,6 @@ class Body(BodyItem):
                 glColorPointer(4, GL_FLOAT, stride_in_bits, c_pointer)
                 glNormalPointer(GL_FLOAT, stride_in_bits, n_pointer)
 
-
                 #    draw (fill or wireframe)
                 if self.display_style == "wireframe":
                     glDisable(GL_LIGHTING)
@@ -406,7 +388,6 @@ class Body(BodyItem):
                 #     else:
                 #         marker._create_VBO()
 
-
     def update_coordinates_and_angles_2D(self, q_i):
         """
         Function updates coordinates Rx, Ry and angle theta and can be displayed in opengl widget
@@ -418,7 +399,6 @@ class Body(BodyItem):
         self.R[0:2] = q_i[0:2]
         self.theta[2] = q_i[2]
 
-
     def update_velocities_2D(self, dq):
         """
         Function updates velocities (translational and rotational) dRx, dRy and angle dtheta and can be displayed in opengl widget
@@ -429,14 +409,39 @@ class Body(BodyItem):
         """
         self.dR[0:2] = dq[0:2]
         self.dtheta[2] = dq[2]
-        
-        
+
     def delete_VBO(self):
         self.geom.__del__()
 #        if self.AABBtree != None:
 #            for _AABBtree in self.AABBtree.children:
 #                _AABBtree.__del__()
 
+    def mechanical_energy(self, q=None, dq=None, gravity=None):
+        """
+        Function evaluates mechanical energy of the body
+        :return:
+        """
+        if q is None:
+            R = self.R[0:2]
+        else:
+            R = q[0:2]
+
+        if dq is None:
+            dR = self.dR[0:2]
+            dtheta = self.dR[2]
+        else:
+            dR = dq[0:2]
+            dtheta = dq[2]
+
+        if gravity is None:
+            g = 0
+        else:
+            g = gravity
+
+        #   mechanical energy (kinematic and potential)
+        _energy = 0.5 * (self.mass * (np.linalg.norm(dR)**2) + self.J_zz * (dtheta**2)) + (self.mass * gravity * R[1])
+
+        return _energy
 
 if __name__ == "__main__":
     a = Body()
