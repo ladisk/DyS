@@ -136,63 +136,6 @@ class ContactWidget(QtGui.QDialog):
         """
         self.close()
 
-    def _save(self, item=None):
-        """
-        
-        """
-        #   name
-        _name = self.ui.name_lineEdit.text()
-
-        #   contact type
-        _type = self.ui.contactTypecomboBox.currentText()
-
-        #   contact model type
-        self.item.contact_model._type = str(self.ui.contactModelTypecomboBox.currentText()).lower()
-
-        #   distance tolerance
-        self.item.distance_TOL = float(self.ui.TOL_distance_lineEdit.text())
-
-#         try:
-        _body_id_i = int(self.ui.bodyIDi_lineEdit.text())
-        _body_id_j = int(self.ui.bodyIDj_lineEdit.text())
-        
-        _coef_of_friction_static = self.ui.frictionCoefStatic_lineEdit.text().toDouble()
-        _coef_of_friction_dynamic = self.ui.frictionCoefDynamic_lineEdit.text().toDouble()
-        _coef_of_restitution = self.ui.restitution_coefficient_lineEdit.text().toDouble()
-        
-        if self.item._type == "Revolute Clearance Joint":
-            _uPi = string2array(self.ui.uPi_lineEdit.text())
-            _uPj = string2array(self.ui.uPj_lineEdit.text())
-            
-            _Ri = float(self.ui.Ri_lineEdit.text())
-            _Rj = float(self.ui.Rj_lineEdit.text())
-
-        if self.item._type == "General":
-            pass
-
-        if self.item is not None:
-            self.item.body_id_i = _body_id_i
-            self.item.body_id_j = _body_id_j
-
-            self.item.friction_model.coef_of_friction_static = _coef_of_friction_static
-            self.item.friction_model.coef_of_friction_dynamic = _coef_of_friction_dynamic
-            self.item.contact_model.coef_of_restitution = _coef_of_restitution
-
-            if self.item._type == "Revolute Clearance Joint":
-                self.item.u_iP = _uPi
-                self.item.u_jP = _uPj
-                self.item.R_i = _Ri
-                self.item.R_j = _Rj
-
-        else:
-            _item = Contact(body_id_i=_body_id_i, body_id_j=_body_id_j)
-
-            pos = len(self.parent_node._children)
-            self.parent_node._parent.forces.append(_item)
-            self._parent.ui.treeView.model().insertRow(pos, _item, self.parent_node)
-
-        self.close()
-
 #         except:
 #             QtGui.QMessageBox.warning(self, "Warning!",
 #                 "Input not correct!",
@@ -204,6 +147,7 @@ class ContactWidget(QtGui.QDialog):
 
         :return:
         """
+        print "edit()"
         self.item = item
 
         #   get (and display in QLineEdit) contact name
@@ -218,10 +162,12 @@ class ContactWidget(QtGui.QDialog):
 
         #   contact model
         #   fix string
-        contact_model_type = fix_string(item.contact_model._type.title())
-        #   get (and display in QLineEdit) contact model
-        _index = self.ui.contactModelTypecomboBox.findText(QtCore.QString(contact_model_type))
-        self.ui.contactModelTypecomboBox.setCurrentIndex(_index)
+        # contact_model_type = fix_string(item.contact_model._type.title())
+        # print "contact_model_type =", contact_model_type, type(contact_model_type)
+        # #   get (and display in QLineEdit) contact model
+        # _index = self.ui.contactModelTypecomboBox.findText(contact_model_type)
+        # print
+        # self.ui.contactModelTypecomboBox.setCurrentIndex(_index)
 
         #   coefficient of restitution
         if item.contact_model._type.title() == "Hertz":
@@ -320,7 +266,13 @@ class ContactWidget(QtGui.QDialog):
             self.ui.contactModelTypecomboBox.clear()
             for i, _contact_model_type in enumerate(item.contact_model._types):
                 _contact_model_type = fix_string(_contact_model_type)
-                self.ui.contactModelTypecomboBox.insertItem(i, QtCore.QString(_contact_model_type))
+                self.ui.contactModelTypecomboBox.insertItem(i, _contact_model_type)
+
+            print "self.item.contact_model._type =", self.item.contact_model._type
+            _index = self.ui.contactModelTypecomboBox.findText(fix_string(self.item.contact_model._type))
+            print "_index =", _index
+            self.ui.contactModelTypecomboBox.setCurrentIndex(_index)
+
 
         elif item._type.title() == "Contact Sphere-Sphere":
             self.ui.SphereSphereContactAddParams.setEnabled(True)
@@ -339,6 +291,65 @@ class ContactWidget(QtGui.QDialog):
         self.item = item
 
         self._show()
+
+    def _save(self, item=None):
+        """
+
+        """
+        #   name
+        _name = self.ui.name_lineEdit.text()
+
+        #   contact type
+        _type = self.ui.contactTypecomboBox.currentText()
+
+        #   contact model type
+        _type = str(self.ui.contactModelTypecomboBox.currentText()).lower()
+        print "_type =", _type
+        self.item.contact_model._type = _type
+        print "self.item.contact_model._type =", self.item.contact_model._type
+        #   distance tolerance
+        self.item.distance_TOL = float(self.ui.TOL_distance_lineEdit.text())
+
+#         try:
+        _body_id_i = int(self.ui.bodyIDi_lineEdit.text())
+        _body_id_j = int(self.ui.bodyIDj_lineEdit.text())
+
+        _coef_of_friction_static = self.ui.frictionCoefStatic_lineEdit.text().toDouble()
+        _coef_of_friction_dynamic = self.ui.frictionCoefDynamic_lineEdit.text().toDouble()
+        _coef_of_restitution = self.ui.restitution_coefficient_lineEdit.text().toDouble()
+
+        if self.item._type == "Revolute Clearance Joint":
+            _uPi = string2array(self.ui.uPi_lineEdit.text())
+            _uPj = string2array(self.ui.uPj_lineEdit.text())
+
+            _Ri = float(self.ui.Ri_lineEdit.text())
+            _Rj = float(self.ui.Rj_lineEdit.text())
+
+        if self.item._type == "General":
+            pass
+
+        if self.item is not None:
+            self.item.body_id_i = _body_id_i
+            self.item.body_id_j = _body_id_j
+
+            self.item.friction_model.coef_of_friction_static = _coef_of_friction_static
+            self.item.friction_model.coef_of_friction_dynamic = _coef_of_friction_dynamic
+            self.item.contact_model.coef_of_restitution = _coef_of_restitution
+
+            if self.item._type == "Revolute Clearance Joint":
+                self.item.u_iP = _uPi
+                self.item.u_jP = _uPj
+                self.item.R_i = _Ri
+                self.item.R_j = _Rj
+
+        else:
+            _item = Contact(body_id_i=_body_id_i, body_id_j=_body_id_j)
+
+            pos = len(self.parent_node._children)
+            self.parent_node._parent.forces.append(_item)
+            self._parent.ui.treeView.model().insertRow(pos, _item, self.parent_node)
+
+        self.close()
 
     def _updateAddParams(self, params_list):
 

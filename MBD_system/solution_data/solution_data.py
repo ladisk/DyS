@@ -12,10 +12,12 @@ from pprint import pprint
 import subprocess
 from moviepy.editor import *
 import xlsxwriter
+import xlrd
 
 from MBD_system.MBD_system import *
 from MBD_system.MBD_system_items import SolutionDataItem
 from MBD_system import convert_bytes_to_
+from MBD_system.check_filename import check_filename
 
 
 class SolutionData(SolutionDataItem):
@@ -25,10 +27,10 @@ class SolutionData(SolutionDataItem):
     __id = itertools.count(0)
 
     def __init__(self, name=None, _file=None, MBD_system=None, parent=None):
-        super(SolutionData, self).__init__(name, parent)
         """
         Constructor of solution data class
         """
+        super(SolutionData, self).__init__(name, parent)
         self._parent = parent
 
         #   MBD system pointer
@@ -41,6 +43,12 @@ class SolutionData(SolutionDataItem):
             self._name = "solution_data_%.2i"%self._id
         else:
             self._name = name
+
+        #   solution type
+        if self._parent is None:
+            self._type = "solution"
+        else:
+            self._type = self._parent._type
 
         #   abs path to solution file
         self._file_abs_path = _file
@@ -58,15 +66,34 @@ class SolutionData(SolutionDataItem):
         #    simulation status
         #    options: finished, running, waiting
         self.waiting = True
-        self.runngin = False
+        self.running = False
         self.finished = False
         self.simulation_status = "waiting"
+
+        #   animation status
+        self.loaded = False
+        self.animation = False
 
         #   parameters
         self._parameters = []
 
         #   number of bodies
         self.n_b = None
+
+        #   number of absolute coordinates of the system
+        self.n = None
+
+        #   fixed header size
+        self.__header0_size = 5
+
+        #   header ids
+        self._header_ids = []
+
+        self.__excel_worksheet = "solution"
+
+    def load_solution_data(self):
+        self.loaded = True
+        return self.solution_data
 
     def getFileSizeInBytes(self):
         """
@@ -115,16 +142,18 @@ class SolutionData(SolutionDataItem):
         """
         Read (load) solution data from file
         """
+        self._file_abs_path = _file_abs_path
+
         #   load data from file if already exists
         _path, _file = os.path.split(_file_abs_path)
         self._name, self._filetype = os.path.splitext(_file)
 
         if self._filetype == ".dat" or self._filetype == ".sol":
-            data = self._read_ascii_file(_file_abs_path)
+            data = self._read_ascii_file()
         elif self._filetype == ".xlsx":
-            data = self._read_excel_file(_file_abs_path)
+            data = self._read_excel_file()
         elif self._filetype == ".csv":
-            data = self._read_csv_file(_file_abs_path)
+            data = self._read_csv_file()
         else:
             raise ValueError, "Filetype not supported."
 
@@ -142,35 +171,105 @@ class SolutionData(SolutionDataItem):
         #   positions and velocities
         self._q_sol_container = data[:, 5::]
 
-    def _read_ascii_file(self, _file):
+        #   status
+        self.loaded = True
+
+    def _read_ascii_file(self):
         """
         Load data from file (filetype .dat, .sol), saved with numpy savetxt
         """
-        data = np.loadtxt(str(_file), skiprows=2)
+        data = np.loadtxt(str(self._file_abs_path), skiprows=2)
         return data
 
     def _read_excel_file(self):
-        print "Under Construction: ", os.path.realpath(__file__)
+        """
+
+        :return:
+        """
+        self.__excel_settings()
+
+        #   open excel workbook
+        workbook = xlrd.open_workbook(self._file_abs_path)
+
+        #   get solution worksheet
+        worksheet = workbook.sheet_by_name(self.__excel_worksheet)
+
+        #   step number
+        _step_num_solution_container = worksheet.col_values(colx=self.__col_step_num_solution_container, start_rowx=self.__column_start_write)
+        #   mechanical energy
+        _energy_solution_container = worksheet.col_values(colx=self.__col_mechanical_energy_solution_container, start_rowx=self.__column_start_write)
+        #   error
+        _R_solution_container = worksheet.col_values(colx=self.__col_error_solution_container, start_rowx=self.__column_start_write)
+        #   step size
+        _step_size_solution_container = worksheet.col_values(colx=self.__col_step_size_solution_container, start_rowx=self.__column_start_write)
+        #   time
+        _t_solution_container = worksheet.col_values(colx=self.__col_t_solution_container, start_rowx=self.__column_start_write)
+
+        # print np.array([_step_num_solution_container, _energy_solution_container])
+        #   read headers
+        self.n = len(worksheet.row_values(self.__column_start_write - 1)) - self.__header0_size
+        # print self.n
+
+        _q_sol_container = []
+        for i in range(self.__header0_size, len(worksheet.row_values(self.__column_start_write - 1))):
+            col = np.array(worksheet.col_values(colx=i, start_rowx=self.__column_start_write))
+            _q_sol_container.append(col)
+
+        _data = np.array([_step_num_solution_container,
+                        _energy_solution_container,
+                        _R_solution_container,
+                        _step_size_solution_container,
+                        _t_solution_container])
+        print np.shape(_data), type(_data), type(np.array(_q_sol_container)), np.shape(_q_sol_container)
+        # print _data.T
+        # print _q_sol_container
+        data = np.hstack((_data.T, np.array(_q_sol_container).T))
+        return data
 
     def _read_csv_file(self):
         print "Under Construction: ", os.path.realpath(__file__)
     
     def add_data(self, data):
         """
-        
+
+        :param data:
+
         """
         self.solution_data = data
     
     def write_to_file(self, _file_abs_path=None):
         """
         Function saves data to file
+
+        :param _file_abs_path:
         """
         if _file_abs_path != None:
             self._file_abs_path = _file_abs_path
 
+        #   number of coordinates and velocities of MBD system
+        [steps, n] = np.shape(self.solution_data)
+        self.n = n - self.__header0_size
+
+        #   nuimber of bodies
+        self.n_b = self.n / 6.
+
+        #   create header ids
+        self._header_ids = np.arange(0, self.n_b)
+
+        #   check filename
+        #   check filename
+        if self._file_abs_path is None:
+            self._filename = self._name+self._filetype
+        else:
+            self._filename = self._file_abs_path
+
+        if self._filetype not in self._filename:
+            self._filename = self._filename + self._filetype
+        self._filename = check_filename(self._filename)
+
         #   save to file of selected type
         if self._filetype == ".dat" or self._filetype == ".sol":
-            data = self._write_to_ascii_file()
+            data = self._write_to_txt_file()
         elif self._filetype == ".xlsx":
             data = self._write_to_excel_file()
         elif self._filetype == ".csv":
@@ -183,41 +282,45 @@ class SolutionData(SolutionDataItem):
         #   write info to log file
         logging.getLogger("DyS_logger").info("Solution data saved to file: %s. Size is %s", self._filename, convert_bytes_to_.convert_size(os.path.getsize(self._filename)))
         
-    def _write_to_ascii_file(self, data):
+    def _write_to_txt_file(self):
         """
         Function saves data to .dat filetype
         """
-        self.solution_data = data
+        #   set headers
+        self._headers = self.__txt_headers()
 
-        print "self.MBD_system._solution_filetype =", self.MBD_system._solution_filetype
-        print "self.simulation_id =", self.simulation_id
-        self.solution_filename = 'solution_data_%02d'%self.simulation_id+self.MBD_system._solution_filetype
+        #    format for each column
+        __frmt = ['%5i']+['%20.16f']+['%20.16f']+['%20.16f']+['%20.16f']+['%.10E']*self.n
 
-        self.solution_filename = check_filename(self.solution_filename)
+        #   add new line at the end of comment
+        self._comments = self._comments + "\n"
 
-        #    order of columns: step number, energy, time, q
-        __frmt = ['%5i']+['%20.16f']+['%20.16f']+['%20.16f']+['%20.16f']+['%.10E']*len(self.initial_conditions())
+        #   write data to txt file
+        np.savetxt(self._filename, self.solution_data, fmt=__frmt, delimiter='\t', header=self._headers, comments=self._comments)
 
-        __header = "i-th step mechanical  energy  \t  R \t\t\t\t\t  dt \t\t\t\t\t  time \t"
+    def __txt_headers(self):
+        """
+        Function creates headers for txt file
+        :return:
+        """
+        header = "i-th step mechanical  energy  \t  R \t\t\t\t\t  dt \t\t\t\t\t  time \t"
 
-        #    add header for q
-        for body in sorted(self.MBD_system.bodies, key=lambda body: body.body_id):
-            _id = body.body_id
+        #   header for q of a MBD system
+        for _id in self._header_ids:
+            _id_str = str(int(_id))
+            q_i_header = "\t\t\t\tRx_" + _id_str + "\t\t\t\tRy_" + _id_str + "\t\t\t\ttheta_" + _id_str
 
-            _header = "\t\t\t\tRx_"+str(_id) +"\t\t\t\tRy_"+str(_id) +"\t\t\t\ttheta_"+str(_id)
-            __header = __header + _header
+            header += q_i_header
 
         #    add header for dq
-        for body in sorted(self.MBD_system.bodies, key=lambda body: body.body_id):
-            _id = body.body_id
+        for body in self._header_ids:
+            _id_str = str(int(_id))
+            dq_i_header = "\t\t\t\tdRx_"+_id_str + "\t\t\t\tdRy_" + _id_str + "\t\t\t\tomega_"+_id_str
 
-            _header = "\t\t\t\tdRx_"+str(_id) +"\t\t\t\tdRy_"+str(_id) +"\t\t\t\tomega_"+str(_id)
-            __header = __header + _header
+            header += dq_i_header
 
-        __comments ='#Insert comments here.\n'
+        return header
 
-        np.savetxt(self.solution_filename, data, fmt=__frmt, delimiter='\t', header = __header, comments = __comments)
-        
     def _write_to_excel_file(self):
         """
         Function saves data to .xlsx filetype
@@ -225,24 +328,15 @@ class SolutionData(SolutionDataItem):
         #   set up excel file
         self.__excel_settings()
 
-        #   create an new excel file and add a worksheet
-        if self._file_abs_path is None:
-            self._filename = self._name+self._filetype
-        else:
-            self._filename = self._file_abs_path
-
-        if self._filetype not in self._filename:
-            self._filename = self._filename + self._filetype
-
         #   create an new Excel file and add a worksheet
         workbook = xlsxwriter.Workbook(self._filename, {'nan_inf_to_errors': True})
         format_1 = workbook.add_format({'num_format': '#0.000000000000000'})
         format_2 = workbook.add_format({'num_format': '#0.00000000'})
         #   add worksheet
-        worksheet = workbook.add_worksheet("solution")
+        worksheet = workbook.add_worksheet(self.__excel_worksheet)
 
         #   write comments
-        self._comments = ""
+        self._comments = "integration method: %s"%self.MBD_system.integrationMethod
         if self._comments == "":
             try:
                 comments = self._parent._parent._name
@@ -272,6 +366,8 @@ class SolutionData(SolutionDataItem):
         for i in range(self.__col_t_solution_container, self.__col_t_solution_container+self.n+1):
             worksheet.write_column(self.__column_start_write, i, self.solution_data[:,i])
 
+        #   freeze first two rows
+        worksheet.freeze_panes(2, 0)
         #   close file
         workbook.close()
 
@@ -281,7 +377,7 @@ class SolutionData(SolutionDataItem):
         :return:
         """
         #   set up headers
-        self._headers = self.__excel_columns()
+        self._headers = self.__excel_headers()
 
         #   row number to start writing data
         self.__column_start_write = 2
@@ -293,36 +389,22 @@ class SolutionData(SolutionDataItem):
         self.__col_step_size_solution_container = 3
         self.__col_t_solution_container = 4
 
-    def __excel_columns(self):
+    def __excel_headers(self):
         """
         Function creates headers for excel file
         :return:
         """
         header = ["i-th step", "mechanical  energy",  "R", "dt", "time"]
 
-        #   number of coordinates and velocities of MBD system
-        [steps, n] = np.shape(self.solution_data)
-        self.n = n - len(header)
-
-        #   nuimber of bodies
-        self.n_b = self.n / 6.
-
-        if self.MBD_system is not None:
-            _ids = sorted(self.MBD_system.bodies, key=lambda body: body.body_id)
-        else:
-            _ids = np.arange(0, self.n_b)
-
-        print "_ids =", _ids
-
         #   header for q of a MBD system
-        for _id in _ids:
+        for _id in self._header_ids:
             _id_str = str(int(_id))
             q_i_header = ["Rx_"+_id_str, "Ry_"+_id_str, "theta_"+_id_str]
 
             header += q_i_header
 
         #   header for dq of a MBD system
-        for body in _ids:
+        for body in self._header_ids:
             _id_str = str(int(_id))
             dq_i_header = ["dRx_"+_id_str, "dRy_"+_id_str, "dtheta_"+_id_str]
 
@@ -364,12 +446,13 @@ class SolutionData(SolutionDataItem):
 
             plt.plot(x_data, y_data, marker=None, color=color, label=label)
 
-    def _save_animation_file(self, folder=None):
+    def _create_animation_file(self, folder=None):
         """
         Function saves
         :param folder:  absolute path to folder that contains figures to be merged in animation movie file
         :return:        None
         """
+        print "SolutionData._create_animation_file()"
 
 if __name__ == "__main__":
     # _file = "solution_data_example.sol"
@@ -390,22 +473,23 @@ if __name__ == "__main__":
     # plt.show()
 
     #   create movie from saved screenshoots
-    # folder = "c:\\Users\\lskrinjar\\Dropbox\\DyS\\dynamic_systems\\0_2_2\\screenshots"
-    # images = []
-    # for _file in os.listdir(folder):
-    #     _file_path = os.path.join(folder, _file)
-    #     images.append(_file_path)
+    folder = "c:\\Users\\lskrinjar\\Dropbox\\DyS\\dynamic_systems\\screenshots"
+    images = []
+    for _file in os.listdir(folder):
+        _file_path = os.path.join(folder, _file)
+        images.append(_file_path)
     #
     # print "images ="
     # print images
     # video = ImageSequenceClip(images, fps=24)
-    # video.write_videofile("test.avi",codec='mpeg4')
-    # print "finished"
+    video = ImageSequenceClip(images, fps=1)
+    video.write_videofile(folder+"\\"+"test.avi",codec='mpeg4')
+    print "finished"
 
     #   save solution data to xlsx file
-    sol.setName("save2excel")
-    sol.solution_data = np.random.rand(11, 11)
-    sol.set_filetype(".xlsx")
+    # sol.setName("save2excel")
+    # sol.solution_data = np.random.rand(11, 11)
+    # sol.set_filetype(".xlsx")
     # pprint(vars(sol))
 
-    sol.write_to_file()
+    # sol.write_to_file()

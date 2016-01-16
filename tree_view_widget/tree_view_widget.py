@@ -32,6 +32,9 @@ class solutionFilenameSignal(QtCore.QObject):
 class loadSolutionFile(QtCore.QObject):
     signal_loadSolutionFile = QtCore.pyqtSignal()
 
+class CreateAnimationFile(QtCore.QObject):
+    signal_createAnimationFile = QtCore.pyqtSignal()
+
 class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView 
     """
     classdocs
@@ -43,9 +46,11 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         super(TreeViewWidget, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        
+
+        #   signals
         self.filename_signal = solutionFilenameSignal()
         self.load_loadSolutionFile = loadSolutionFile()
+        self.create_animation_file = CreateAnimationFile()
         
         self._parent = parent
 
@@ -63,6 +68,8 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         # those actions will be to delete an item :)
         self.ui.treeView.customContextMenuRequested.connect(self.contextMenuEvent)
         QtCore.QObject.connect(self.ui.treeView, QtCore.SIGNAL("clicked (QModelIndex)"),self.row_clicked)
+
+        # self._create_animation_file.connect(self._parent.SimulationControlWidget._create_animation_file)
  
         self._widget = ItemWidget(parent=self)
 
@@ -170,12 +177,18 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             loadAction = self.menu.addAction("Load from File")
             loadAction.triggered.connect(self._load_solution_file_to_project)
 
+        #   solution data item context menu
         elif self._item._typeInfo == "solutiondata":
             loadAction = self.menu.addAction("Load solution")
             loadAction.triggered.connect(self._load_solution_data)
 
             propertiesAction = self.menu.addAction("Properties")
             propertiesAction.triggered.connect(self.solution_properties)
+
+            if self._item.loaded:
+                saveAnimationFileAction = self.menu.addAction("Save animation to file")
+                saveAnimationFileAction.triggered.connect(self._item._create_animation_file)
+                saveAnimationFileAction.triggered.connect(self._create_animation_file)
 
         elif self._item._typeInfo == "group":
 
@@ -330,7 +343,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         """
         #   this has to be put in a thread
-        data = self._item._load_dat_file()
+        # data = self._item._load_dat_file()
         self._parent.SimulationControlWidget.load_solution_file(filename = self._item._name, solution_data=data)
 
     def _load_solution_file_to_project(self):
@@ -375,8 +388,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         Function adds created solution object item in tree view in folder solutions
         """
-        print "solution_data_object_ID =", solution_data_object_ID
-        print "filename =", filename
         #   root index
         root_index = self.ui.treeView.rootIndex()
 
@@ -505,3 +516,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         
         """
         self._item.save_solution_data()
+
+    def _create_animation_file(self):
+        """
+
+        :return:
+        """
+        print "exe in tree view widget"
+        self.create_animation_file.signal_createAnimationFile.emit()
+        print "signal emited!!!"

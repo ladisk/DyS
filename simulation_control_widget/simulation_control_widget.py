@@ -1,23 +1,31 @@
-'''
+"""
 Created on 3. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
+import os
 import datetime
 from pprint import pprint
 import sys
 import time
+import gc
+import shutil
 
+import numpy as np
+import scipy as sp
+from matplotlib import pyplot as plt
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from moviepy.editor import ImageSequenceClip
 
-import numpy as np
+
 
 from opengl_widget.opengl_widget import OpenGLWidget
 from simulation_control_widget_ui import Ui_Form
 from solver.solver import Solver
 from signals import StatusSignal
+from MBD_system.check_filename import check_filename
 
 
 try:
@@ -136,8 +144,7 @@ class SimulationControlWidget(QtGui.QWidget):
         
         self.ui.currentStep.setEnabled(False)
         self.ui.currentStep.setValidator(__validator_int)
-        
-        
+
         #    connections and signals
         self.ui.simulationStartButton.clicked.connect(self.simulationStart)
         self.ui.simulationStartButton.clicked.connect(self.solver.start_solver)
@@ -166,7 +173,7 @@ class SimulationControlWidget(QtGui.QWidget):
 
         self.ui.backwardButton.clicked.connect(self.animation_backward) #clicked
         self.ui.forwardButton.clicked.connect(self.animation_forward)
-        self.ui.playButton.clicked.connect(self.__animation_play)
+        self.ui.playButton.clicked.connect(self.animationPlay)
         
 
         #    signal repaintGL.signal_repaintGL from self.solver triggers self.OpenGLWidget.repaintGL
@@ -180,6 +187,8 @@ class SimulationControlWidget(QtGui.QWidget):
 
         #   change integration method
         self.ui.integrationMethodComboBox.currentIndexChanged.connect(self.selectedIntegrationMethod)
+
+        self._parent.TreeViewWidget.create_animation_file.signal_createAnimationFile.connect(self._create_animation_file)
 
     def _time_integration_error(self):
         """
@@ -229,7 +238,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         if solution_object_id is not None:
             #   assign solution data from solution data object to ne variable
-            solution_data = self.solver.solveODE._solution_data.solution_data
+            solution_data = self.solver.solveODE._solution_data.load_solution_data()
         elif filename is not None:
             pass
         else:
@@ -238,6 +247,10 @@ class SimulationControlWidget(QtGui.QWidget):
         # if filename is not None and solution_object_id is None:
         #     solution_data = self.solver.solveODE.load_simulation_solution_from_file(filename)
 
+        #   assign a solution data object to pointer of object attribute
+        for sol in self.MBD_system.solutions:
+            if id(sol) == solution_object_id:
+                self.MBD_system.loaded_solution = sol
 
         self.step = solution_data[:, 0]
         self.energy = solution_data[:, 1]
@@ -280,7 +293,7 @@ class SimulationControlWidget(QtGui.QWidget):
 
     def animation_forward(self):
         """
-        
+        Go to next solution time step
         """
         if (self.__step + self._delta_step) <= self.step[-1]:
             self.__step += int(self._delta_step)
@@ -291,7 +304,7 @@ class SimulationControlWidget(QtGui.QWidget):
 
     def animation_backward(self):
         """
-        
+        Return to prevouos solution time step
         """
         if (self.__step - self._delta_step) >= self.step[0]:
             self.__step -= int(self._delta_step)
@@ -300,24 +313,16 @@ class SimulationControlWidget(QtGui.QWidget):
         else:
             self.ui.backwardButton.setEnabled(False)
 
-    def __animation_play(self):
-        """
-        
-        """
-        for _step in xrange(0, len(self.step), self._delta_step):
-            self.__step = int(_step)
-            self.__update_GL()
-
     def take_snapshot(self):
         """
-
+        Create a snapshot
         """
         captured_figure = self.OpenGLWidget.takeSnapShot()
         captured_figure.save(self.solver.solveODE.screenshot_filename_abs_path + '.png', 'png')
 
     def selectedIntegrationMethod(self, int):
         """
-        
+        Assign a selected integration method to object attribute
         """
         self.MBD_system.integrationMethod = str(self.ui.integrationMethodComboBox.currentText())
     
@@ -385,3 +390,57 @@ class SimulationControlWidget(QtGui.QWidget):
         self.solver.solveODE.restore_initial_condition()
         # self.ui.simulationResetButton.setEnabled(False)
         self.ui.simulationStartButton.setEnabled(True)
+
+    def animationPlay(self):
+        """
+        Function plays animation when solution data is loaded
+        :return:
+        """
+        for _step in xrange(0, len(self.step), int(self._delta_step)):
+            self.__step = int(_step)
+            self.__update_GL()
+
+            time.sleep(self.ui.playBackSpeed_doubleSpinBox.value()*1E-2)
+
+    def _create_animation_file(self):
+        """
+        Function creates video file of animation
+        :return:
+        """
+        #   check if folder exists and if not create it
+        folder = "_animation"
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        #   absolute path to store animation images to use them to create video file
+        animation_folder_abs_path = os.path.join(os.getcwd(), folder)
+
+        #   predefine empty list to store image objects
+        # images = []
+        for _step in xrange(0, len(self.step), int(self._delta_step)):
+            filename = "V1_step=%03d"%_step+".png"
+
+            #   assign step and repaint GL widget
+            self.__step = int(_step)
+            self.__update_GL()
+
+            #   get image of current opengl widget scene
+            image = self.OpenGLWidget.grabFrameBuffer()
+
+            #   abs path to image object of current simulation time step
+            file_abs_path = os.path.join(animation_folder_abs_path, filename)
+            #   save image to file
+            image.save(file_abs_path)
+
+        #   create video object
+        video = ImageSequenceClip(animation_folder_abs_path, fps=24)#24
+        #   write data to video object
+        __animation_filename = "animation.avi"
+
+        #   check filename
+        __animation_filename = check_filename(__animation_filename)
+
+        video.write_videofile(__animation_filename,codec='mpeg4')
+
+        #   delete animation folder with animation figures
+        shutil.rmtree(animation_folder_abs_path)

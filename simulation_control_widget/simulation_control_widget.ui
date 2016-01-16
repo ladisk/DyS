@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>360</width>
-    <height>579</height>
+    <height>598</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -38,6 +38,13 @@
       <string>Animation Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="updateDisplayStep">
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="currentStep">
         <property name="enabled">
@@ -48,31 +55,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="updateDisplayStep">
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="currentStepLabel">
-        <property name="text">
-         <string>Current step </string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="updateDisplayStepLabel">
         <property name="text">
          <string>Update disp. on i-th stp</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="numberOfSteps_label">
-        <property name="text">
-         <string>Number of steps</string>
         </property>
        </widget>
       </item>
@@ -83,6 +69,34 @@
         </property>
         <property name="inputMethodHints">
          <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="numberOfSteps_label">
+        <property name="text">
+         <string>Number of steps</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="currentStepLabel">
+        <property name="text">
+         <string>Current step </string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="playBackSpeed_doubleSpinBox">
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="numberOfSteps_label_2">
+        <property name="text">
+         <string>Playback speed</string>
         </property>
        </widget>
       </item>

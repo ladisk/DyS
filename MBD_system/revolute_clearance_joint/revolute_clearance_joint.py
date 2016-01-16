@@ -35,13 +35,6 @@ class RevoluteClearanceJoint(Contact):
     """
 #     __id = itertools.count(0)
     def __init__(self, _type, body_id_i, body_id_j, u_iP, u_jP, R0_i, R0_j, properties_dict=[], parent=None):
-        #    number
-#         self.contact_id = self.__id.next()
-        #    name as string
-        self._name = "RC_Joint_"# + str(self.contact_id)
-        
-        #    this has to be after attributes contact_id and _name as name is constructed from contact_id and _name
-        super(RevoluteClearanceJoint, self).__init__(_type, body_id_i, body_id_j, name=self._name, properties_dict=properties_dict, parent=parent)
         """
         Constructor of class contact of revolute clearance joint
         :param _type:       type of clearance joint or contact
@@ -53,6 +46,14 @@ class RevoluteClearanceJoint(Contact):
         :param R0_j:        radius of a pin
         :param properties_dict: additioanl parameters to override default values or add new parameters
         """
+        #    number
+#         self.contact_id = self.__id.next()
+        #    name as string
+        self._name = "RC_Joint_"# + str(self.contact_id)
+        
+        #    this has to be after attributes contact_id and _name as name is constructed from contact_id and _name
+        super(RevoluteClearanceJoint, self).__init__(_type, body_id_i, body_id_j, name=self._name, properties_dict=properties_dict, parent=parent)
+
         self._parent = parent
 
         #    joint type
@@ -81,7 +82,8 @@ class RevoluteClearanceJoint(Contact):
         #   contact model
         if self.contact_model_type is None:
             self.contact_model_type = "hertz"
-        self.contact_model = ContactModelCylinder(self.contact_model_type, parent=self)
+        # print "self.properties_contact_model =", self.properties_contact_model
+        self.contact_model = ContactModelCylinder(self.contact_model_type, properties_dict=self.properties_contact_model, parent=self)
 
         #    joint body ids
         self.body_id_i = body_id_i
@@ -103,10 +105,11 @@ class RevoluteClearanceJoint(Contact):
         self._distance, self._delta = self._contact_geometry_GCS(q)
         # print "self._delta =", self._delta
         #   add distance value to container
-        self._distance_solution_container = np.append(self._distance_solution_container, self._delta)
+
+        # self._distance_solution_container = np.append(self._distance_solution_container, self._delta)
 
         #   check sign
-        self._sign_check = np.sign(self._distance_solution_container[-1]*self._distance_solution_container[-2])
+        self._sign_check = np.sign(self._delta * self._distance_solution_container[-1])
 
         #    contact has happened, but time step has to be reduced as initial penetration depth is too large
         # if (np.sign(self._dqn_solution_container[-1]) == +1) or (self._dqn_solution_container[-1] == 0) and (self._sign_check == -1) and (self._distance >= self._radial_clearance):
@@ -126,12 +129,12 @@ class RevoluteClearanceJoint(Contact):
             if abs(self._delta) > self.distance_TOL:
                 self.contact_detected = True
                 self.status = -1
-                self._distance_solution_container = np.delete(self._distance_solution_container, -1)
+                # self._distance_solution_container = np.delete(self._distance_solution_container, -1)
                 return -1
 
         #    all calculated distances are greater than tolerance and bodies are not in contact
         self.status = 0
-        self._status_container = np.append(self._status_container, self.status)
+        # self._status_container = np.append(self._status_container, self.status)
         self.no_contact()
 
         # for _force_n, _force_t in zip(self._Fn_list, self._Ft_list):
@@ -146,8 +149,6 @@ class RevoluteClearanceJoint(Contact):
         :return:
             status - status of contact 0-no contact, 2-contact
         """
-        # time.sleep(1)
-        # print "contact_update()"
         self._step = step
         # print "self._step =", self._step
         #   current contact velocity at time t
@@ -175,7 +176,6 @@ class RevoluteClearanceJoint(Contact):
             for _force_n, _force_t in zip(self._Fn_list, self._Ft_list):
                 _force_n.update(self._step)
                 _force_t.update(self._step)
-
         return self.status
 
     def _get_contact_geometry_data(self, q):
@@ -296,8 +296,8 @@ class RevoluteClearanceJoint(Contact):
         self.u_P_list_LCS = np.array(self.u_P_list_LCS, dtype="float32")
         self.u_P_GCS = np.array(_u_P_GCS, dtype="float32")
 
-        if self._step_solution_accepted:
-            self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
+        # if self._step_solution_accepted:
+        #     self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
 
         if plot:
             plt.grid()
@@ -324,7 +324,7 @@ class RevoluteClearanceJoint(Contact):
             #    add to list
             dr_P.append(dr_P_body)
 
-        _dq = dr_P[1] - dr_P[0]
+        _dq = dr_P[0] - dr_P[1]
 
         #   relative contact velocity
         #   normal direction
@@ -334,6 +334,49 @@ class RevoluteClearanceJoint(Contact):
         _dq_t = np.dot(_dq, self._t)
 
         return _dq_n, _dq_t
+
+    def solve(self, t, q):
+        """
+        Calculate contact parameters
+        returns:
+        """
+        # print "solve() @ RCJ()"
+        # print "Ry_i =", q[1]
+        # print "Ry_j =", q[4]
+        #    calculate coordinates of contact point from global coordinates in local coordinates of each body in contact
+        if not self._contact_point_found:
+            self._get_contact_geometry_data(q)
+            self._contact_point_found = True
+        else:
+            pass
+            # self._distance, self._delta = self._contact_geometry_GCS(q)
+            # print "contact update"
+
+        # print "self._contact_point_found =", self._contact_point_found
+
+        #   kinematic properties of contact point
+        #   initial contact velocity
+        if not self.initial_contact_velocity_calculated:
+            self._dq0_n, self._dq0_t = self._contact_velocity(q)
+            self.contact_model.set_dq0(self._dq0_n, self._dq0_t)
+            self.initial_contact_velocity_calculated = True
+
+        # if self.contact_detected:
+        self._distance, self._delta = self._contact_geometry_GCS(q)
+        # print "self._delta =", self._delta
+        # print "self._dq0_n, self._dq0_t =", self._dq0_n, self._dq0_t
+
+        #   current contact velocity at time t
+        self._dq_n, self._dq_t = self._contact_velocity(q)
+        # print "self._dq_n, self._dq_t =", self._dq_n, self._dq_t
+        # time.sleep(100)
+        #   current contact velocity at time t
+        # self._dq_n, self._dq_t = self._contact_velocity(q)
+
+        if self._type.lower() in self._types:#== "general" or self._type.lower() == "revolute clearance joint" or self._type.lower() == "contact sphere-sphere":#ECF-N
+            self._solve_ECF_N(t, q, self._delta, self._dq_n, self._dq_t)#self._delta
+        else:
+            raise ValueError, "Contact type not correct!"
 
 
 if __name__ == "__main__":

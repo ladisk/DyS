@@ -1,17 +1,17 @@
-'''
+"""
 Created on 13. mar. 2014
 
 @author: luka.skrinjar
-'''
+"""
+import os
+import sys
 import operator
+import time
 import copy
 import logging
 import datetime
-import os
 import inspect
 from pprint import pprint
-import sys
-import time
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
@@ -106,7 +106,6 @@ class SolveODE(QObject):  # Thread, QObject
         self.stop_time_simulation_info_in_sec_UTC = []
         self.stop_time_simulation_info = []
 
-
     def _solution_containers(self):
         """
 
@@ -150,7 +149,7 @@ class SolveODE(QObject):  # Thread, QObject
         q0 = self._MBD_system.create_q0()
 
         #   create solution data object to store data at each simulation start
-        self._solution_data = SolutionData()#parent=self.MBD_system.Solution
+        self._solution_data = SolutionData(MBD_system=self.MBD_system)#parent=self.MBD_system.Solution
         print "self._solution_data._name =", self._solution_data._name
         self.MBD_system.solutions.append(self._solution_data)
 
@@ -222,9 +221,9 @@ class SolveODE(QObject):  # Thread, QObject
 
             # self.__evaluate_contacts(h, t, w)
 
-            h, t, w = self.__track_data(h, t, w)
+            h, t, w = self._track_data(h, t, w)
 
-            self.__info(t, w)
+            self._info(t, w)
 
             #   check time step
             h = self.check_time_step(h, w)
@@ -271,6 +270,7 @@ class SolveODE(QObject):  # Thread, QObject
 
         while self.FLAG == 1:
             # print "-------------------------------------"
+            # print "step =", self.step, "contact =", self.FLAG_contact
             # print "t =", t
             if self.stopped:
                 self.update_GL_(t=t, q=w)
@@ -293,7 +293,7 @@ class SolveODE(QObject):  # Thread, QObject
             K3 = h * self.ode_fun.create_dq(h, t + (3 / 8.) * h, w + (3 / 32.) * K1 + (9 / 32.) * K2)
             K4 = h * self.ode_fun.create_dq(h, t + (12 / 13.) * h, w + (1932 / 2197.) * K1 - (7200 / 2197.) * K2 + (7296 / 2197.) * K3)
             K5 = h * self.ode_fun.create_dq(h, t + h, w + (439 / 216.) * K1 - 8 * K2 + (3680 / 513.) * K3 - (845 / 4104.) * K4)
-            K6 = h * self.ode_fun.create_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 - (1859 / 4104.) * K4 - (11 / 40.) * K5)
+            K6 = h * self.ode_fun.create_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 + (1859 / 4104.) * K4 - (11 / 40.) * K5)
             
             self.R = (1 / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
             self.R = absTol
@@ -325,11 +325,11 @@ class SolveODE(QObject):  # Thread, QObject
                 self._energy_t = self._mechanical_energy(w)
                 self._energy_delta = self._energy_t - self.energy_data[-1]
 
-                h, t, w = self.__track_data(h, t, w)
+                h, t, w = self._track_data(h, t, w)
 
                 #   evaluate difference of mechanical energy of a system between this and prevouis time step
 
-                self.__info(t, w)
+                self._info(t, w)
 
                 #   check time step
                 h = self.check_time_step(h, w)
@@ -396,7 +396,7 @@ class SolveODE(QObject):  # Thread, QObject
         #    save data to file
         self.write_simulation_solution_to_file()
 
-    def __info(self, t, w):
+    def _info(self, t, w):
         """
 
         :return:
@@ -419,7 +419,7 @@ class SolveODE(QObject):  # Thread, QObject
         #    energy data signal
         self.energy_signal.signal_energy.emit(self._energy_t, self._energy_delta)
 
-    def __track_data(self, h, t, q):
+    def _track_data(self, h, t, q):
         """
 
         :return:
@@ -440,6 +440,9 @@ class SolveODE(QObject):  # Thread, QObject
             self.R_vector = np.vstack((self.R_vector, self.R))
             #   append current mechanical energy to array
             self.energy_data = np.append(self.energy_data, self._energy_t)
+
+            for contact in self.MBD_system.contacts:
+                contact._track_data(self.step, h, t, q)
 
         #    reduce step size and continue integration from previous step
         elif self.FLAG_contact == -1:
@@ -477,28 +480,20 @@ class SolveODE(QObject):  # Thread, QObject
         self.__update_coordinates_and_angles_of_all_bodies(q)
 
         self.contact_status_list = []
-        # print t, self.step
         #    check for contacts
         if self.MBD_system.contacts is not []:
-            
             #    check for contact of every contact pair
             for contact in self.MBD_system.contacts:
                 contact.data_tracker(t, self.step)
-                # print "contact._contact_point_found =",contact._contact_point_found
+                # print "contact._contact_point_found =", contact._contact_point_found, "t =", t
                 if not contact._contact_point_found:
                     #    function recursively loops through all potential AABB objects in AABB tree of each body
                     #    and if two AABB objects overlap, a new overlap object is created
                     #    that has both overlapping AABB objects
 
-                    #    adds simulation data to contact object as this is not possible in the next line because of the recursion
-#                     __step_num = self.step+0
-                    # contact.data_tracker(t, self.step)
                     #   general contact
                     if contact._type == "General":
-                        #    adds simulation data to contact object
-                        # __step_num = self.step+0
-                        # contact.data_tracker(t, __step_num)
-
+                        #   adds simulation data to contact object
                         #   reset to empty list a contact object attribute of list of overlap pairs,
                         #   as this is not possible in the next line (function) due to the recursion
                         contact.AABB_list_of_overlap_pairs = []
@@ -632,13 +627,13 @@ class SolveODE(QObject):  # Thread, QObject
 
     def write_simulation_solution_to_file(self):
         """
-        Function writes solution_data to txt file and saves it.
+        Function writes solution data to solution data object
         """
+        #   reshape data to join in one matrix
+        #   step
         _step = np.array([self.step_counter]).T
-
+        #   energy
         _energy_data = np.array([self.energy_data]).T
-
-
         #   add all solution data to one variable
         solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol))
 
@@ -659,42 +654,18 @@ class SolveODE(QObject):  # Thread, QObject
 
         #   write data to file
         self._solution_data.write_to_file()
-        # #    order of columns: step number, energy, time, q
-        # __frmt = ['%5i']+['%20.16f']+['%20.16f']+['%20.16f']+['%20.16f']+['%.10E']*len(self.q0)
-        #
-        # __header = "i-th step mechanical  energy  \t  R \t\t\t\t\t  dt \t\t\t\t\t  time \t"
-        #
-        # #    add header for q
-        # for body in sorted(self.MBD_system.bodies, key=lambda body: body.body_id):
-        #     _id = body.body_id
-        #
-        #     _header = "\t\t\t\tRx_"+str(_id) +"\t\t\t\tRy_"+str(_id) +"\t\t\t\ttheta_"+str(_id)
-        #     __header = __header + _header
-        #
-        # #    add header for dq
-        # for body in sorted(self.MBD_system.bodies, key=lambda body: body.body_id):
-        #     _id = body.body_id
-        #
-        #     _header = "\t\t\t\tdRx_"+str(_id) +"\t\t\t\tdRy_"+str(_id) +"\t\t\t\tomega_"+str(_id)
-        #     __header = __header + _header
-        #
-        # __comments ='#Insert comments here.\n'
-        #
-        # np.savetxt(self.solution_filename, solution_data, fmt=__frmt, delimiter='\t', header = __header, comments = __comments)
 
-        # logging.getLogger("DyS_logger").info("Solution data saved to file: %s. Size is %s", self.solution_filename, convert_bytes_to_.convert_size(os.path.getsize(self.solution_filename)))
-
-        # self.filename_signal.signal_filename.emit(self._solution_data._filename)
-
+        #   emit signal
         self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._filename)
 
+        #   write contact values of every simulation time step to file
         for contact in self.MBD_system.contacts:
             if contact.save_to_file:
-                contact.save_solution_data()
+                contact.write_to_file()
 
     def start_solve(self):
         """
-
+        Start solver (time integration process)
         """
         self.simulation_id = self.__simulation_id.next()
         logging.getLogger("DyS_logger").info("Simulation started, simulation id: %s"%self.simulation_id)
@@ -705,7 +676,7 @@ class SolveODE(QObject):  # Thread, QObject
 
     def stop_solve(self):
         """
-
+        Stop solver (time integration process)
         """
         self.stopped = True
         self.running = False
@@ -716,6 +687,10 @@ class SolveODE(QObject):  # Thread, QObject
         logging.getLogger("DyS_logger").info("Simulation stopped by user at simulation time:%s", self.t)
 
     def finished_solve(self):
+        """
+        Method sets some parameters when integration process is finished
+        :return:
+        """
         self.finished = True
         self.running = False
 

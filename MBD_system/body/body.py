@@ -1,8 +1,8 @@
-'''
+"""
 Created on 9. maj. 2013
 
 @author: reti-luka
-'''
+"""
 import time
 import sys
 import os
@@ -211,6 +211,22 @@ class Body(BodyItem):
                 val = np.deg2rad(val)
 
             setattr(self, key, val)
+
+    def _evaluate_uP_i_max(self):
+        """
+        Function finds max coordinate of a point of body geometry in x and y axis
+        :return:
+        """
+        self.uP_i_max = np.amax(abs(self.geom.geom_data.vertices), axis=0)
+
+    def get_uP_i_max(self):
+        """
+
+        :return:
+        """
+        self._evaluate_uP_i_max()
+
+        return self.uP_i_max
 
     def _show(self):
         """

@@ -232,7 +232,7 @@ class ODEfun(QObject):
             
     def create_Q_e(self, t, q_):
         """
-        
+        Evaluate vector of generalized external forces of the system
         """
         # print "create_Q_e()"
         # print "t =", t
@@ -348,11 +348,10 @@ class ODEfun(QObject):
         # print "t(sub) = ", t
         #    construct Cq matrix
         self.C_q, self.C_qT = self.create_C_q(t, q)
-        
 
+        #   size of C_s matrix
         self.rows_C_s = 0
         self.cols_C_s = 0
-        
                 
         #    construct augmented matrix
         #    size of predefined empty matrix
@@ -362,7 +361,7 @@ class ODEfun(QObject):
         #    construct vector of external and constraint forces
         _vector = np.empty([rows])
 
-        #    vector of external forces
+        #    vector of external and contact forces
         Q_e = self.create_Q_e(t, q)
         _vector[0:self.M_dim] = Q_e
         # print "%2.10f"%t, Q_e, "FLAG =", self._parent.FLAG_contact
@@ -410,9 +409,10 @@ class ODEfun(QObject):
 
     def solve_contacts(self, t, q):
         """
-        
+        Solve all contact that are detected at integration time t
         """
         #   loop through all contacts
+        # print "q =", q
         for contact in self.MBD_system.contacts:
             # print "contact.contact_detected =", contact.contact_detected
             # print "contact.contact_distance_inside_tolerance =", contact.contact_distance_inside_tolerance

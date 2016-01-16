@@ -41,6 +41,9 @@ class ContactModel(object):
         """
         self._parent = parent
 
+        #   sub string
+        self._substring = "contact_model"
+
         #   if parent is specified (if exists)
         if self._parent is not None:
             #   get attributes from parent
@@ -110,7 +113,7 @@ class ContactModel(object):
         #   set additional properties to object from dictionary
         self.properties = properties_dict
         if self.properties is not []:
-            self.__add_aditional_parameters(self.properties)
+            self._add_aditional_parameters(self.properties)
 
     def _type_check(self):
         """
@@ -123,7 +126,7 @@ class ContactModel(object):
         else:
             raise ValueError, "Contact model type not correct! Define contact model type."
 
-    def __add_aditional_parameters(self, dict):
+    def _add_aditional_parameters(self, dict):
         """
 
         :param dict:
@@ -185,7 +188,7 @@ class ContactModel(object):
 
         :return:
         """
-        h = (1-ni**2)/(np.pi * E)
+        h = (1-ni**2)/E
         return h
 
     def set_dq0(self, dq0_n, dq0_t):

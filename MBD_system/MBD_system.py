@@ -47,6 +47,7 @@ class MBDsystem(MBDsystemItem):
         #   use baumgarte stabilization method - BSM
         self.use_BSM = True
         self.t_n = 1
+        self.integrationMethod = None
 
         #   filetype settings
         #   project filetype
@@ -55,6 +56,8 @@ class MBDsystem(MBDsystemItem):
         #   solution properties
         #   predefined list
         self.solutions = []
+        #   a pointer to solution data object that has been loaded
+        self.loaded_solution = None
         #   filetype, options:
         #   .dat, (.xlsx, .csv - not implemented yet)
         self._solution_filetype = ".sol" #.sol,.xlsx

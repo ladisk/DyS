@@ -39,7 +39,7 @@ class Contact(ContactItem):
     """
     __id = itertools.count(0)
 
-    def __init__(self, _type=None, body_id_i=None, body_id_j=None, name=None, properties_dict=[], parent=None):
+    def __init__(self, _type=None, body_id_i=None, body_id_j=None, name=None, contact_model_type=None, friction_model_type=None, properties_dict=[], parent=None):
         """
         Constructor of class contact
         :param  _type       supported types:
@@ -69,7 +69,12 @@ class Contact(ContactItem):
         self._parent = parent
         #    contact type
         self._type = _type
-        self.__types = ["general", "revolute clearance joint", "contact sphere-sphere", "contact plane-sphere", "linear pin-slot clearance joint", "radial pin-slot clearance joint"]
+        self._types = ["general",
+                        "revolute clearance joint",
+                        "contact sphere-sphere",
+                        "contact plane-sphere",
+                        "linear pin-slot clearance joint",
+                        "radial pin-slot clearance joint"]
 
         #   contact geometry (profile) - list of object pairs
         self.contact_geometry_list = []
@@ -89,15 +94,6 @@ class Contact(ContactItem):
         #    numerical error when calculating distance (point to line), in m
         self.distance_TOL = 1.E-7
 
-        #   default properties
-        self.contact_model_type = None
-
-        #    set properties dictionary as object property
-        __properties = copy.copy(properties_dict)
-        self.properties = properties_dict
-        if self.properties is not []:
-            self.add_additional_parameters(self.properties)
-
         #   solution options
         self._save_options = "Discard"
         #   solution file type, optional: .dat, .xlsx, .csv
@@ -114,17 +110,23 @@ class Contact(ContactItem):
         self.body_list = []
         self.contact_geometry_list = []
 
-        #   extract only properties that relate to contact model object properties
-        self.properties_contact_model = extract_from_dictionary_by_string_in_key(__properties, "contact_model.")
-
         #   contact model
-        self.contact_model = ContactModel(self.contact_model_type, c_r=self.coef_of_restitution, properties_dict=self.properties_contact_model, parent=self)
+        #   default properties
+        self.contact_model_type = contact_model_type
+        if self.contact_model_type is None:
+            self.contact_model_type = "hertz"
+        #   extract only properties that relate to contact model object properties
+        self.properties_contact_model = extract_from_dictionary_by_string_in_key(properties_dict, "contact_model.")
+        self.contact_model = ContactModel(self.contact_model_type, c_r=self.coef_of_restitution, properties_dict=properties_dict, parent=self)
 
         #    friction model
-        self.friction_model_type = "ideal"
+        self.friction_model_type = friction_model_type
+        if self.friction_model_type is None:
+            self.friction_model_type = "ideal"
         self._dq_t_TOL = 1E-3
         self.coef_of_friction_dynamic = 0
         self.coef_of_friction_static = 0
+        self.properties_friction_model = extract_from_dictionary_by_string_in_key(properties_dict, "contact_model.")
         self.friction_model = FrictionModel(self.friction_model_type, coef_of_friction_dynamic=self.coef_of_friction_dynamic, coef_of_friction_static=self.coef_of_friction_static, parent=self)
 
         #   set type properties
@@ -133,6 +135,12 @@ class Contact(ContactItem):
             
         if self._type == "ECF-N":
             self.__set_ECF_N_parameters()
+
+        #    set properties dictionary as object property
+        __properties = copy.copy(properties_dict)
+        self.properties = properties_dict
+        if self.properties is not []:
+            self.add_additional_parameters(self.properties)
 
         #    initialize a list of AABB
         self.AABB_i = None
@@ -236,13 +244,17 @@ class Contact(ContactItem):
         :return:
         """
         #    solution containers over integration times
-        self._step_num_solution_container = np.zeros([1])
+        self._step_num_solution_container = np.empty(1)
+        self._step_num_solution_container.fill(0)
 
-        self._status_container = np.zeros([1])
+        self._status_container = np.empty(0)
+        self._status_container.fill(0)
 
-        self._step_size_solution_container = np.zeros([1])
+        self._step_size_solution_container = np.empty(1)
+        self._step_size_solution_container.fill(0)
 
-        self._t_solution_container = np.zeros([1])
+        self._t_solution_container = np.empty(1)
+        self._t_solution_container.fill(0)
         
         self._distance_solution_container = np.empty([1])
         self._distance_solution_container.fill(0)
@@ -394,29 +406,61 @@ class Contact(ContactItem):
 
         #    append last value if time t is greater than last element in data container
         if t > self._t_solution_container[-1]:
-            #    step size
-            self._h = t - self._t_solution_container[-1]
-
-            if self._step==self._step_num_solution_container[0]:
-                self._step_num_solution_container[0] = self._step
-            else:
-                self._step_num_solution_container = np.append(self._step_num_solution_container, self._step)
-
-            self._t_solution_container = np.append(self._t_solution_container, self.t)
-
-            self._step_size_solution_container = np.append(self._step_size_solution_container, self._h)
+            # #    step size
+            # self._h = t - self._t_solution_container[-1]
+            #
+            # if self._step==self._step_num_solution_container[0]:
+            #     self._step_num_solution_container[0] = self._step
+            # # else:
+            # #     pass
+            #     # self._step_num_solution_container = np.append(self._step_num_solution_container, self._step)
+            #
+            # self._t_solution_container = np.append(self._t_solution_container, self.t)
+            #
+            # self._step_size_solution_container = np.append(self._step_size_solution_container, self._h)
             self._step_solution_accepted = True
 
         #    replace last value if new value is smaller than last value
         else:
-            #    step size
-            self._h = t - self._t_solution_container[-2]
-
-            self._step_num_solution_container[-1] = self._step
-            self._t_solution_container[-1] = self.t
-
-            self._step_size_solution_container[-1] = self._h
+            # #    step size
+            # self._h = t - self._t_solution_container[-2]
+            #
+            # self._step_num_solution_container[-1] = self._step
+            # self._t_solution_container[-1] = self.t
+            #
+            # self._step_size_solution_container[-1] = self._h
             self._step_solution_accepted = False
+
+    def _track_data(self, step, h, t, q):
+        """
+        Function saves current calculated data at
+        :return:
+        """
+        #   step number
+        self._step_num_solution_container = np.append(self._step_num_solution_container, step)
+
+        #   status
+        self._status_container = np.append(self._status_container, self.status)
+
+        #   step size
+        self._step_size_solution_container = np.append(self._step_size_solution_container, h)
+
+        #   time
+        self._t_solution_container = np.append(self._t_solution_container, t)
+
+        #   delta
+        self._distance_solution_container = np.append(self._distance_solution_container, self._delta)
+
+        #   dq
+        self._dqn_solution_container = np.append(self._dqn_solution_container, self._dq_n)
+        self._dqt_solution_container = np.append(self._dqt_solution_container, self._dq_t)
+
+        #   F
+        self._Fn_solution_container = np.append(self._Fn_solution_container, self.Fn)
+        self._Ft_solution_container = np.append(self._Ft_solution_container, self.Ft)
+
+        #   uPi, uPj
+        self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
 
     def __AABB_AABB_overlap(self, AABB_i, AABB_j):
         """
@@ -565,10 +609,10 @@ class Contact(ContactItem):
         self._distance_sign = min(self._distance_sign_list_values)
 
         #   add calculated data to container
-        if self._step_solution_accepted:
-            self._distance_solution_container = np.append(self._distance_solution_container, self._distance_sign)  # _distance_sign, _distance
-        else:
-            self._distance_solution_container[-1] = self._distance_sign
+        # if self._step_solution_accepted:
+        #     self._distance_solution_container = np.append(self._distance_solution_container, self._distance_sign)  # _distance_sign, _distance
+        # else:
+        #     self._distance_solution_container[-1] = self._distance_sign
 
         #    all calculated distances are greater than minimum tolerance for contact
         #    returns value 1 - to divide time step
@@ -583,12 +627,12 @@ class Contact(ContactItem):
             self.contact_detected = True
             self.contact_distance_inside_tolerance = True
             self.status = 1
-            self._status_container = np.append(self._status_container, self.status)
+            # self._status_container = np.append(self._status_container, self.status)
             return self.status
 
         #    all calculated distances are greater than tolerance and bodies are not in contact
         self.status = 0
-        self._status_container = np.append(self._status_container, self.status)
+        # self._status_container = np.append(self._status_container, self.status)
         self.no_contact()
 
         # print "self.contact_detected =", self.contact_detected
@@ -769,6 +813,7 @@ class Contact(ContactItem):
         :return:
             status - status of contact 0-no contact, 2-contact
         """
+        # print "contact_update()"
         self._step = step
 
         #   calculate relative contact velocity in normal direction at time t
@@ -797,6 +842,7 @@ class Contact(ContactItem):
             for _Fn in self._Fn_list:
                 _Fn._update_force_vector(np.zeros(2))
 
+        # print "self.status - contact_update() =", self.status
         return self.status
 
     def solve(self, t, q):
@@ -804,10 +850,15 @@ class Contact(ContactItem):
         Calculate contact parameters
         returns:
         """
+        # print "self._contact_point_found =", self._contact_point_found
         #    calculate coordinates of contact point from global coordinates in local coordinates of each body in contact
         if not self._contact_point_found:
             self._get_contact_geometry_data(q)
             self._contact_point_found = True
+        else:
+            pass
+            # self._distance, self._delta = self._contact_geometry_GCS(q)
+            # print "contact update"
 
         # print "self._contact_point_found =", self._contact_point_found
 
@@ -817,6 +868,9 @@ class Contact(ContactItem):
             self._dq0_n, self._dq0_t = self._contact_velocity(q)
             self.contact_model.set_dq0(self._dq0_n, self._dq0_t)
             self.initial_contact_velocity_calculated = True
+
+        # if self.contact_detected:
+        self._distance, self._delta = self._contact_geometry_GCS(q)
         # print "self._dq0_n, self._dq0_t =", self._dq0_n, self._dq0_t
 
         #   current contact velocity at time t
@@ -841,13 +895,15 @@ class Contact(ContactItem):
             F - force vector (Fx, Fy)
         """
         # print "_solve_ECF_N()"
-        # print "t =", t
+
         # print "delta =", _delta
         # print "dqn =", _dq_n
         # print "q =", q
         #    normal and tangent force are calculated with selected contact and friction model
         self.Fn = self.contact_model.contact_force(_delta, _dq_n)# _dq_t, self._n, self._t
-        # print "Fn =", self.Fn, "delta =", _delta, "dqn =", _dq_n
+        # print "--------------------------------"
+        # print "q =", q
+        # print "t =%20.15f"%t, "Fn =", self.Fn, "delta =", _delta, "dqn =", _dq_n
         self.Ft = self.friction_model.friction_force(self.Fn, _dq_t)
         # print "Ft =", Ft
 
@@ -867,6 +923,7 @@ class Contact(ContactItem):
         #    check if contact is finished
         # print "TOL =", self.distance_TOL
         # print "_delta =", _delta
+        # print "_delta0 =", self._delta0
         # print "abs(_delta) < self.distance_TOL =", abs(_delta) < self.distance_TOL
         #   contact
         if _delta <= self._delta0:#<self._delta0 and self._dq_n <= abs(self._dq0_n):#-self.distance_TOL:# and self._dq_n >=  self._dq0_n:#self.distance_TOL:# and (self._dq_n < 0):, _delta<-1*self.distance_TOL
@@ -901,13 +958,10 @@ class Contact(ContactItem):
                 # pprint(vars(_force_n))
             # time.sleep(100)
             #   store data to solution containers
-            self._distance_solution_container = np.append(self._distance_solution_container, _delta)
+            # self._distance_solution_container = np.append(self._distance_solution_container, _delta)
 
-            self._dqn_solution_container = np.append(self._dqn_solution_container, _dq_n)
-            self._dqt_solution_container = np.append(self._dqt_solution_container, _dq_t)
-
-            self._Fn_solution_container = np.append(self._Fn_solution_container, self.Fn)
-            self._Ft_solution_container = np.append(self._Ft_solution_container, self.Ft)
+            # self._dqn_solution_container = np.append(self._dqn_solution_container, _dq_n)
+            # self._dqt_solution_container = np.append(self._dqt_solution_container, _dq_t)
 
         #   no contact
         else:
@@ -919,7 +973,7 @@ class Contact(ContactItem):
             self.no_contact()
             # time.sleep(10)
 
-        self._status_container = np.append(self._status_container, self.status)
+        # self._status_container = np.append(self._status_container, self.status)
 
     def _contact_velocity(self, q):
         """
@@ -952,13 +1006,17 @@ class Contact(ContactItem):
 
     def no_contact(self):
         """
-
+        Method sets values to contact attributes when there is no contact
         """
-        self._Fn_solution_container = np.append(self._Fn_solution_container, 0)
-        self._Ft_solution_container = np.append(self._Ft_solution_container, 0)
-        
-        self._dqn_solution_container = np.append(self._dqn_solution_container, 0)
-        self._dqt_solution_container = np.append(self._dqt_solution_container, 0)
+        self.Fn = 0
+        self.Ft = 0
+        # self._Fn_solution_container = np.append(self._Fn_solution_container, 0)
+        # self._Ft_solution_container = np.append(self._Ft_solution_container, 0)
+
+        self._dq_n = 0
+        self._dq_t = 0
+        # self._dqn_solution_container = np.append(self._dqn_solution_container, 0)
+        # self._dqt_solution_container = np.append(self._dqt_solution_container, 0)
 
         #   update contact force values with zeros as no contact is present
         for _force_n, _force_t in zip(self._Fn_list, self._Ft_list):
@@ -975,7 +1033,7 @@ class Contact(ContactItem):
             self._distance_solution_container = np.append(self._distance_solution_container, np.nan)
 
         self.no_contact()
-        self._status_container = np.append(self._status_container, self.status)
+        # self._status_container = np.append(self._status_container, self.status)
 
     def mechanical_energy(self):
         """
@@ -988,7 +1046,7 @@ class Contact(ContactItem):
         else:
             return 0
 
-    def save_solution_data(self):
+    def write_to_file(self):
         """
         Save contact solution data to file.
         """
@@ -999,16 +1057,16 @@ class Contact(ContactItem):
         self._comments ="contact model: "+self.contact_model._type+"\n"
 
         #   save to selected file format
-        if self._solution_filetype == ".dat":
-            self._write2dat_file()
+        if self._solution_filetype == ".dat" or self._solution_filetype == ".sol":
+            self._write_to_txt_file()
         elif self._solution_filetype == ".xlsx" or self._solution_filetype == ".xls":
-            self._write2excel_file()
+            self._write_to_excel_file()
         elif self._solution_filetype == ".csv":
-            self._write2csv_file()
+            self._write_to_csv_file()
 
         logging.getLogger("DyS_logger").info("Contact data (time and geometry) saved to file:\n%s" % self._solution_filename)
 
-    def _write2dat_file(self):
+    def _write_to_txt_file(self):
         """
 
         :return:
@@ -1021,7 +1079,7 @@ class Contact(ContactItem):
         #   save to file
         np.savetxt(self._solution_filename, solution_data, fmt=['%5i', '%5i', '%20.10f', '%20.10f', '%20.10f', '%20.10f', '%20.10f', '%20.10f'], delimiter='\t', header=_header, comments = self._comments)
 
-    def _write2excel_file(self):
+    def _write_to_excel_file(self):
         """
 
         :return:
@@ -1078,6 +1136,9 @@ class Contact(ContactItem):
         except:
             pass
         worksheet.set_column("J:M", 22)
+
+        #   freeze first two rows
+        worksheet.freeze_panes(2, 0)
 
         #   close file
         workbook.close()
@@ -1198,7 +1259,7 @@ class Contact(ContactItem):
         else:
             None
 
-    def plot_Fn_delta(self, color=None):
+    def plot_Fn_delta(self, color=None, plot_label=None):
         """
 
         :return:
@@ -1206,7 +1267,11 @@ class Contact(ContactItem):
         _contact_indices = self.__contact()
 
         label, color = self._plot_info(color)
-        plt.plot(abs(self._distance_solution_container[_contact_indices]), abs(self._Fn_solution_container[_contact_indices]), marker=None, color=color, label=label)
+
+        x = abs(self._distance_solution_container[_contact_indices])
+        y = abs(self._Fn_solution_container[_contact_indices])
+
+        plt.plot(x, y, marker=None, color=color, label=label)
 
     def plot_Fn_time(self, color=None):
         """
@@ -1219,7 +1284,7 @@ class Contact(ContactItem):
 
         plt.plot(abs(self._t_solution_container[_contact_indices]), abs(self._Fn_solution_container[_contact_indices]), marker=None, color=color, label=label)
 
-    def plot(self, x, y, color=None, label=None):
+    def plot(self, x, y, color=None, label=None, str_id=None):
         """
 
         :param x: options = (delta)
@@ -1239,15 +1304,22 @@ class Contact(ContactItem):
             raise ValueError, "x not corrent!"
 
         if y == "Fn":
-            y_data = abs(self._Fn_solution_container[_contact_indices])
+            y_data = abs(self._Fn_solution_container[_contact_indices]) / 0.015
         elif y == "dqn":
             y_data = self._dqn_solution_container[_contact_indices]
         else:
             raise ValueError, "y not corrent!"
 
-        plt.plot(x_data, y_data, marker=None, color=color, label=label)
+        plt.plot(x_data, y_data, marker=None, color=color, label=r"%s"%label)
+        # plt.loglog(x_data, y_data, basex=10, color=color, label=label)
+        #   add label to graph
+        # plt.text(abs(min(self._distance_solution_container[_contact_indices])), max(y_data), str_id+" "+label)
 
     def __contact(self):
+        """
+
+        :return:
+        """
         #   indices where contact is present, value is 1
         _contact_indices = np.nonzero(self._status_container)#_Fn_solution_container, _status_container
         return _contact_indices

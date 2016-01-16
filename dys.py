@@ -160,7 +160,6 @@ class MainWindow(QtGui.QMainWindow):
         self.TreeViewWidget.move(.25*screen.width() - self.TreeViewWidget.frameGeometry().width(), dy)#self.frameGeometry().width(), self.frameGeometry().height())
         # self.TreeViewWidget.move(self.window_offset_x - self.TreeViewWidget.frameGeometry().width(), self.window_offset_y)
 
-        
         #    simulation control widget
         self.SimulationControlWidget = SimulationControlWidget(MBD_system=self.MBD_system, parent=self)
         self.SimulationControlWidget.setWindowFlags(self.flags)

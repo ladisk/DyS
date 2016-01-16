@@ -20,13 +20,12 @@ from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
 
-import camera_view.camera_view as camera_view
 import coordinate_system.display_CS.display_CS as display_CS
-import coordinate_system.display_CS_main.display_CS_main as display_CS_main
-import display_window.display_window as display_window
-import gl_matrix.gl_matrix as gl_matrix
 import paint_text.paint_text as paint_text
+from simulation_control_widget.opengl_widget.view.view import View
 from coordinate_system.coordinate_system import CoordinateSystem
+from simulation_control_widget.opengl_widget.matrix.matrix import Matrix
+from simulation_control_widget.opengl_widget.window.window import Window
 
 
 class OpenGLWidget(QtOpenGL.QGLWidget):
@@ -49,7 +48,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         
         #    opengl properties for glOrtho()
         #    the window corner OpenGL coordinates are (-+1, -+1)
-        xy_window_values = .5E-1
+        xy_window_values = 1.E-1
         
         self.left_GL = -1 * xy_window_values
         self.right_GL = +1 * xy_window_values
@@ -61,8 +60,8 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.delta_zoom = 0
         self.CS_window = 80
         
-        self.scale_factor_Translation = 0.005 * xy_window_values
-        self.scale_factor_Rotation = 10. * xy_window_values
+        self.__scale_factor_Translation = self.scale_factor_Translation = 0.001
+        self.__scale_factor_Rotation = self.scale_factor_Rotation = 1
         
         #    window dimensions
         self.initial_window_width = self._parent.geometry().width() #500
@@ -128,11 +127,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
         glEnable(GL_LIGHT0)
         #    gl matrix object
-        self.gl_matrix = gl_matrix.Matrix()
+        self.gl_matrix = Matrix()
         #    camera view
-        self.camera = camera_view.View()
+        self.view = View()
         #    coordinate system view
-        self.camera_CS = camera_view.View()
+        self.view_CS = View()
 
         #    viewing
         self.geometry()
@@ -141,8 +140,10 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.GCS._create_VBO()
 
         #    display window
-        self.display_window = display_window.Window(width=self.initial_window_width, height=self.initial_window_height, left_GL=self.left_GL, right_GL=self.right_GL, bottom_GL=self.bottom_GL, top_GL=self.top_GL, near_GL=self.near_GL, far_GL=self.far_GL, zoom=self.zoom, scale_factor_Translation=self.scale_factor_Translation, scale_factor_Rotation=self.scale_factor_Rotation)
-        
+        self.window = Window(width=self.initial_window_width, height=self.initial_window_height, left_GL=self.left_GL, right_GL=self.right_GL, bottom_GL=self.bottom_GL, top_GL=self.top_GL, near_GL=self.near_GL, far_GL=self.far_GL, zoom=self.zoom, scale_factor_Translation=self.scale_factor_Translation, scale_factor_Rotation=self.scale_factor_Rotation)
+        self.scale_factor_Translation = self.scale_factor_Translation * float(self.window.width) / float(self._parent.geometry().width())
+        self.scale_factor_Rotation = self.scale_factor_Rotation * float(self.window.width) / float(self._parent.geometry().width())
+
         #    shaders
         self.shader_program = QGLShaderProgram()
         self.shader_program.addShaderFromSourceFile(QGLShader.Vertex, os.path.join(os.path.dirname(os.path.abspath(__file__)), "shaders", "shader.vert"))
@@ -160,7 +161,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    setup camera
         #    projection matrix
         glMatrixMode(GL_PROJECTION)
-        glLoadMatrixf(self.camera.current_PROJECTION_matrix)
+        glLoadMatrixf(self.view.current_PROJECTION_matrix)
         #    modelview matrix
         glMatrixMode(GL_MODELVIEW)
 
@@ -175,11 +176,11 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
                 #     self.GCS._paintGL_VBO()
                 # except:
                 #     pass
-            # display_CS_main.display(self, self.camera.current_MODELVIEW_matrix, int(self.display_window.width), int(self.display_window.height))
+            # display_CS_main.display(self, self.view.current_MODELVIEW_matrix, int(self.window.width), int(self.window.height))
         
-        glViewport(0, 0, int(self.display_window.width), int(self.display_window.height))
+        glViewport(0, 0, int(self.window.width), int(self.window.height))
 
-        glLoadMatrixf(self.camera.current_MODELVIEW_matrix)
+        glLoadMatrixf(self.view.current_MODELVIEW_matrix)
 
         glPointSize(10)
         glBegin(GL_POINTS)
@@ -190,7 +191,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         # self.MBD_system.ground.paintGL_VBO()
 
-
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_COLOR_ARRAY)
 
@@ -200,8 +200,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
             self.GCS._paintGL_VBO()
 
         glEnableClientState(GL_NORMAL_ARRAY)
-
-
 
         #    display main GCS
 #         if self.GCS._visible:
@@ -246,7 +244,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    save matrices to gl_matrix object
         self.gl_matrix.update_projection_matrix(glGetDoublev(GL_PROJECTION_MATRIX)) 
         self.gl_matrix.update_modelview_matrix(glGetDoublev(GL_MODELVIEW_MATRIX))
-        self.gl_matrix.update_modelview_matrix_CS(self.camera_CS.current_MODELVIEW_matrix)
+        self.gl_matrix.update_modelview_matrix_CS(self.view_CS.current_MODELVIEW_matrix)
         
         #    display CS symbol in lower left corner
         try:
@@ -257,7 +255,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    reload saved matrices from gl_matrix object
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glViewport(0, 0, self.display_window.width, self.display_window.height)
+        glViewport(0, 0, self.window.width, self.window.height)
 
         glMatrixMode(GL_MODELVIEW)
         
@@ -289,19 +287,61 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
                     if not marker._VBO_created:
                         marker._create_VBO()
 
+    def refit(self):
+        """
+        Function finds max coordinates of a point on a body in GCS to resize window on all system geometries
+
+
+        :return:
+        """
+        _uP_i_max = []
+        for body in self.MBD_system.bodies:
+            _uP_i_max_i = body.get_uP_i_max() + abs(body.R)
+
+            _uP_i_max.append(_uP_i_max_i)
+
+        #   convert to numpy array
+        _uP_i_max = np.array(_uP_i_max)
+
+        #   max element in every axis
+        [x, y, z] = np.amax(_uP_i_max, axis=0)
+        #   max dim is 50% larger than max coordinate
+        self._max_dim = 1.5 * np.amax(np.array([x, y]))
+
+        delta = self.view._right_GL / self._max_dim
+
+
+        self.left_GL = - self._max_dim
+        self.right_GL = self._max_dim
+
+        self.bottom_GL = -self._max_dim
+        self.top_GL = self._max_dim
+
+        self.view.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
+
+        self.scale_factor_Rotation = self.__scale_factor_Rotation / delta
+        self.scale_factor_Translation = .1 * self.__scale_factor_Translation / delta
+
+    def get_aspect(self):
+
+        return self.window.aspect
+
     def takeSnapShot(self):
         """
-        
+        Create a snapshot
         """
         screen_shot = self.grabFrameBuffer(withAlpha=True)
+        pprint(vars(screen_shot))
         return screen_shot
 
     def resizeGL(self, width, height):
         """
         Resize
+
+        :param width:
+        :param height:
+
         """
-        self.scale_factor_Translation = self.scale_factor_Translation * float(self.display_window.width) / float(self._parent.geometry().width())
-        self.scale_factor_Rotation = self.scale_factor_Rotation * float(self.display_window.width) / float(self._parent.geometry().width())
         #    paint within the whole window
         self.width = width
         self.height = height
@@ -310,17 +350,19 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.resize_factor_width = self.initial_window_width / self.width
         self.resize_factor_height = self.initial_window_height / self.height
 
-        self.display_window = display_window.Window(width, height, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom, self.scale_factor_Translation, self.scale_factor_Rotation)
+        self.window = Window(width, height, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom, self.scale_factor_Translation, self.scale_factor_Rotation)
 
-        glViewport(0, 0, self.display_window.width, self.display_window.height)
+        glViewport(0, 0, self.window.width, self.window.height)
         
-        #    aspect ratio
+        #    aspect ratio of width by height
         self.aspect = float(width) / height
 
         #    set orthographic projection (2D only) 
-        self.camera.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
+        self.view.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
 
         glMatrixMode(GL_MODELVIEW)
+
+        self.refit()
 
     def mouseReleaseEvent(self, event):
         """
@@ -387,14 +429,14 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
                 tX = dx * self.scale_factor_Translation
                 tY = -dy * self.scale_factor_Translation
-                self.camera.translate(tX, tY, 0)
+                self.view.translate(tX, tY, 0)
             #    rotate
             else:
                 self.setCursor(Qt.CursorShape(Qt.OpenHandCursor))
                 rX = dx * self.scale_factor_Rotation
                 rY = dy * self.scale_factor_Rotation
-                self.camera.rotate(rX, rY, 0)
-                self.camera_CS.rotate(rX, rY, 0)             
+                self.view.rotate(rX, rY, 0)
+                self.view_CS.rotate(rX, rY, 0)             
 
             self.updateGL()
             self.last_pos = event.posF()
@@ -403,14 +445,13 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         """
         Zoom
         """
-        self.delta_zoom = event.delta() / 120
+        self.delta_zoom = event.delta() / 120 #120
         
         self.zoom = self.zoom * (1 + 0.1 * self.delta_zoom)
         self.scale_factor_Translation = self.scale_factor_Translation * (1 + 0.1 * self.delta_zoom)
         self.scale_factor_Rotation = self.scale_factor_Rotation * (1 + 0.01 * self.delta_zoom)
-        self.aspect = self.display_window.aspect
-        
-        self.camera.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
+        self.aspect = self.window.aspect
+        self.view.zoom(self.aspect, self.left_GL, self.right_GL, self.bottom_GL, self.top_GL, self.near_GL, self.far_GL, self.zoom)
 
         self.updateGL()
 
@@ -444,42 +485,42 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
     @QtCore.pyqtSlot()
     def viewFront(self):
-        self.camera.front()
-        self.camera_CS.front()
+        self.view.front()
+        self.view_CS.front()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewBack(self):
-        self.camera.back()
-        self.camera_CS.back()
+        self.view.back()
+        self.view_CS.back()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewBottom(self):
-        self.camera.bottom()
-        self.camera_CS.bottom()
+        self.view.bottom()
+        self.view_CS.bottom()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewTop(self):
-        self.camera.top()
-        self.camera_CS.top()
+        self.view.top()
+        self.view_CS.top()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewRight(self):
-        self.camera.left()
-        self.camera_CS.left()
+        self.view.left()
+        self.view_CS.left()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewLeft(self):
-        self.camera.right()
-        self.camera_CS.right()
+        self.view.right()
+        self.view_CS.right()
         self.updateGL()
 
     @QtCore.pyqtSlot()
     def viewIsometric(self):
-        self.camera.isometric()
-        self.camera_CS.isometric()
+        self.view.isometric()
+        self.view_CS.isometric()
         self.updateGL()
