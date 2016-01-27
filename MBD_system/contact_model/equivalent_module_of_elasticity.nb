@@ -1,0 +1,154 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      4137,        145]
+NotebookOptionsPosition[      3712,        125]
+NotebookOutlinePosition[      4059,        140]
+CellTagsIndexPosition[      4016,        137]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"eq1", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox["1", 
+      SuperscriptBox["E", "*"]], " ", "\[Equal]", " ", 
+     RowBox[{
+      FractionBox[
+       RowBox[{"1", "-", 
+        SubsuperscriptBox["\[Nu]", "i", "2"]}], 
+       SubscriptBox["E", "i"]], "+", 
+      FractionBox[
+       RowBox[{"1", "-", 
+        SubsuperscriptBox["\[Nu]", "j", "2"]}], 
+       SubscriptBox["E", "j"]]}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{"eq1", ",", " ", 
+    SuperscriptBox["E", "*"]}], "]"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6607475950910254`*^9, 3.660747687132882*^9}, {
+  3.660747740779797*^9, 3.660747779555497*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+    SuperscriptBox["\[ExponentialE]", "*"], "\[Rule]", 
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{
+       SubscriptBox["\[ExponentialE]", "i"], " ", 
+       SubscriptBox["\[ExponentialE]", "j"]}], 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["\[ExponentialE]", "j"], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"-", "1"}], "+", 
+          SubsuperscriptBox["\[Nu]", "i", "2"]}], ")"}]}], "+", 
+       RowBox[{
+        SubscriptBox["\[ExponentialE]", "i"], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"-", "1"}], "+", 
+          SubsuperscriptBox["\[Nu]", "j", "2"]}], ")"}]}]}]]}]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{{3.6607477584108315`*^9, 3.6607477802395744`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"eq1", " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox["1", 
+      SuperscriptBox["E", "*"]], " ", "\[Equal]", " ", 
+     RowBox[{
+      FractionBox[
+       RowBox[{"1", "-", 
+        SubsuperscriptBox["\[Nu]", "i", "2"]}], 
+       RowBox[{"\[Pi]", " ", 
+        SubscriptBox["E", "i"]}]], "+", 
+      FractionBox[
+       RowBox[{"1", "-", 
+        SubsuperscriptBox["\[Nu]", "j", "2"]}], 
+       RowBox[{"\[Pi]", " ", 
+        SubscriptBox["E", "j"]}]]}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{"eq1", ",", " ", 
+    SuperscriptBox["E", "*"]}], "]"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.6607477984370375`*^9, 3.660747801817294*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+    SuperscriptBox["\[ExponentialE]", "*"], "\[Rule]", 
+    RowBox[{"-", 
+     FractionBox[
+      RowBox[{"\[Pi]", " ", 
+       SubscriptBox["\[ExponentialE]", "i"], " ", 
+       SubscriptBox["\[ExponentialE]", "j"]}], 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["\[ExponentialE]", "j"], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"-", "1"}], "+", 
+          SubsuperscriptBox["\[Nu]", "i", "2"]}], ")"}]}], "+", 
+       RowBox[{
+        SubscriptBox["\[ExponentialE]", "i"], " ", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"-", "1"}], "+", 
+          SubsuperscriptBox["\[Nu]", "j", "2"]}], ")"}]}]}]]}]}], "}"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.660747803191182*^9}]
+}, Open  ]]
+},
+WindowSize->{767, 553},
+WindowMargins->{{Automatic, 248}, {24, Automatic}},
+FrontEndVersion->"10.0 for Microsoft Windows (64-bit) (September 9, 2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 741, 21, 78, "Input"],
+Cell[1324, 45, 794, 24, 50, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2155, 74, 758, 22, 78, "Input"],
+Cell[2916, 98, 780, 24, 50, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

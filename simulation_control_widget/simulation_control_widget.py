@@ -10,6 +10,7 @@ import sys
 import time
 import gc
 import shutil
+import cProfile
 
 import numpy as np
 import scipy as sp
@@ -189,6 +190,21 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.integrationMethodComboBox.currentIndexChanged.connect(self.selectedIntegrationMethod)
 
         self._parent.TreeViewWidget.create_animation_file.signal_createAnimationFile.connect(self._create_animation_file)
+
+        #   profiler
+        self.profile = cProfile.Profile()
+
+    @pyqtSlot()
+    def profile_functions(self):
+        """
+        Function profiles main functions that are used in numerical integration
+        :return:
+        """
+        print "profile here"
+        self.profile.enable()
+        self.solver.solveODE.ode_fun.create_M()
+        self.profile.disable()
+        self.profile.print_stats()
 
     def _time_integration_error(self):
         """

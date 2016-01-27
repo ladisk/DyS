@@ -1,14 +1,13 @@
-'''
+"""
 Created on 13. mar. 2014
 
 @author: luka.skrinjar
-'''
+"""
 import logging
 from pprint import pprint
 import sys
 import time
-
-from PyQt4.QtCore import *
+import cProfile
 
 import numpy as np
 import scipy as sp
@@ -24,28 +23,36 @@ from gaussian_elimination import gaussian_elimination
 from MBD_system.force.force import Force
 
 
-class ODEfun(QObject):
+class ODEfun(object):
     """
-    
+    classdocs
     """
+
     def __init__(self, MBD_system=[], parent=None):
-        super(ODEfun, self).__init__(parent)
         """
-        
+
         """
+        # super(ODEfun, self).__init__(parent)
+
+        #   parent
         self._parent = parent
+        #   pointer to MBD system as object attribute
         self.MBD_system = MBD_system
 
         #    gravity
         self.gravity = MBD_system.gravity * MBD_system.gravity_vector
 
     def __C_q_size(self):
+        """
+        Evaluate MBD system matrix C_q size
+        :return:
+        """
         self.cols_C_q = 3 * self.MBD_system.number_of_bodies
         self.rows_C_q = self.MBD_system.C_q_number_of_rows
 
     def create_M(self):
         """
-        Create mass matrix.
+        Create mass matrix
         """
         self.M_dim = 3 * self.MBD_system.number_of_bodies
         self.q_dim = 6 * self.MBD_system.number_of_bodies
@@ -71,7 +78,7 @@ class ODEfun(QObject):
 
     def getDOF(self):
         """
-
+        Evaluate degrees of freedom
         """
         q0 = self.MBD_system.create_q0()
 #         print "number of coordinates =", len(self.MBD_system.q0) / 2

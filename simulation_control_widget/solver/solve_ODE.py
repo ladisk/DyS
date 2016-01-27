@@ -511,7 +511,7 @@ class SolveODE(QObject):  # Thread, QObject
                 #   revolute clearance joint contact
                 elif contact._type.lower() == "revolute clearance joint" or contact._type.lower() == "contact sphere-sphere" or contact._type.lower() == "contact plane-sphere" or contact._type.lower() == "pin-slot clearance joint linear":
                     status = contact.check_for_contact(q)
-                    # print "status(check_for_contact) =", status
+                    print "t =", t, "status(check_for_contact) =", status
                     self.contact_status_list.append(status)
 
                 else:

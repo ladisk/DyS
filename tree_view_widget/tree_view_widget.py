@@ -153,6 +153,9 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             propertiesAction.triggered.connect(self._properties)
             
             self.menu.addSeparator()
+
+            profileAction = self.menu.addAction("Profile")
+            profileAction.triggered.connect(self._parent.SimulationControlWidget.profile_functions)
             
             getDOFsAction = self.menu.addAction("DOF")
             getDOFsAction.triggered.connect(self.__getDOF)

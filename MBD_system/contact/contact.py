@@ -71,6 +71,7 @@ class Contact(ContactItem):
         self._type = _type
         self._types = ["general",
                         "revolute clearance joint",
+                        "prismatic clearance joint",
                         "contact sphere-sphere",
                         "contact plane-sphere",
                         "pin-slot clearance joint linear",
@@ -164,7 +165,7 @@ class Contact(ContactItem):
         self.u_P_LCS = None
         self.u_P_list_LCS = []
 
-        #   list of normals and tangents in LCS
+        #   list of normals and tangents in LCS of each body in contact
         self._n_list = []
         self._t_list = []
 
@@ -464,9 +465,6 @@ class Contact(ContactItem):
         self._Ft_solution_container = np.append(self._Ft_solution_container, self.Ft)
 
         #   uPi, uPj
-        print "t =", t
-        print "self.u_P_list_LCS =", self.u_P_list_LCS, type(self.u_P_list_LCS)
-        # time.sleep(100)
         self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
 
     def __AABB_AABB_overlap(self, AABB_i, AABB_j):

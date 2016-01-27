@@ -125,9 +125,6 @@ def create_list(filename, parent=None):
                                 dict_ = OrderedDict([])
                             #   pin-slot clearance joint linear
                             elif (dict_["type"]=="pin-slot clearane joint linear") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("u_iP")) and (dict_.has_key("u_jP")) and (dict_.has_key("u_jR")) and (dict_.has_key("h0_jP")) and (dict_.has_key("R0_i")):
-                                for key in dict_:
-                                    print key, dict_[key], type(dict_[key])
-
                                 contact = PinSlotClearanceJointLinear(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["u_jR"], dict_["R0_i"], dict_["h0_jP"], parent=parent)
                                 #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
                                 contacts.append(contact)
