@@ -1,8 +1,8 @@
-'''
+"""
 Created on 7. apr. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 
 import numpy as np
 

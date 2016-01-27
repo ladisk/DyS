@@ -37,6 +37,8 @@ negative the bodies are separating, which corresponds to the restitution phase.
 
 *Done*
 
+- [x] cylindrical contact models added
+- [x] save animation to .avi video file
 - [x] euler method
 - [x] add dq_t - relative tangential contact velocity
 - [x] Display LCS of a body

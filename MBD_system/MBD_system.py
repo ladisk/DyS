@@ -61,10 +61,11 @@ class MBDsystem(MBDsystemItem):
         #   filetype, options:
         #   .dat, (.xlsx, .csv - not implemented yet)
         self._solution_filetype = ".sol" #.sol,.xlsx
-        #   options
-        #   Discard
-        #   Overwrite
-        self._save_options = "Discard",
+        #   options:
+        #   discard
+        #   overwrite
+        #   save to new
+        self._save_options = "discard"
 
         #   extension of data files
         self._data_filetype = ".dat"
@@ -443,7 +444,7 @@ class MBDsystem(MBDsystemItem):
         """
         Create ground object in object MBD_system.
         """
-        self.ground = Body(parent=self, body_name="Ground", MBD_folder_abs_path=self.MBD_folder_abs_path_)
+        self.ground = Body(parent=self, name="Ground", MBD_folder_abs_path=self.MBD_folder_abs_path_)
 
     def create_bodies(self, bodies_function=[]):
         if bodies_function == []:
@@ -476,9 +477,9 @@ class MBDsystem(MBDsystemItem):
 
     def addBody(self, body_name_):
         """
-        
+        Create a body object and add it to the list of bodies
         """
-        body_ = Body(body_name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path_, parent = self.Bodies)
+        body_ = Body(name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path_, parent = self.Bodies)
         self.bodies.append(body_)
 
     def create_joints(self):

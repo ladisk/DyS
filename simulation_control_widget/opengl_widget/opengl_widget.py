@@ -381,10 +381,17 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
     def mousePressEvent(self, event):
         """
-        
+        Runs when mouse button is pressed
         """
         self.last_pos = QtCore.QPoint(event.pos())
         self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
+
+        print "event =", event
+        pprint(vars(event))
+        if event.button() == QtCore.Qt.LeftButton:
+            print event.pos()
+
+        print "-------------------------------------------"
 
     def _repaintGL(self):
         """

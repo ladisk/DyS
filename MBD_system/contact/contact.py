@@ -39,7 +39,7 @@ class Contact(ContactItem):
     """
     __id = itertools.count(0)
 
-    def __init__(self, _type=None, body_id_i=None, body_id_j=None, name=None, contact_model_type=None, friction_model_type=None, properties_dict=[], parent=None):
+    def __init__(self, _type, body_id_i, body_id_j, name=None, contact_model_type=None, friction_model_type=None, properties_dict=[], parent=None):
         """
         Constructor of class contact
         :param  _type       supported types:
@@ -73,8 +73,8 @@ class Contact(ContactItem):
                         "revolute clearance joint",
                         "contact sphere-sphere",
                         "contact plane-sphere",
-                        "linear pin-slot clearance joint",
-                        "radial pin-slot clearance joint"]
+                        "pin-slot clearance joint linear",
+                        "pin-slot clearance joint radial"]
 
         #   contact geometry (profile) - list of object pairs
         self.contact_geometry_list = []
@@ -183,6 +183,10 @@ class Contact(ContactItem):
         self._delta = 0
         self._Fn_list = []
         self._Ft_list = []
+
+        #   define relative contact velocity components as object attributes
+        self._dq_n = 0
+        self._dq_t = 0
 
         if self._parent is not None:
             for body_id in self.body_id_list:
@@ -460,6 +464,9 @@ class Contact(ContactItem):
         self._Ft_solution_container = np.append(self._Ft_solution_container, self.Ft)
 
         #   uPi, uPj
+        print "t =", t
+        print "self.u_P_list_LCS =", self.u_P_list_LCS, type(self.u_P_list_LCS)
+        # time.sleep(100)
         self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
 
     def __AABB_AABB_overlap(self, AABB_i, AABB_j):

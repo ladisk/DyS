@@ -260,10 +260,10 @@ class Joint(JointItem):
         #    assigns properties of body object to variable (object) from list of bodies and body index
         #    calculates vector of point of joint on each body from cad lcs to cm lcs of a body
         if not self.additional_params_calulated:
-            self.u_iP_cm = u_P_cad2cm_lcs(_body_id=self.body_id_i, _u_P=self.u_iP_CAD, _bodies=bodies_)
-            self.u_jP_cm = u_P_cad2cm_lcs(_body_id=self.body_id_j, _u_P=self.u_jP_CAD, _bodies=bodies_)
+            self.u_iP_cm = u_P_cad2cm_lcs(_body_id=self.body_id_i, _u_P=self.u_iP_CAD)
+            self.u_jP_cm = u_P_cad2cm_lcs(_body_id=self.body_id_j, _u_P=self.u_jP_CAD)
 
-            self.u_iQ_cm = u_P_cad2cm_lcs(_body_id=self.body_id_i, _u_P=self.u_iQ, _bodies=bodies_)
+            self.u_iQ_cm = u_P_cad2cm_lcs(_body_id=self.body_id_i, _u_P=self.u_iQ)
 
             self.h_i_cm = self.u_iP_cm - self.u_iQ_cm
 

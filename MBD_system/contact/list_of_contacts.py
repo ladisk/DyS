@@ -1,20 +1,21 @@
-'''
+"""
 Created on 18. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import logging
 import os
-from pprint import pprint
-import re
 import time
 from collections import OrderedDict
+from pprint import pprint
+
 import numpy as np
 
 from MBD_system.contact.contact import Contact
-from MBD_system.revolute_clearance_joint.revolute_clearance_joint import RevoluteClearanceJoint
-from MBD_system.contact.contact_sphere_sphere.contact_sphere_sphere import ContactSphereSphere
 from MBD_system.contact.contact_plane_sphere.contact_plane_sphere import ContactPlaneSphere
+from MBD_system.contact.contact_revolute_clearance_joint.revolute_clearance_joint import RevoluteClearanceJoint
+from MBD_system.contact.contact_sphere_sphere.contact_sphere_sphere import ContactSphereSphere
+from MBD_system.contact.contact_pin_slot_clearance_joint.linear.pin_slot_clearance_joint_linear import PinSlotClearanceJointLinear
 
 
 def create_list(filename, parent=None):
@@ -71,7 +72,7 @@ def create_list(filename, parent=None):
                             if key == "body_i" or key == "body_j":
                                 value = int(line[line.index('=') + 1:].strip())
 
-                            elif key == "u_iP" or key == "u_jP" or "contact_area" in key or key == "n_i":
+                            elif key == "u_iP" or key == "u_jP" or "u_" in key or "contact_area" in key or key == "n_i":
                                 #   string to array
                                 _array = line[line.index('=') + 1:].strip()
                                 value = np.fromstring(_array, dtype=float, sep=',')
@@ -123,13 +124,20 @@ def create_list(filename, parent=None):
                                 #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
                                 dict_ = OrderedDict([])
                             #   pin-slot clearance joint linear
-                            elif (dict_["type"]=="contact plane-linear"):
-                                print dict_["type"] + "Under construction!"
+                            elif (dict_["type"]=="pin-slot clearane joint linear") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("u_iP")) and (dict_.has_key("u_jP")) and (dict_.has_key("u_jR")) and (dict_.has_key("h0_jP")) and (dict_.has_key("R0_i")):
+                                for key in dict_:
+                                    print key, dict_[key], type(dict_[key])
+
+                                contact = PinSlotClearanceJointLinear(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["u_jR"], dict_["R0_i"], dict_["h0_jP"], parent=parent)
+                                #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
+                                contacts.append(contact)
+                                dict_ = OrderedDict([])
                             elif (dict_["type"]=="contact plane-radial"):
                                 print dict_["type"] + "Under construction!"
 
                             else:
                                 print dict_
+                                print "type =", dict_["type"]
                                 print "Contact not created!"
                                 # raise ValueError,
 

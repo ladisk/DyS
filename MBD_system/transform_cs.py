@@ -1,9 +1,9 @@
-'''
+"""
 Created on 20. apr. 2015
 
 @author: lskrinjar
 
-'''
+"""
 import numpy as np
 
 from A_inv import A_inv_matrix

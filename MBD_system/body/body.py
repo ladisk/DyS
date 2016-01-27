@@ -33,33 +33,33 @@ class Body(BodyItem):
     """
     __id = itertools.count(0)
 
-    def __init__(self, body_name, MBD_folder_abs_path=None, density=0, volume=0, mass=0, J_zz=0, CM_CAD_LCS=np.zeros(3), CAD_LCS_GCS=np.zeros(3), theta=np.zeros(3), dR=np.zeros(3), dtheta=np.zeros(3), color_GL=np.ones(3), transparent_GL=1, visible=True, display_style="filled", connected_to_ground = False, parent=None):
-        super(Body, self).__init__(body_name, parent)
+    def __init__(self, name, MBD_folder_abs_path=None, density=0, volume=0, mass=0, J_zz=0, CM_CAD_LCS=np.zeros(3), CAD_LCS_GCS=np.zeros(3), theta=np.zeros(3), dR=np.zeros(3), dtheta=np.zeros(3), color_GL=np.ones(3), transparent_GL=1, visible=True, display_style="filled", connected_to_ground=False, parent=None):
         """
         Constructor of body class
         Args:
-            _name - body name as string
-            properties_file - mass and geometry properties data in .txt file
-            geometry_data_file - geometry .stl or .obj file
-            
-            R - position numpy array
-            theta - orientation angles in degrees numpy array
-            dR - velocitiy numpy array
-            dtheta - angular velocity numpy array
-            
-            color_GL - RGB numpy array
-            transparent_GL - a transparency factor of a body between 0 and 1
-            display_style - filled or wireframe as string
-            
-            density - specific density of a body material
-        Returns:
-            body object with its properties
-            OpenGL object - VBO
+        :param name:                    body name (string)
+        :param MBD_folder_abs_path:     absolute path to MBD system project folder
+        :param density:                 density of the material of the body
+        :param volume:                  volume of the body (as float) in m^3
+        :param mass:                    mass of the body (as float) in kg
+        :param J_zz:                    mass moment of inertia of a body against z-axis (as float) in kg*m^2
+        :param CM_CAD_LCS:              a vector to mass center of a body in body CAD CS (as array) in m
+        :param CAD_LCS_GCS:             a vector to body CAD CS in GCS of a system (as array) in m
+        :param theta:                   orientation angles (numpy array) in degrees
+        :param dR:                      a vector of velocities (numpy array) in m/s
+        :param dtheta:                  a vector of angular velocities (numpy array) in deg/s
+        :param color_GL:                a color vector (RGB)
+        :param transparent_GL:          transparency (float) a value from 0 to 1
+        :param visible:                 true or false
+        :param display_style:           a display style (as string) options: filled, wireframe, points-check last option
+        :param properties_file:         a path to mass and geometry properties data in .dat file (todo)
+        :param geometry_data_file:      a path to geometry .stl or .obj file (todo)
         """
+        super(Body, self).__init__(name, parent)
         self._parent = parent
 
         #    set working directory
-        if body_name.lower() == "ground":
+        if name.lower() == "ground":
             self.body_id = -1
         else:
             #    body id
@@ -77,10 +77,10 @@ class Body(BodyItem):
 #         self.body_id = (len(bodies_list) - 1) + 1
         
         #    name as string
-        self._name = body_name                                  
+        self._name = name
         
         #    check if body is ground
-        if not body_name == "ground":
+        if not name == "ground":
             self.mass = mass
             self.J_zz = J_zz
         else:
@@ -141,7 +141,7 @@ class Body(BodyItem):
         self.LCS = CoordinateSystem(parent=self)
         self.LCS._visible = False
 
-        if body_name.lower() == "ground":
+        if name.lower() == "ground":
             pass
         else:
             self.color_GL = color_GL
@@ -153,7 +153,7 @@ class Body(BodyItem):
             self.uP_i_max = None
 
             #    if body is not ground read body properties data
-            if body_name == "ground":
+            if name.lower() == "ground":
                 self._visible = False
                 self.actual_body_name = "ground"
             else:

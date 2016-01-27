@@ -127,9 +127,10 @@ class MainWindow(QtGui.QMainWindow):
 #         MBD_folder_name_ = "dynamic_systems\\0_7_2_revolute_clearence_joint"
 #         self.MBD_filename = "0_7_3_0_contact_models.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models"
-        self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
-
+#         self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
+        self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
 
 #         self.MBD_filename = "dys_0_7_3_0.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"

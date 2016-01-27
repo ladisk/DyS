@@ -1,15 +1,14 @@
-'''
+"""
 Created on 17. nov. 2013
 
 @author: lskrinjar
-'''
+"""
 import warnings
 import time
 import copy
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import axes3d
 from pprint import pprint
 import ctypes
@@ -19,15 +18,10 @@ from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 from dxfwrite import DXFEngine as dxf
 import itertools
-from bounding_box_data_container import DataContainerAABB
-try:
-    from ...q2R_i import q2R_i
-    from ...q2theta_i import q2theta_i
-    from ...MBD_system_items import AABBItem
-    from ...A import A_matrix
-except:
-    pass
 
+
+from bounding_box_data_container import DataContainerAABB
+from MBD_system.A import A_matrix
 from MBD_system.MBD_system_items import AABBItem
 from MBD_system.transform_cs import gcs2lcs_z_axis
 from MBD_system.q2R_i import q2R_i
@@ -38,14 +32,15 @@ np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, 
 
 
 class AABB(object):  # AABBItem or object - for testing
-    '''
+    """
     classdocs
-    '''
+    """
     __level = 1
     __id = itertools.count(1)
+
     def __init__(self, nodes_LCS=[], normals_LCS=[], min_LCS=None, max_LCS=None, z_dim=None, parent_body=None, id_sub=1, parent=None, visibility=False, _type=None):
         # super(AABBItem, self).__init__(name="AABB" + parent._name + "_body=", parent=parent)
-        '''
+        """
         Constructor of BB (bounding box) from nodes of a geometry
         Args:
             nodes_LCS     - nodes body matrix (columns = 3, rows = N, dtype = numpy array) in local coordinate system of a body
@@ -59,7 +54,7 @@ class AABB(object):  # AABBItem or object - for testing
             visibility    - 
         Constructs:
             tree of BB objects
-        '''
+        """
         self._parent = parent
         self.children = []
         self._typeInfo = "aabb"
@@ -695,14 +690,12 @@ class AABB(object):  # AABBItem or object - for testing
         [self.x_max_GCS, self.y_max_GCS, self.z_max_GCS] = self._parent_body.R + np.append(xy_max, self.z_max)  # [self.x_max, self.y_max, self.z_max]  #  
     
         self.update_frame_geometry_center_2D()
-        
-        
+
     def update_frame_geometry_center_2D(self):
         """
-        
+        Function updates positio vector to center of AABB frame
         """
         [self.x_center_GCS, self.y_center_GCS] = [self.x_center, self.y_center] + self.R[0:2] # add theta
-        
         
     def update_nodes_and_normals_GCS_in_AABB_2D(self, q):
         """

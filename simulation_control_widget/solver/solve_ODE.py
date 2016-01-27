@@ -67,6 +67,7 @@ class SolveODE(QObject):  # Thread, QObject
         self.stopped = False
         self.finished = False
         self.failed = False
+        self._no_error = False
 
         #   signals
         self.step_signal = stepSignal()
@@ -193,7 +194,7 @@ class SolveODE(QObject):  # Thread, QObject
         self.Hmax = h = Hmax
         self.R = 0
 
-        while self.FLAG == 1:
+        while self.FLAG == 1 and self._no_error:
 
             if self.stopped:
                 self.update_GL_(t=t, q=w)
@@ -232,7 +233,8 @@ class SolveODE(QObject):  # Thread, QObject
             self.finished_solve()
 
         #    save data to file
-        self.write_simulation_solution_to_file()
+        if self.MBD_system._save_options.lower() == "discard":
+            self.write_simulation_solution_to_file()
 
     def solve_ODE_RK(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
         """
@@ -472,7 +474,8 @@ class SolveODE(QObject):  # Thread, QObject
         Returns:
             q_   vector of new calculated velocities (positions are equal before and after contact
             status - 0 - contact is not detected continue with integration to next time step
-                     1 - contact is detected (has happened) return to previous time step solution and split time step size
+                     1 - contact is detected (has happened) return to previous time step solution and split time step
+                         size
                      2 - contact is detected (will happen) split time step size   
         Raises:
             None 
@@ -480,50 +483,48 @@ class SolveODE(QObject):  # Thread, QObject
         self.__update_coordinates_and_angles_of_all_bodies(q)
 
         self.contact_status_list = []
-        #    check for contacts
-        if self.MBD_system.contacts is not []:
-            #    check for contact of every contact pair
-            for contact in self.MBD_system.contacts:
-                contact.data_tracker(t, self.step)
-                # print "contact._contact_point_found =", contact._contact_point_found, "t =", t
-                if not contact._contact_point_found:
-                    #    function recursively loops through all potential AABB objects in AABB tree of each body
-                    #    and if two AABB objects overlap, a new overlap object is created
-                    #    that has both overlapping AABB objects
+        #    check for contact of every contact pair
+        for contact in self.MBD_system.contacts:
+            contact.data_tracker(t, self.step)
+            # print "contact._contact_point_found =", contact._contact_point_found, "t =", t
+            if not contact._contact_point_found:
+                #    function recursively loops through all potential AABB objects in AABB tree of each body
+                #    and if two AABB objects overlap, a new overlap object is created
+                #    that has both overlapping AABB objects
 
-                    #   general contact
-                    if contact._type == "General":
-                        #   adds simulation data to contact object
-                        #   reset to empty list a contact object attribute of list of overlap pairs,
-                        #   as this is not possible in the next line (function) due to the recursion
-                        contact.AABB_list_of_overlap_pairs = []
-                        #   check for overlap and if overlap is present build a overlap pair object
-                        contact.check_for_overlap(q, contact.AABB_i, contact.AABB_j)
+                #   general contact
+                if contact._type == "General":
+                    #   adds simulation data to contact object
+                    #   reset to empty list a contact object attribute of list of overlap pairs,
+                    #   as this is not possible in the next line (function) due to the recursion
+                    contact.AABB_list_of_overlap_pairs = []
+                    #   check for overlap and if overlap is present build a overlap pair object
+                    contact.check_for_overlap(q, contact.AABB_i, contact.AABB_j)
 
-                        #   if list of overlap object pairs is not empty, check for contact
-                        if contact.AABB_list_of_overlap_pairs is not []:
-                            status = contact.check_for_contact(q)
-                            self.contact_status_list.append(status)
-                        else:
-                            contact.no_overlap()
-
-                    #   revolute clearance joint contact
-                    elif contact._type == "Revolute Clearance Joint" or contact._type == "Contact Sphere-Sphere" or contact._type == "Contact Plane-Sphere":
+                    #   if list of overlap object pairs is not empty, check for contact
+                    if contact.AABB_list_of_overlap_pairs is not []:
                         status = contact.check_for_contact(q)
-                        # print "status(check_for_contact) =", status
                         self.contact_status_list.append(status)
-
                     else:
-                        self.FLAG = 0
-                        QtGui.QMessageBox.critical(self._parent, "Error!", "Contact type not correct: %s"%contact._type+". \nDefine correct contact type!", QtGui.QMessageBox.Ok)
-                        raise ValueError, "Contact type not correct: %s"%contact._type, "\n Define correct contact type!"
-                else:
-                    #    adds simulation data to contact object as this is not possible in the next line because of the recursion
-                    # print "contact.update_status()"
-                    # print "contact_update() @ solve_ODE"
-                    status = contact.contact_update(self.step, t, q)
-                    # print "status (from contact_update) =", status
+                        contact.no_overlap()
+
+                #   revolute clearance joint contact
+                elif contact._type.lower() == "revolute clearance joint" or contact._type.lower() == "contact sphere-sphere" or contact._type.lower() == "contact plane-sphere" or contact._type.lower() == "pin-slot clearance joint linear":
+                    status = contact.check_for_contact(q)
+                    # print "status(check_for_contact) =", status
                     self.contact_status_list.append(status)
+
+                else:
+                    self.FLAG = 0
+                    QtGui.QMessageBox.critical(self._parent, "Error!", "Contact type not correct: %s"%contact._type+". \nDefine correct contact type!", QtGui.QMessageBox.Ok)
+                    raise ValueError, "Contact type not correct: %s"%contact._type, "\n Define correct contact type!"
+            else:
+                #    adds simulation data to contact object as this is not possible in the next line because of the recursion
+                # print "contact.update_status()"
+                # print "contact_update() @ solve_ODE"
+                status = contact.contact_update(self.step, t, q)
+                # print "status (from contact_update) =", status
+                self.contact_status_list.append(status)
 
             self.contact_status_list = np.array(self.contact_status_list)
             # print "self.contact_status_list =", self.contact_status_list

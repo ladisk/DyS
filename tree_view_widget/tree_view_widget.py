@@ -277,8 +277,14 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
             self.menu.addSeparator()
 
-            if self._item._type == "Revolute Clearance Joint":
-                for marker in self._item.markers:
+            if self._item._type.lower() == "revolute clearance joint":
+                for marker, ID in zip(self._item.markers, ["i", "j"]):
+                    show_marker_Action = QtGui.QAction("Show Body "+ID+" joint center", self, checkable=True, checked=marker._visible)
+                    show_marker_Action.triggered.connect(marker._show)
+                    self.menu.addAction(show_marker_Action)
+
+            if self._item._type.lower() == "pin-slot clearance joint linear":
+                for marker, ID in zip(self._item.markers, ["i", "j", "j"]):
                     show_marker_Action = QtGui.QAction("Show Body "+ID+" joint center", self, checkable=True, checked=marker._visible)
                     show_marker_Action.triggered.connect(marker._show)
                     self.menu.addAction(show_marker_Action)
