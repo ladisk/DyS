@@ -129,7 +129,6 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.relTol.setText(str(self.MBD_system.relTol))
         self.ui.relTol.setValidator(__validator_dbl)
 
-        
         #    create solver thread
         self.solver = Solver(MBD_system=MBD_system, parent=self)#parent
         self._solver_thread = QThread()
@@ -193,6 +192,22 @@ class SimulationControlWidget(QtGui.QWidget):
 
         #   profiler
         self.profile = cProfile.Profile()
+
+        #   analysis type
+        self.ui.analysisTypeComboBox.currentIndexChanged.connect(self._analysis_type_changed)
+
+        #   set analysis type to display it in combobox
+        if self.MBD_system.analysis_type is not None:
+            _index = self.ui.analysisTypeComboBox.findText(QtCore.QString(self.MBD_system.analysis_type.title()))
+            self.ui.analysisTypeComboBox.setCurrentIndex(_index)
+
+    @pyqtSlot()
+    def _analysis_type_changed(self):
+        """
+        Function assignes new value to object attribute if it is changed by user in combo box
+        :return:
+        """
+        self.MBD_system.analysis_type = self.ui.analysisTypeComboBox.currentText().toLower()
 
     @pyqtSlot()
     def profile_functions(self):

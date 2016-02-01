@@ -22,7 +22,7 @@ from output_widget.output_widget import OutputWidget
 from simulation_control_widget.simulation_control_widget import SimulationControlWidget
 from tree_view_widget.tree_view_widget import TreeViewWidget
 from MBD_system import read_and_write
-
+from options_widget.options_widget import OptionsWidget
 
 import qrc_resources
 
@@ -129,8 +129,11 @@ class MainWindow(QtGui.QMainWindow):
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models"
 #         self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
-        self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
+#         self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
+
+        self.MBD_filename = "0_7_3_3_kinematic_analysis.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis"
 
 #         self.MBD_filename = "dys_0_7_3_0.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
@@ -168,6 +171,9 @@ class MainWindow(QtGui.QMainWindow):
         self.SimulationControlWidget.show()
         #    move
         self.SimulationControlWidget.move(.25*screen.width() + self.geometry().width(), dy)
+
+        #   options widget
+        self.options_widget = OptionsWidget()
 
         #    output widget
         #    maybe put in new thread? if output will be large
@@ -284,16 +290,20 @@ class MainWindow(QtGui.QMainWindow):
                                                        self,
                                                        statusTip='Job List')
         self.show_job_list_action.triggered.connect(self.show_job_list)   
-        
-        
-        
+
         #    settings - menu
         self.show_change_background_color_dialog_action = QtGui.QAction('Background color',
                                                                    self,
                                                                    shortcut="None",
                                                                    statusTip='Status tip')
         self.show_change_background_color_dialog_action.triggered.connect(self.show_change_background_color_dialog)
-        
+
+
+        self.show_options_widget_action = QtGui.QAction('Options',
+                                                                   self,
+                                                                   shortcut="None",
+                                                                   statusTip='options')
+        self.show_options_widget_action.triggered.connect(self.options_widget.show)
         
         #    help - menu
         #    about
@@ -381,6 +391,7 @@ class MainWindow(QtGui.QMainWindow):
         #    settings
         self.settingsMenu = QtGui.QMenu(self.tr("&Settings"), self)
         self.settingsMenu.addAction(self.show_change_background_color_dialog_action)
+        self.settingsMenu.addAction(self.show_options_widget_action)
         
         #    about
         self.helpMenu = QtGui.QMenu(self.tr("&Help"), self)
@@ -488,7 +499,7 @@ class MainWindow(QtGui.QMainWindow):
         self.JobListWidget.move(self.window_offset_x + self.SimulationControlWidget.OpenGLWidget.initial_window_width + 10 + 220, 6)
         self.JobListWidget.show()
 
-    def take_snapshot(self, filename=[]):
+    def take_snapshot(self, filename=None):
         """
         Function takes snapshot and opens save as dialog to save it as .png picture file.
         """

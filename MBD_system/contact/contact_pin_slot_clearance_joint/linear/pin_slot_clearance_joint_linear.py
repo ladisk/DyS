@@ -230,7 +230,8 @@ class PinSlotClearanceJointLinear(Contact):
         :param q:
         :return:
         """
-        print "contact_update()"
+
+
 
     def _contact_geometry_GCS(self, q):
         """
@@ -307,22 +308,24 @@ class PinSlotClearanceJointLinear(Contact):
         #
         # print "center node GCS =", self._distance_obj.u_jP
         if self.pin_in_section_jPjR:
-            #   contact point on body j - slot in GCS
+            #   contact point on body j - slot
+            #   GCS
             self.u_jP_GCS = self._distance_obj.contact_point_on_line_GCS()
             print "self.u_jP_GCS =", self.u_jP_GCS
-            #   contact point on body j - slot in body LCS
+            #   LCS
             self.u_jP_LCS = u_P_gcs2lcs(self.u_jP_GCS, q, self.body_id_j)
             print "self.u_jP_LCS =", self.u_jP_LCS
 
-            #   get normal
+            #   get normal in GCS
             self._n_GCS = self._distance_obj.normal
+            #   get tangent in CS
+            self._t_GCS = n2t(self._n_GCS)
             print "self._n_GCS =", self._n_GCS
 
             #   contact point on body i - pin
             #   in LCS
             self.u_iP_LCS = Ai_ui_P_vector(-self._n_GCS, q2theta_i(q, self.body_id_i))
             print "self.u_iP_LCS =", self.u_iP_LCS
-
             #   in GCS
             self.u_iP_GCS = u_P_lcs2gcs(self.u_iP_LCS, q, self.body_id_i) + (-self._n_GCS) * self.R0_i
             print "self.u_iP_GCS =", self.u_iP_GCS
@@ -330,7 +333,7 @@ class PinSlotClearanceJointLinear(Contact):
 
 
 
-        time.sleep(100)
+        # time.sleep(100)
 
 
 

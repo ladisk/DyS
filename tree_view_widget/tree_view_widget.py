@@ -132,6 +132,9 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             loadGroupItemsAction.triggered.connect(self._load_group_items)
         
             self.menu.addSeparator()
+
+            if self._item._name == "Motions":
+                pprint(vars(self._item))
             
         if self._item._typeInfo != "group" or self._item._typeInfo != "solution":# or self._item._name.lower() != "solution":
             editAction = self.menu.addAction("Edit")
@@ -318,15 +321,18 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 getBody_qdq_Action = self.menu.addAction("Get body [q dq]")
                 getBody_qdq_Action.triggered.connect(self._item.get_qdq)
                 self.menu.addSeparator()
+        else:
+            pass
+
 
         self.menu.exec_(event.globalPos())
-        self._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
+        self._parent.SimulationControlWidget.OpenGLWidget.updateGL()
 
     def closeEvent(self, event):
         """
 
         """
-        self._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
+        self._parent.SimulationControlWidget.OpenGLWidget.updateGL()
 
     def _list_parameters(self):
         """

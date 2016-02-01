@@ -3,6 +3,8 @@ Created on 13. mar. 2014
 
 @author: luka.skrinjar
 """
+
+
 import os
 import sys
 import operator
@@ -35,31 +37,36 @@ from signals import SolutionSignal
 
 class stepSignal(QtCore.QObject):
     signal_step = QtCore.pyqtSignal(int, name='signal_step')
-    
+
 class RepaintGLSignal(QtCore.QObject):
     signal_repaintGL = QtCore.pyqtSignal()
 
 class FinishedSignal(QtCore.QObject):
     signal_finished = QtCore.pyqtSignal(str)
-    
+
 class SaveScreenshot(QtCore.QObject):
     signal_saveScreenshot = QtCore.pyqtSignal()
-    
+
 class solutionFilenameSignal(QtCore.QObject):
     signal_filename = QtCore.pyqtSignal(str, name='')
-    
+
 class EnergySignal(QtCore.QObject):
     signal_energy = QtCore.pyqtSignal(float, float, name='energy')
 
-class SolveODE(QObject):  # Thread, QObject
+
+class SolveDynamicAnalysis(QObject):    # Thread, QObject
     """
-    Integrator
+    classdocs
     """
     __simulation_id = itertools.count(0)
-    
-    def __init__(self, MBD_system, parent=None):
-        super(SolveODE, self).__init__(parent)
 
+    def __init__(self, MBD_system=[], parent=None):
+        """
+        Constructor
+        """
+        super(SolveDynamicAnalysis, self).__init__(parent)
+
+        #   parent
         self._parent = parent
 
         #   states of simulations
@@ -84,7 +91,7 @@ class SolveODE(QObject):  # Thread, QObject
         #    copy MBD object
         self._MBD_system = copy.copy(self.MBD_system)
         #    DAE fun object
-        self.DAE_fun = DAEfun(MBD_system=self._MBD_system, parent=self)
+        self.DAE_fun = DAEfun(self._MBD_system, parent=self)
 
         #    simulation settings - properties
         # self.integrationMethod = "RKF"  #    self.MBD_system.integrationMethod
@@ -93,7 +100,7 @@ class SolveODE(QObject):  # Thread, QObject
         self.step = 0
         self.update_opengl_widget_step_count = 0
         self.update_opengl_widget_every_Nth_step = self.MBD_system.updateEveryIthStep
-        
+
         self.save_screenshot_step_count = 0
         self.save_screenshot_every_Nth_step = 2 * self.update_opengl_widget_every_Nth_step
 
@@ -121,25 +128,21 @@ class SolveODE(QObject):  # Thread, QObject
         self.step_size = np.array([self._MBD_system.Hmax])
         self.energy_data = np.array([self._mechanical_energy(self.q0)])
 
-    def solve_ODE(self):
+    def solve(self):
         """
         Solves system of ode with dormand-prince order 5 method with runge-kutta algorithm
-        in:
-            DAE_fun - ode function
-            q0 - initial values (conditions) array q0_i = [Rx_i, Ry_i, theta_i, dRx_i, dRy_i, dtheta_i]
         """
-        
-        #    copy MBD objec
+        #    copy MBD object
         self._MBD_system = copy.copy(self.MBD_system)
         #    ode fun object
-        self.DAE_fun = DAEfun(MBD_system=self._MBD_system, parent=self)
-        
+        self.DAE_fun = DAEfun(self._MBD_system, parent=self)
+
         self.start_solve()
-        
+
         self.start_time_simulation_info_in_sec_UTC = time.time()
         self.start_time_simulation_info = datetime.datetime.fromtimestamp(self.start_time_simulation_info_in_sec_UTC).strftime("%H:%M:%S %d.%m.%Y")
         print "Simulation started: ", self.start_time_simulation_info
-        
+
         #    create mass and inverse mass matrix (only once)
         self.DAE_fun.create_M()
         #    create array of initial conditions for differential equations
@@ -238,15 +241,15 @@ class SolveODE(QObject):  # Thread, QObject
 
     def solve_ODE_RK(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
         """
-        RKF - Runge-Kutta-Fehlberg 
+        RKF - Runge-Kutta-Fehlberg
         Based on Numerical Analysis 9th ed Burden & Faires
         Args:
-        t_0 - 
-        t_n - 
-        q0 - 
-        absTol - 
-        Hmax - 
-        Hmin - 
+        t_0 -
+        t_n -
+        q0 -
+        absTol -
+        Hmax -
+        Hmin -
         """
         self.t_0 = t_0
         self.t_n = t_n
@@ -296,10 +299,10 @@ class SolveODE(QObject):  # Thread, QObject
             K4 = h * self.DAE_fun.create_dq(h, t + (12 / 13.) * h, w + (1932 / 2197.) * K1 - (7200 / 2197.) * K2 + (7296 / 2197.) * K3)
             K5 = h * self.DAE_fun.create_dq(h, t + h, w + (439 / 216.) * K1 - 8 * K2 + (3680 / 513.) * K3 - (845 / 4104.) * K4)
             K6 = h * self.DAE_fun.create_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 + (1859 / 4104.) * K4 - (11 / 40.) * K5)
-            
+
             self.R = (1 / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
             self.R = absTol
-            #    if calculated difference is less the absTolerance limit accept the calculated solution 
+            #    if calculated difference is less the absTolerance limit accept the calculated solution
             if self.R <= absTol or self.FLAG_contact == 1:
                 self.t = t = t + h
                 # print "i =", self.step, "t =", t
@@ -313,11 +316,11 @@ class SolveODE(QObject):  # Thread, QObject
                 #    check time step size
 #                t = self.check_time_step(t, w)
 #                print "t_out =", t
-#                 print "t = %1.3e" % t  # , "absTol =%10.3E" % R_, "h =%10.3E" % h, "step =", self.step      
+#                 print "t = %1.3e" % t  # , "absTol =%10.3E" % R_, "h =%10.3E" % h, "step =", self.step
 #                 __print_options = np.get_printoptions()
 #                 np.set_printoptions(precision=10, threshold=1000, edgeitems=True, linewidth=1000, suppress=False, formatter={'float': '{: 10.9e}'.format})
 #                 np.set_printoptions(**__print_options)
-                
+
                 #    solve contacts here
                 # print "t =", t
                 # time.sleep(100)
@@ -466,7 +469,7 @@ class SolveODE(QObject):  # Thread, QObject
 
     def __evaluate_contacts(self, t, q):
         """
-        Function solves contacts. Finds overlap pairs of (sub)AABB and calculates actual distances between node 
+        Function solves contacts. Finds overlap pairs of (sub)AABB and calculates actual distances between node
         and line (edge). If distance is below userdefined limit contact is present and contact equations are solved.
         :type self: object
         Args:
@@ -476,9 +479,9 @@ class SolveODE(QObject):  # Thread, QObject
             status - 0 - contact is not detected continue with integration to next time step
                      1 - contact is detected (has happened) return to previous time step solution and split time step
                          size
-                     2 - contact is detected (will happen) split time step size   
+                     2 - contact is detected (will happen) split time step size
         Raises:
-            None 
+            None
         """
         self.__update_coordinates_and_angles_of_all_bodies(q)
 
@@ -544,7 +547,7 @@ class SolveODE(QObject):  # Thread, QObject
                 # print "function:", info.function+"()"
                 # time.sleep(100)
                 return FLAG_contact
-            
+
             #    contact
             if (self.contact_status_list == 1).any():
                 FLAG_contact = 1
@@ -559,19 +562,19 @@ class SolveODE(QObject):  # Thread, QObject
 
                 # logging.getLogger("DyS_logger").info("Contact calculation finished")
                 return FLAG_contact
-            
+
             #    contact has already happened - reduce time step
             if (self.contact_status_list == -1).any():
                 FLAG_contact = -1  # 0-no contact, 1-contact has already happened - reduce time step
                 return FLAG_contact
-        
+
         else:
             FLAG_contact = 0
             return FLAG_contact
 
     def _mechanical_energy(self, q):
         """
-        
+
         """
         #    predefine zero array
         _energy = np.zeros(self.MBD_system.number_of_bodies)
@@ -593,12 +596,12 @@ class SolveODE(QObject):  # Thread, QObject
 
         #   total mechanical energy
         energy = np.sum(_energy) + np.sum(_energy_of_contacts)
-        
+
         return energy
 
     def check_time_step(self, h, q):
         """
-        
+
         """
         # _t_max = []
         # for contact in self.MBD_system.contacts:
@@ -670,7 +673,7 @@ class SolveODE(QObject):  # Thread, QObject
         """
         self.simulation_id = self.__simulation_id.next()
         logging.getLogger("DyS_logger").info("Simulation started, simulation id: %s"%self.simulation_id)
-        
+
         self.running = True
         self.stopped = False
         self.finished = False
@@ -696,7 +699,7 @@ class SolveODE(QObject):  # Thread, QObject
         self.running = False
 
         self.finished_signal.signal_finished.emit("Finished")
-        
+
         logging.getLogger("DyS_logger").info("Simulation finished successfully!")
 
     def load_simulation_solution_from_file(self, filename):
@@ -718,7 +721,7 @@ class SolveODE(QObject):  # Thread, QObject
         """
         Update opengl widget at preset time steps
         """
-        
+
         if self.update_opengl_widget_step_count == self.update_opengl_widget_every_Nth_step or self.finished or self.stopped:
             #    update opengl widget
             self.MBD_system.update_simulation_properties(time=t, step_num=self.step)
@@ -728,16 +731,16 @@ class SolveODE(QObject):  # Thread, QObject
             self.time = t
 
             self.save_updated_GL_screenshot_to_file(self.time)
-            
+
             #    reset step counter to update opengl widget
-            
+
             self.update_opengl_widget_step_count = 0
 
         return None
 
     def save_updated_GL_screenshot_to_file(self, t):
         """
-        
+
         """
         if self.MBD_system.save_screenshots:
             if (self.save_screenshot_step_count == self.save_screenshot_every_Nth_step) or (t == self.t_0) or (self.finished):
@@ -752,6 +755,6 @@ class SolveODE(QObject):  # Thread, QObject
         """
         self.step = 0
         self.MBD_system._restore_initial_conditions()
-        
+
         self.repaintGL_signal.signal_repaintGL.emit()
         self.update_GL_(t=0, q=self.MBD_system.q0)

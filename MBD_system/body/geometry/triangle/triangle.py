@@ -6,7 +6,7 @@ Created on 7. feb. 2015
 import time
 import numpy as np
 from pprint import pprint
-from MBD_system.body.geometry.edge.edge import Edge
+from MBD_system.body.geometry.line.line import Line
 
 class Triangle(object):
     '''

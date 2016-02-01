@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 
 from MBD_system.body.geometry.triangle.triangle import Triangle
 from MBD_system.body.geometry.node.node import Node
-from MBD_system.body.geometry.edge.edge import Edge
+from MBD_system.body.geometry.line.line import Line
 
 
 class ModelLoader(object):
@@ -202,7 +202,6 @@ class ModelLoader(object):
         else:
             raise IOError, "number of normals and vertices do not a match, check file."
 
-
     def construct_contact_profile_2D(self, z_dim, _min=None, _max=None):
         """
         Function constructs a 2D profile where plane at Z coordinate z_dim intersects mesh of triangles
@@ -221,15 +220,15 @@ class ModelLoader(object):
                 #     # self.profile_nodes.append(triangle._p[0])
                 #     # self.profile_nodes.append(triangle._p[1])
                 #     #
-                #     # _edge = Edge(triangle._p[0], triangle._p[1], triangle.normal)
+                #     # _edge = Line(triangle._p[0], triangle._p[1], triangle.normal)
                 #     # self.profile.append(_edge)
                 #
                 # else:
                 self.profile_nodes.append(triangle._edge[0])
                 self.profile_nodes.append(triangle._edge[1])
 
-                _edge = Edge(triangle._edge[0], triangle._edge[1], triangle.normal)
-                self.profile.append(_edge)
+                _line = Line(triangle._edge[0], triangle._edge[1], triangle.normal)
+                self.profile.append(_line)
                 
                 # for point in triangle._p:
                 #     #   if point is not already in list append it

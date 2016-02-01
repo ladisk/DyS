@@ -22,14 +22,13 @@ import force.list_of_forces as list_of_forces
 import joint.list_of_joints as list_of_joints
 import spring.list_of_springs as list_of_springs
 from MBD_system_items import *
-
+from motion import list_of_motions
 
 class MBDsystem(MBDsystemItem):
     """
     classdocs
     """
     def __init__(self, MBD_file_abs_path=[], MBD_folder_name=[], MBD_folder_abs_path=[], MBD_filename="Model_1", parent=None):
-        super(MBDsystem, self).__init__(MBD_filename, parent)
         """
         Constructor creates a world (MBD system) a object has object parameters:
         - list of bodies
@@ -39,7 +38,8 @@ class MBDsystem(MBDsystemItem):
         - gen_body_list_func - function creates body system from 1 body
         - gen_joint_list_func - function creates joints of body system between bodies
         """
-        self.list_of_object_groups = ["Bodies", "Forces", "Joints", "Contacts", "Springs"]
+        super(MBDsystem, self).__init__(MBD_filename, parent)
+        self.list_of_object_groups = ["Bodies", "Forces", "Motions", "Measures", "Joints", "Contacts", "Springs"]
         
         self.get_folder_and_filename(MBD_file_abs_path)
 
@@ -48,6 +48,11 @@ class MBDsystem(MBDsystemItem):
         self.use_BSM = True
         self.t_n = 1
         self.integrationMethod = None
+
+        #   type of analysis, options:
+        #   kinematic
+        #   dynamic
+        self.analysis_type = None
 
         #   filetype settings
         #   project filetype
@@ -161,6 +166,8 @@ class MBDsystem(MBDsystemItem):
         self.springs = []
         self.joints = []
         self.contacts = []
+        self.motions = []
+        self.measures = []
         
         #    gravity properties
         self.gravity = 9.81
@@ -329,7 +336,6 @@ class MBDsystem(MBDsystemItem):
         for group_name in self.list_of_object_groups:
             group_obj = GroupItem(group_name, parent=self)
             setattr(self, group_name, group_obj)
-            
 
             #    create abs path to group items filenames
             self._create_abs_path_to_group_file(group_name)
@@ -378,6 +384,8 @@ class MBDsystem(MBDsystemItem):
         self.create_joints()
         #    create forces
         self.create_forces()
+        #   create motions
+        self.create_motions()
         #    create contacts
         self.create_contacts()
         #    create springs
@@ -479,7 +487,7 @@ class MBDsystem(MBDsystemItem):
         """
         Create a body object and add it to the list of bodies
         """
-        body_ = Body(name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path_, parent = self.Bodies)
+        body_ = Body(name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path_, parent=self.Bodies)
         self.bodies.append(body_)
 
     def create_joints(self):
@@ -487,7 +495,7 @@ class MBDsystem(MBDsystemItem):
         Create list of joint objects
         """
         self.joints = list_of_joints.create_list(joints_=self.joints, filename=self.abs_path_to_joints, parent=self.Joints)
-        
+
         if self.joints == [] and os.path.isfile(self.abs_path_to_joints):
             print "No joints (objects) created when finished reading filename: joints.txt. Check file: %s" % self.abs_path_to_joints
 
@@ -496,6 +504,13 @@ class MBDsystem(MBDsystemItem):
         Create list of force objects
         """
         self.forces = list_of_forces.create_list(filename=self.abs_path_to_forces, parent=self.Forces)
+
+    def create_motions(self):
+        """
+        Create list of motion objects
+        """
+        self.motions = list_of_motions.create_list(filename=self.abs_path_to_motions, parent=self.Motions)
+        print "Motion objects created, number of motions =", len(self.motions)
 
     def create_springs(self):
         """

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 13. jan. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import os
 import time
 
@@ -15,7 +15,6 @@ from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
 import numpy as np
-
 from ..paint_text_color_update import update_text_color
 
 
@@ -30,16 +29,15 @@ def text(self, resize_factor_width, resize_factor_height, filename, simulation_t
     
     glLoadIdentity()
 
-    
     #    info text
     #    change color
     update_text_color.update(self)
     #    filename
     self.renderText(dx_left_pos - 1, dy_top_pos, 0, QString("Filename: ") + QString(filename), font=QFont("Consolas", 10))
     #    time and date
-    self.renderText(dx_right_pos, dy_top_pos, 0, str(time.strftime("%b %d %Y\n%H:%M:%S")), font=QFont("Consolas", 10))
+    self.renderText(dx_right_pos, dy_top_pos, 0, str(time.strftime("%b %d %Y %H:%M:%S")), font=QFont("Consolas", 10))
     #    time
     self.renderText(dx_left_pos - 1, dy_top_pos - resize_factor_height * 0.1, 0, QString("Simulation time: ") + str(simulation_time), font=QFont("Consolas", 10))
     #    step num
     self.renderText(dx_left_pos - 1, dy_top_pos - resize_factor_height * 0.2, 0, QString("Step number: ") + str(simulation_step_number), font=QFont("Consolas", 9))
-    
+

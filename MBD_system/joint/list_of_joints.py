@@ -1,8 +1,8 @@
-'''
+"""
 Created on 18. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import logging
 import os
 from pprint import pprint
@@ -17,7 +17,7 @@ import numpy as np
 def create_list(joints_=None, filename=None, parent=None):
     """
     lists file joints.txt in folder - folder_path and returns the list of joints as objects
-    in:
+    :param
         folder_path - absolute path of folder
         folder_name - name of the folder
     """
@@ -44,8 +44,7 @@ def create_list(joints_=None, filename=None, parent=None):
                 if line.startswith("JOINTS FILE-START"):
                     continue
                 elif line.startswith("JOINTS FILE-END"):
-                    None
-    #                     print "Reading file: "+filename+" finished."
+                    file_.close()
                     break
                 
                 elif line.startswith("joint_type="):

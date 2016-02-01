@@ -1,5 +1,9 @@
 **DyS TODO list - tasks**
 
+*In progress*
+
+- [AT] decrease-increase time step size 
+- [LS] kinematic motors-motions (drives) – df/dt = ?
 
 *Info*
 
@@ -25,18 +29,18 @@ negative the bodies are separating, which corresponds to the restitution phase.
 - [ ] update display on delta time, not number of time steps (display opengl based on simulation time, not simulation step number)
 - [ ] find and update (location of) new contact point between two bodies
 - [ ] pause simulation
-- [ ] increase time step after contact has happened
 - [ ] write predictor corrector method (variable order of numerical method)
-- [ ] Menu to edit (create, delete) in tree model view and automatic update in opengl widget
 - [ ] Graphical representation of springs (translational, torsional)
-- [ ] kinematic motors (drives) – df/dt = ?
 - [ ] calculate mass moment of inertia (volume) from cloud of triangles – stl file
 - [ ] use package [OOC](http://www.pythonocc.org/) for 3D visualization as it also has support for 3D modeling, neutral formats: step, iges
-- [ ] visualize parameterized (with lines) geometry models
 - [ ] dynamics 2D to 3D
 
 *Done*
 
+- [x] increase time step after contact has happened
+- [x] visualize parameterized (with lines) geometry models
+- [x] Menu to edit (create, delete) in tree model view and automatic update in opengl widget
+- [x] rename ODEfun() to DAEfun()
 - [x] cylindrical contact models added
 - [x] save animation to .avi video file
 - [x] euler method

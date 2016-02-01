@@ -32,16 +32,15 @@ from MBD_system.transform_cs import gcs2lcs_z_axis
 
 
 class Spring(SpringItem):
-    '''
+    """
     classdocs
-    '''
+    """
     __id = itertools.count(0)
 
     def __init__(self, _name, spring_type, body_id_i, body_id_j, u_iP_CAD, u_jP_CAD, k=0, c=0, l_0=None, parent = None):
-        super(Spring, self).__init__(_name, parent)
         """
-        Constructor of force class
-        in:
+        Constructor of a spring class
+        :param :
             _name - string
             spring_type - translational, rotational
             k - spring stiffness
@@ -57,6 +56,8 @@ class Spring(SpringItem):
             u_iP_f - vector of acting force in CAD LCS of a body
             
         """
+        super(Spring, self).__init__(_name, parent)
+        #   parent
         self._parent = parent
 
         #    number

@@ -42,18 +42,20 @@ class Contact(ContactItem):
     def __init__(self, _type, body_id_i, body_id_j, name=None, contact_model_type=None, friction_model_type=None, properties_dict=[], parent=None):
         """
         Constructor of class contact
-        :param  _type       supported types:
-                            1 general
-                            2 sphere-sphere
-                            3 plane-sphere
-                            4 revolute clearance joint
-                            5 pin-slot (linear) clearance joint
-                            6 prismatic (translational) clearance joint
-        :param  body_id_i   body i id
-        :param  body_id_j   body j id
-        :param  name        name of the contact as str
+        :param  _type               supported types:
+                                    1 general
+                                    2 sphere-sphere
+                                    3 plane-sphere
+                                    4 revolute clearance joint
+                                    5 pin-slot (linear) clearance joint
+                                    6 prismatic (translational) clearance joint
+        :param  body_id_i           body i id
+        :param  body_id_j           body j id
+        :param  name                name of the contact as str
+        :param  contact_model_type  type of contact model (str)
+        :param  friction_model_type type of friction model (str)
         :param  properties_dict     dictionary of additional object properties
-        :param  parent      pointer to the parent
+        :param  parent              pointer to the parent object
         """
         #    number
         self.contact_id = self.__id.next()
@@ -66,9 +68,13 @@ class Contact(ContactItem):
         #    this has to be after attributes contact_id and _name as name is constructed from contact_id and _name
         super(Contact, self).__init__(self._name, parent)
 
+        #   parent
         self._parent = parent
+
         #    contact type
         self._type = _type
+
+        #   supported types
         self._types = ["general",
                         "revolute clearance joint",
                         "prismatic clearance joint",
@@ -82,25 +88,19 @@ class Contact(ContactItem):
 
         #   position of contact in z direction
         self.z_dim = 0
-        self.coef_of_restitution = 0
 
+        #   solution atrributes
         #   save solution - properties
         self.save_to_file = False
         self._solution_filename = None
         #   a solutions list to store solution data of contact object of each simulation
         self.solutions = []
-        # if os.path.isfile(self._solution_filename):
-        #     self.load_solution_data(self._solution_filename)
-
-        #    numerical error when calculating distance (point to line), in m
-        self.distance_TOL = 1.E-7
-
         #   solution options
         self._save_options = "Discard"
         #   solution file type, optional: .dat, .xlsx, .csv
         self._solution_filetype = ".xlsx"
 
-        #   visualization properties
+        #   visualization properties - open gl properties
         self._color_GL = np.array([0.4, 0.2, 0.2], dtype="float32")
         self._scale_GL = 1E-2
 
@@ -113,6 +113,7 @@ class Contact(ContactItem):
 
         #   contact model
         #   default properties
+        self.coef_of_restitution = 1
         self.contact_model_type = contact_model_type
         if self.contact_model_type is None:
             self.contact_model_type = "hertz"
@@ -130,26 +131,24 @@ class Contact(ContactItem):
         self.properties_friction_model = extract_from_dictionary_by_string_in_key(properties_dict, "contact_model.")
         self.friction_model = FrictionModel(self.friction_model_type, coef_of_friction_dynamic=self.coef_of_friction_dynamic, coef_of_friction_static=self.coef_of_friction_static, parent=self)
 
-        #   set type properties
-        if self._type == "ACCF":
-            self.__set_ACCF_parameters()
-            
-        if self._type == "ECF-N":
-            self.__set_ECF_N_parameters()
-
         #    set properties dictionary as object property
-        __properties = copy.copy(properties_dict)
         self.properties = properties_dict
         if self.properties is not []:
             self.add_additional_parameters(self.properties)
 
-        #    initialize a list of AABB
-        self.AABB_i = None
-        self.AABB_j = None
-        self.AABB_list = []
-
-        #    initialize a list of contact pairs
-        self.AABB_list_of_overlap_pairs = []
+        #    status of contact
+        #    0 - no contact
+        #    -1 - contact is detected, two bodies have already collided and are in collision, but the
+        #    current initial penetration depth is too large (halve the time step)
+        #    1 - contact is detected
+        self.status = 0
+        #   numerical error when calculating distance (point to line), in m
+        self.distance_TOL = 1.E-7
+        #    contact distance - penetration depth
+        self._delta = 0
+        self.contact_detected = False  # True or False
+        self.contact_distance_inside_tolerance = False
+        self._contact_point_found = False
 
         #   contact node-edge points to calculate contact properties
         self.node_LCS = None
@@ -159,67 +158,82 @@ class Contact(ContactItem):
 
         #   contact point(s) in GCS
         self.u_P_GCS = None
-        self.u_P_list_GCS = []
+        self.u_iP_GCS = None
+        self.u_jP_GCS = None
+        self.u_P_list_GCS = [self.u_iP_GCS, self.u_jP_GCS]
 
-        #   predefined empty list of contact point in body LCS
+        #   contact point in body LCS
         self.u_P_LCS = None
-        self.u_P_list_LCS = []
+        self.u_iP_LCS = None
+        self.u_jP_LCS = None
+        self.u_P_LCS_list = [self.u_iP_LCS, self.u_jP_LCS]
 
         #   list of normals and tangents in LCS of each body in contact
+        #   tangents
+        self._t_GCS = None
+        self._t_i_LCS = None
+        self._t_j_LCS = None
+        self._t_LCS_list = [self._t_i_LCS, self._t_j_LCS]
+        #   normals
+        self._n_GCS = None
+        self._n_i_LCS = None
+        self._n_j_LCS = None
+        self._n_LCS_list = [self._n_i_LCS, self._n_j_LCS]
         self._n_list = []
-        self._t_list = []
 
-        #    contact status attributes
-        self.AABB_overlay_detected = False
-        self.contact_detected = False  # True or False
-        self.contact_distance_inside_tolerance = False
-        self.initial_contact_velocity_calculated = False
-        self._contact_point_found = False
-
-        #   pair of contact force list
+        #   contact forces
         self.contact_bodies_added_to_list = False
         self.list_of_contact_force_objects_constructed = False
-        self.Fn = 0
-        self.Ft = 0
-        self._delta = 0
-        self._Fn_list = []
-        self._Ft_list = []
+        #   create normal contact forces
+        self._create_Fn_forces()
+        #   create tangential (friction) contact forces
+        self._create_Ft_forces()
 
+        #   relative contact velocity
         #   define relative contact velocity components as object attributes
         self._dq_n = 0
         self._dq_t = 0
+        self.initial_contact_velocity_calculated = False
 
+        #   create solution containers
+        self._solution_containers()
+
+    def _create_Fn_forces(self):
+        """
+        Function creates list of contact forces as objects
+        :return:
+        """
+        self.Fn = 0
+        self._Fn_list = []
         if self._parent is not None:
             for body_id in self.body_id_list:
                 _Fn = Force(body_id, force_name=self._name + "_Fn_on_body_" + str(body_id))
-                # _Fn._visible = True
+                #   add pair of contact forces to forces list of MBD system
+                self._parent._parent.forces.append(_Fn)
+                #   add pair of contact forces to forces list of contact
+                self._Fn_list.append(_Fn)
+                self._parent._parent.bodies[body_id].forces.append(_Fn)
+            self._Fn_list[0]._visible = False
+            self.list_of_contact_force_objects_constructed = True
+
+    def _create_Ft_forces(self):
+        """
+        Function creates list of friction (tangential) contact forces as objects
+        :return:
+        """
+        self.Ft = 0
+        self._Ft_list = []
+        if self._parent is not None:
+            for body_id in self.body_id_list:
                 _Ft = Force(body_id, force_name=self._name + "_Ft_on_body_" + str(body_id))
                 _Ft._scale_GL = self._scale_GL
                 #   add pair of contact forces to forces list of MBD system
-                self._parent._parent.forces.append(_Fn)
                 self._parent._parent.forces.append(_Ft)
-
                 #   add pair of contact forces to forces list of contact
-                self._Fn_list.append(_Fn)
                 self._Ft_list.append(_Ft)
-
-                self._parent._parent.bodies[body_id].forces.append(_Fn)
                 self._parent._parent.bodies[body_id].forces.append(_Ft)
-
+            self._Ft_list[0]._visible = False
             self.list_of_contact_force_objects_constructed = True
-        
-        # self._Fn_list[0]._visible = False
-        # self._Ft_list[0]._visible = False
-        #    status of contact
-        #    0 - no contact
-        #    1 - contact is detected, two bodies have already collided and are in collision
-        #    2 - contact is detected
-        self.status = 0
-
-        self._solution_containers()
-
-        #   create marker list
-        self.markers = []
 
     def add_additional_parameters(self, dict):
         """

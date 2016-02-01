@@ -10,7 +10,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
         self._rootNode = root
         
-        self._editable_types = ["body", "force", "joint", "contact", "spring"]
+        self._editable_types = ["body", "force", "joint", "contact", "spring", "motion", "measure"]
 
     def headerData(self, section, orientation, role):
         """
@@ -68,7 +68,6 @@ class TreeModel(QtCore.QAbstractItemModel):
         :param role:
         :return:
         """
-
         if not index.isValid():
             return None
 
@@ -104,7 +103,6 @@ class TreeModel(QtCore.QAbstractItemModel):
 #                    return QtGui.QIcon(":/folder.png")
 
                 if typeInfo == "settings":
-#                    return QtGui.QIcon(":/settings.png")
                     return QtGui.qApp.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon)
 
                 if typeInfo == "solution":

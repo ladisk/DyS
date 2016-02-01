@@ -1,14 +1,13 @@
-'''
+"""
 Created on 21. feb. 2014
 
 @author: lskrinjar
-'''
+"""
 import numpy as np
 
 import itertools
 from OpenGL.GL import *
 import numpy as np
-#import xlsxwriter
 from sympy import Symbol
 from sympy.parsing.sympy_parser import parse_expr
 
@@ -19,11 +18,7 @@ try:
 except:
     None
 
-try:
-    from ..MBD_system_items import ForceItem
-except:
-    from MBD_system_items import ForceItem
-
+from MBD_system.MBD_system_items import ForceItem
 from MBD_system.q2theta_i import q2theta_i
 from simulation_control_widget.opengl_widget.marker.marker import Marker
 from MBD_system.transform_cs import u_P_cad2cm_lcs
@@ -34,8 +29,7 @@ class Force(ForceItem):
     """
     __id = itertools.count(-1)
 
-    def __init__(self, body_id, Fx=0, Fy=0, Mz=0, u_iP_f=np.array([0, 0, 0]), force_name=None, data=None, parent=None):
-        super(Force, self).__init__(force_name, parent)
+    def __init__(self, body_id, force_name=None, Fx=0, Fy=0, Mz=0, u_iP_f=np.array([0, 0, 0]), data=None, parent=None):
         """
         Constructor of force class
         in:
@@ -47,16 +41,20 @@ class Force(ForceItem):
             u_iP_f - vector of acting force in CAD LCS of a body
             
         """
+        super(Force, self).__init__(force_name, parent)
+
+        #   parent
         self._parent = parent
         #    number
         self.force_id = self.__id.next()
         self._comments = ""
+
         #    name as string
         if force_name is None:
             self._name = "Force_" + str(self.force_id)
         else:
             self._name = force_name
-        
+
         self.body_id = body_id
 
         self._body_assigned = False
@@ -67,13 +65,19 @@ class Force(ForceItem):
         self.Mz = Mz
 
         #   function of time
-        self._Fx_t = None
-        self._Fy_t = None
-        self._Mz_t = None
-        
+        self._Fx_t = 0
+        self._Fy_t = 0
+        self._Mz_t = 0
+        # print "exe?"
         #    position of acting force in CAD LCS of a body
+        # print "u_iP_f =", u_iP_f
         self.u_iP_f = u_iP_f[0:2]
-        self.z_dim_lcs = u_iP_f[2]
+        # print "len(u_iP_f) =", len(u_iP_f)
+        # print "len(u_iP_f) =", len(u_iP_f)
+        if len(u_iP_f) == 2:
+            self.z_dim_lcs = 0
+        else:
+            self.z_dim_lcs = u_iP_f[2]
 
         #   force data from file - matrix F(t)
         self.data = data
@@ -85,7 +89,6 @@ class Force(ForceItem):
 
         #   marker parameters
         self.markers = []
-
         if self._parent is not None:
             if self._parent._name.lower() == "forces":
                 #   body handle
@@ -297,3 +300,6 @@ class Force(ForceItem):
                     glEnd()
                 except:
                     pass
+
+if __name__ == "__main__":
+    pass

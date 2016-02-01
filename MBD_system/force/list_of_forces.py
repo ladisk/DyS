@@ -1,16 +1,17 @@
-'''
+"""
 Created on 18. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import os
+import re
 import logging
 from pprint import pprint
-import re
 import time
+import numpy as np
+
 
 from force import Force
-import numpy as np
 
 
 def create_list(filename, parent=None):
@@ -85,12 +86,15 @@ def create_list(filename, parent=None):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
                     u_iP_f_ = np.array(line[match_equal.start() + 2:match_newline.start()].split(','), dtype="float64")
-    
-        
-                if (force_name_ != None) and (body_id_ != None) and (Fx_ != None) and (Fy_ != None) and (Mz_ != None) and (u_iP_f_ != None):
-    
+
+                # print "force_name_ =", force_name_
+                # print "body_id_ =", body_id_
+                # print "Fx_ =", Fx_
+                if (force_name_ != None) and (body_id_ != None) and (u_iP_f_ != None) and (Fx_ != None) and (Fy_ != None) and (Mz_ != None):
+                    # print "u_iP_f_ =", u_iP_f_
                     #    create force object here
-                    force_ = Force(force_name=force_name_, body_id=body_id_, Fx=Fx_, Fy=Fy_, Mz=Mz_, u_iP_f=u_iP_f_, parent=parent)
+                    force_ = Force(body_id_, force_name=force_name_, Fx=Fx_, Fy=Fy_, Mz=Mz_, u_iP_f=u_iP_f_, parent=parent)
+                    # print "object created"
                     forces.append(force_)
                     
                     #    force
@@ -113,7 +117,4 @@ if __name__ == "__main__":
     list = create_list("forces.txt")
     for object in list:
         pprint(vars(object))
-    
 
-    
-    

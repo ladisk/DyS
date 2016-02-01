@@ -92,6 +92,7 @@ class ProjectItem(TreeItem):
         super(ProjectItem, self).__init__(name, parent)
         self._type = "projectNode"
 
+
 class AnalysisTreeItem(TreeItem):
     def __init__(self, name, item=None, mean_value=None, parent=None):
         super(AnalysisTreeItem, self).__init__(name, parent)
@@ -116,6 +117,7 @@ class AnalysisTreeItem(TreeItem):
     def max_value(self):
         return self._max_value
 
+
 class MBDsystemItem(TreeItem):
     def __init__(self, name, parent=None):
         super(MBDsystemItem, self).__init__(name, parent)
@@ -124,6 +126,7 @@ class MBDsystemItem(TreeItem):
     def typeInfo(self):
         return "MBDsystem"
 
+
 class SettingsGroupItem(TreeItem):
     def __init__(self, name, parent=None):
         super(SettingsGroupItem, self).__init__(name, parent)
@@ -131,7 +134,8 @@ class SettingsGroupItem(TreeItem):
     
     def typeInfo(self):
         return self._typeInfo
-    
+
+
 class SolutionGroupItem(TreeItem):
     def __init__(self, name, parent=None):
         super(SolutionGroupItem, self).__init__(name, parent)
@@ -139,6 +143,7 @@ class SolutionGroupItem(TreeItem):
     
     def typeInfo(self):
         return self._typeInfo
+
 
 class SolutionDataItem(TreeItem):
     def __init__(self, name, parent=None):
@@ -148,6 +153,7 @@ class SolutionDataItem(TreeItem):
     def typeInfo(self):
         return self._typeInfo
 
+
 class GroupItem(TreeItem):
     def __init__(self, name, parent=None):
         super(GroupItem, self).__init__(name, parent)
@@ -155,7 +161,8 @@ class GroupItem(TreeItem):
     
     def typeInfo(self):
         return self._typeInfo
-        
+
+
 class BodyItem(TreeItem):
     def __init__(self, name, parent=None):
         super(BodyItem, self).__init__(name, parent)
@@ -164,6 +171,7 @@ class BodyItem(TreeItem):
     def typeInfo(self):
         return self._typeInfo
 
+
 class ContactItem(TreeItem):
     def __init__(self, name, parent=None):
         super(ContactItem, self).__init__(name, parent)
@@ -171,7 +179,8 @@ class ContactItem(TreeItem):
         
     def typeInfo(self):
         return self._typeInfo
-    
+
+
 class ForceItem(TreeItem):
     def __init__(self, name, parent=None):
         super(ForceItem, self).__init__(name, parent)
@@ -179,7 +188,26 @@ class ForceItem(TreeItem):
     
     def typeInfo(self):
         return self._typeInfo
-    
+
+
+class MotionItem(TreeItem):
+    def __init__(self, name, parent=None):
+        super(MotionItem, self).__init__(name, parent)
+        self._typeInfo = "motion"
+
+    def typeInfo(self):
+        return self._typeInfo
+
+
+class MeasureItem(TreeItem):
+    def __init__(self, name, parent=None):
+        super(MotionItem, self).__init__(name, parent)
+        self._typeInfo = "measure"
+
+    def typeInfo(self):
+        return self._typeInfo
+
+
 class JointItem(TreeItem):
     def __init__(self, name, parent=None):
         super(JointItem, self).__init__(name, parent)
@@ -188,6 +216,7 @@ class JointItem(TreeItem):
     def typeInfo(self):
         return self._typeInfo
 
+
 class SpringItem(TreeItem):
     def __init__(self, name, parent=None):
         super(SpringItem, self).__init__(name, parent)
@@ -195,7 +224,8 @@ class SpringItem(TreeItem):
         
     def typeInfo(self):
         return self._typeInfo
-    
+
+
 class AABBItem(TreeItem):
     def __init__(self, name, parent=None):
         super(AABBItem, self).__init__(name, parent)

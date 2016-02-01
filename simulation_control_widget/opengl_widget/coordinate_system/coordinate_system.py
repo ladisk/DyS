@@ -9,6 +9,7 @@ from pprint import pprint
 import itertools
 import logging
 import numpy as np
+from PyQt4 import QtCore, QtGui, QtOpenGL
 
 
 from simulation_control_widget.opengl_widget.marker.marker import Marker

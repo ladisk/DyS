@@ -44,28 +44,6 @@ class ContactModel(object):
         #   sub string
         self._substring = "contact_model"
 
-        #   if parent is specified (if exists)
-        if self._parent is not None:
-            #   get attributes from parent
-            if hasattr(self._parent, "R_i") and hasattr(self._parent, "R_j"):
-                self.R_i = self._parent.R_i
-                self.R_j = self._parent.R_j
-
-            if hasattr(self._parent, "K"):
-                self.K = self._parent.K
-
-            if self._parent._parent is not None and K is None:
-                if self._parent._type.lower() == "contact sphere-sphere":#contact sphere-sphere
-                    self.K = self._evaluate_K_sphere_sphere()
-                if self._parent._type.lower() == "contact plane-sphere":
-                    self.K = self._evaluate_K_plane_sphere()
-
-        #   if parent is None
-        else:
-            self.K = K
-            self.R_i = None
-            self.R_j = None
-
         #   coefficient of restitution
         self.c_r = c_r
 
@@ -94,6 +72,8 @@ class ContactModel(object):
 
         #   type attribute
         self._type = _type
+
+        #   supported types
         self._types = ["hertz",
                         "kelvin-voigt",
                         "hunt-crossley",
@@ -114,6 +94,30 @@ class ContactModel(object):
         self.properties = properties_dict
         if self.properties is not []:
             self._add_aditional_parameters(self.properties)
+
+        pprint(vars(self))
+        #   if parent is specified (if exists)
+        if self._parent is not None:
+            #   get attributes from parent
+
+            if hasattr(self._parent, "R_i") and hasattr(self._parent, "R_j"):
+                self.R_i = self._parent.R_i
+                self.R_j = self._parent.R_j
+
+            if hasattr(self._parent, "K"):
+                self.K = self._parent.K
+
+            if self._parent._parent is not None and K is None:
+                if self._parent._type.lower() == "contact sphere-sphere":#contact sphere-sphere
+                    self.K = self._evaluate_K_sphere_sphere()
+                if self._parent._type.lower() == "contact plane-sphere":
+                    self.K = self._evaluate_K_plane_sphere()
+
+        #   if parent is None
+        else:
+            self.K = K
+            self.R_i = None
+            self.R_j = None
 
     def _type_check(self):
         """
@@ -153,7 +157,7 @@ class ContactModel(object):
         """
         [self.h_i, self.h_j] = self._evaluate_h()
 
-        K = (4/(3*(self.h_i + self.h_j)))*np.sqrt((self._parent.R_i * self._parent.R_j)/(self._parent.R_i + self._parent.R_j))
+        K = (4./(3.*(self.h_i + self.h_j)))*np.sqrt((self.R_i * self.R_j)/(self.R_i + self.R_j))
         return K
 
     def _evaluate_K_plane_sphere(self):
@@ -163,7 +167,7 @@ class ContactModel(object):
         """
         [self.h_i, self.h_j] = self._evaluate_h()
 
-        K = (4/(3 * np.pi * (self.h_i + self.h_j)))*(self._parent.R0_j**0.5)
+        K = (4/(3 * np.pi * (self.h_i + self.h_j)))*(self.R0_j**0.5)
         return K
 
     def _evaluate_h(self):

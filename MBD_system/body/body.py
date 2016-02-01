@@ -1,7 +1,7 @@
 """
 Created on 9. maj. 2013
 
-@author: reti-luka
+@author: luka.skrinjar
 """
 import time
 import sys
@@ -18,6 +18,7 @@ from OpenGL.GLU import *
 
 
 from geometry.geometry import Geometry
+from geometry.line.line import Line
 import read_body_data_file.read_body_data_file as read_body_data_file
 from simulation_control_widget.opengl_widget.coordinate_system.coordinate_system import CoordinateSystem
 from simulation_control_widget.opengl_widget.marker.marker import Marker
@@ -25,6 +26,7 @@ from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.MBD_system_items import BodyItem
+from MBD_system.extract_from_dictionary_by_string_in_key import extract_from_dictionary_by_string_in_key
 
 
 class Body(BodyItem):
@@ -36,7 +38,6 @@ class Body(BodyItem):
     def __init__(self, name, MBD_folder_abs_path=None, density=0, volume=0, mass=0, J_zz=0, CM_CAD_LCS=np.zeros(3), CAD_LCS_GCS=np.zeros(3), theta=np.zeros(3), dR=np.zeros(3), dtheta=np.zeros(3), color_GL=np.ones(3), transparent_GL=1, visible=True, display_style="filled", connected_to_ground=False, parent=None):
         """
         Constructor of body class
-        Args:
         :param name:                    body name (string)
         :param MBD_folder_abs_path:     absolute path to MBD system project folder
         :param density:                 density of the material of the body
@@ -111,9 +112,17 @@ class Body(BodyItem):
         #   list of contact geometry data (nodes, edges) objects that are created for contact detection
         self.contact_geometries = []
 
+        #   geometry properties
+        self._geometry_type = ".stl"
+        self._geometry_types = ["line", ".stl"]
+        self.geometry = None
+        self.geometry_filename = None
+        self.geometry_file_extension = ".stl"
+        self.z_dim = 0
+
         #   opengl visualization properties
         self._visible = visible
-        self.geom = None
+        self.geometry = None
         self.VBO_created = False
 
         #    AABB tree object assigned to body object as attribute if body is specified to be in contact with other body
@@ -131,7 +140,6 @@ class Body(BodyItem):
         else:
             print 'Data file not found for body %s' % self._name
 
-        self.geometry_file_extension = ".stl"
 
         self.properties_file_with_extension = self._name + self.properties_file_extension
 
@@ -167,25 +175,37 @@ class Body(BodyItem):
                     if not os.path.isfile(self.properties_file_with_extension):
                         raise IOError, "Properties file not found!"
 
-                    if not os.path.isfile(self.geometry_filename):
-                        raise IOError, "Geometry file %s not found!"%self.geometry_filename
+                    if self._geometry_type == self.geometry_file_extension and self.geometry_filename is not None:
+                        if not os.path.isfile(self.geometry_filename):
+                            raise IOError, "Geometry file %s not found!"%self.geometry_filename
 
-            self.CM_CAD_LCS_ = self.CM_CAD_LCS
+            # self.CM_CAD_LCS_ = self.CM_CAD_LCS
             self.CM_CAD_LCS[0:2] = Ai_ui_P_vector(self.CM_CAD_LCS[0:2], self.theta[2])  # np.deg2rad(self.theta[2])
 
-            self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
+            if all(self.CM_CAD_LCS == np.zeros(3)) and all(self.CAD_LCS_GCS == np.zeros(3)):
+                pass
+            else:
+                self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
 
             #   cad coordinate system of geometry
-            # print "self.CM_CAD_LCS =", self.CM_CAD_LCS
             self.CAD_CS = Marker(-self.CM_CAD_LCS, parent=self)#-self.CM_CAD_LCS-self.CAD_LCS_GCS
             self.CAD_CS._visible = False
 
-            #    create geom object
+            #    create geometry object
             #    read geometry file and save vertices and normals
-            if os.path.isfile(self.geometry_filename):
-                self.geom = Geometry(self.geometry_filename, parent=self)
+            if self.geometry_filename is not None:
+                if os.path.isfile(self.geometry_filename):
+                    self.geometry = Geometry(self.geometry_filename, parent=self)
+            elif self._geometry_type == "line":
+                self.geometry = Line(parent=self)
             else:
-                print "Body geometry file not found! Attribute self.geom not created."
+                if self.geometry is None:
+                    print "Body geometry file not found! Attribute self.geometry not created."
+
+            #   add additional attributes to geometry object
+            _dict_geometry = extract_from_dictionary_by_string_in_key(_dict, "geometry.")
+            if self.geometry is not None and _dict_geometry:
+                self.geometry.add_attributes_from_dict(_dict_geometry)
 
         #    construct and display body geometry from stl data file
         # if body_name != "ground":
@@ -217,7 +237,13 @@ class Body(BodyItem):
         Function finds max coordinate of a point of body geometry in x and y axis
         :return:
         """
-        self.uP_i_max = np.amax(abs(self.geom.geom_data.vertices), axis=0)
+        if self.geometry is not None:
+            if self._geometry_type == ".stl":
+                self.uP_i_max = np.amax(abs(self.geometry.geom_data.vertices), axis=0)
+            elif self._geometry_type == "line":
+                self.uP_i_max = np.amax(abs(self.geometry.vertices), axis=0)
+        else:
+            self.uP_i_max = np.zeros(3)
 
     def get_uP_i_max(self):
         """
@@ -225,7 +251,6 @@ class Body(BodyItem):
         :return:
         """
         self._evaluate_uP_i_max()
-
         return self.uP_i_max
 
     def _show(self):
@@ -272,7 +297,7 @@ class Body(BodyItem):
         """
         
         """
-        self.geom._update_VBO_color(self.color_GL, self.transparent_GL)
+        self.geometry._update_VBO_color(self.color_GL, self.transparent_GL)
 
     def create_VBO(self):
         """
@@ -281,8 +306,8 @@ class Body(BodyItem):
         # print "=================================="
         # print "create_VBO() =", self._name, "id =", self.body_id
         #    construct a body shape OpenGL object - VBO
-        if self.geom is not None:
-            self.geom.create_VBO()
+        if self.geometry is not None:
+            self.geometry.create_VBO()
             #    is buffer - status if VBO is created and can be displayed
             self.VBO_created = True
             #   create body LCS as vbo
@@ -358,42 +383,9 @@ class Body(BodyItem):
                     marker._create_VBO()
 
             if self.VBO_created:
-#                 print "buffer check(body) =", glIsBuffer(self.geom.vbo_id)
-                #   bind to buffer
-                glBindBuffer(GL_ARRAY_BUFFER, self.geom.vbo_id)
+                self.geometry._paint_VBO()
+#                 print "buffer check(body) =", glIsBuffer(self.geometry.vbo_id)
 
-                #    pointer - offset in bits
-                v_pointer = ctypes.c_void_p(0)
-                n_pointer = ctypes.c_void_p(12)
-                c_pointer = ctypes.c_void_p(24)
-
-                #    stride in bits (1 float = 4 bits)
-                stride_in_bits = 40
-
-                glVertexPointer(3, GL_FLOAT, stride_in_bits, v_pointer)
-                glColorPointer(4, GL_FLOAT, stride_in_bits, c_pointer)
-                glNormalPointer(GL_FLOAT, stride_in_bits, n_pointer)
-
-                #    draw (fill or wireframe)
-                if self.display_style == "wireframe":
-                    glDisable(GL_LIGHTING)
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)  # GL_FRONT, GL_FRONT_AND_BACK
-                    glDrawArrays(GL_TRIANGLES, 0, self.geom.N_vertices)
-                    glEnable(GL_LIGHTING)
-                elif self.display_style == "filled":
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-                    glDrawArrays(GL_TRIANGLES, 0, self.geom.N_vertices)
-                elif self.display_style == "points":
-                    glDisable(GL_LIGHTING)
-                    glPointSize(0.2)
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT)
-                    glDrawArrays(GL_TRIANGLES, 0, self.geom.N_vertices)
-                    glPointSize(1)
-                    glEnable(GL_LIGHTING)
-                else:
-                    None
-
-                glBindBuffer(GL_ARRAY_BUFFER, 0)
 
         # for contact_geometry in self.contact_geometries:
         #     contact_geometry.paintGL_VBO()
@@ -427,7 +419,7 @@ class Body(BodyItem):
         self.dtheta[2] = dq[2]
 
     def delete_VBO(self):
-        self.geom.__del__()
+        self.geometry.__del__()
 #        if self.AABBtree != None:
 #            for _AABBtree in self.AABBtree.children:
 #                _AABBtree.__del__()

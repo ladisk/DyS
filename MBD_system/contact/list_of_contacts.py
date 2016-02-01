@@ -92,7 +92,18 @@ def create_list(filename, parent=None):
                                     except:
                                         value = line[line.index('=') + 1:].strip()
                         #    add dict item to dict with value
-                        dict_[key] = value
+                        #   checks if key is already in dist it does not override current value, but adds/appends
+                        #   new value to key item
+                        if key in dict_:
+                            #   check if key value is already a list
+                            #   and if it is a list, then new value is appended to list
+                            #   else old key value item is tranformed to list and
+                            if isinstance(dict_[key], list):
+                                dict_[key] = dict_[key].append(value)
+                            else:
+                                dict_[key] = [dict_[key], value]
+                        else:
+                            dict_[key] = value
 
                     if dict_.has_key("type") and dict_.has_key("all_attributes_read"):
                         if dict_["all_attributes_read"]:
@@ -125,7 +136,7 @@ def create_list(filename, parent=None):
                                 dict_ = OrderedDict([])
                             #   pin-slot clearance joint linear
                             elif (dict_["type"]=="pin-slot clearane joint linear") and (dict_.has_key("body_i")) and (dict_.has_key("body_j")) and (dict_.has_key("u_iP")) and (dict_.has_key("u_jP")) and (dict_.has_key("u_jR")) and (dict_.has_key("h0_jP")) and (dict_.has_key("R0_i")):
-                                contact = PinSlotClearanceJointLinear(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["u_jR"], dict_["R0_i"], dict_["h0_jP"], parent=parent)
+                                contact = PinSlotClearanceJointLinear(dict_["type"], dict_["body_i"], dict_["body_j"], dict_["u_iP"], dict_["u_jP"], dict_["u_jR"], dict_["R0_i"], dict_["h0_jP"], properties_dict=dict_, parent=parent)
                                 #    the ordered dictionary in reinitialized to empty for properties of next contact to be read
                                 contacts.append(contact)
                                 dict_ = OrderedDict([])

@@ -60,7 +60,7 @@ class Overlap_pair(object):
 
     def __distance_node2edge_AABBi_AABBj(self, AABB_i, AABB_j):
         """
-        Function calculates a distance from node to edge for all nodes and edges in contact AABB overlap pair
+        Function calculates a distance from node to line for all nodes and edges in contact AABB overlap pair
         """
         #   pointers of edge and node body as object attributes
         self.edge_body = AABB_j._parent_body

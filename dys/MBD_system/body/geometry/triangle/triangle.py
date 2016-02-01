@@ -64,7 +64,7 @@ class Triangle(object):
 
     def edge_in_area(self, _min, _max):
         """
-        Function checks if list of edge nodes (created from triangle plane intersection)
+        Function checks if list of line nodes (created from triangle plane intersection)
         :return:
         """
         #   predefined empy list to store booleans

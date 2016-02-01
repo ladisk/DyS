@@ -114,8 +114,8 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
         _mass = float(self.ui.m_lineEdit.text())
         _J_zz = float(self.ui.J_lineEdit.text())
         
-        _R = string2array(self.ui.R_lineEdit.text())
-        _theta = string2array(self.ui.theta_lineEdit.text())
+        _R = np.array(string2array(self.ui.R_lineEdit.text()), dtype="float32")
+        _theta = np.array(string2array(self.ui.theta_lineEdit.text()), dtype="float32")
         
         _dR = string2array(self.ui.dR_lineEdit.text())
         _dtheta = string2array(self.ui.dtheta_lineEdit.text())
@@ -123,8 +123,7 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
         _color = string2array(self.ui.color_lineEdit.text())
         _transparent = float(self.ui.transparent_lineEdit.text())
         _display_style = str(self.ui.display_style_comboBox.currentText()).lower()
-        
-        
+
         #    update data to selected object
         if self.item is not None:
             self.item._name = _name
@@ -134,17 +133,14 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
             self.item.theta = np.deg2rad(_theta)
             self.item.dR = _dR
             self.item.dtheta = np.deg2rad(_dtheta)
-            
             self.item.display_style = _display_style
-            
-            if (_color != self.item.color_GL).any or _transparent != self.item.transparent_GL:
+
+            #   update vbo if it is changed
+            if any(_color != self.item.color_GL) or _transparent != self.item.transparent_GL:
                 self.item.color_GL = _color
                 self.item.transparent_GL = _transparent
-                
                 self.item._update_VBO()
-            
-            
-            
+
         #    create new object
         else:
             _item = Body(body_name=_name, parent=self.group_item)

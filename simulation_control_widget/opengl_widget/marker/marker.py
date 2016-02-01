@@ -25,6 +25,9 @@ class Marker(object):
         """
         Class constructor of VBO marker
         :param node:
+        :param visible:
+        :param scale:
+        :param parent:
         """
         self._parent = parent
         self._visible = visible

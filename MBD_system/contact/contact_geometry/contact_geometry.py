@@ -12,7 +12,7 @@ from OpenGL.GL.ARB.vertex_buffer_object import *
 from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 
-from MBD_system.body.geometry.edge.edge import Edge
+from MBD_system.body.geometry.line.line import Line
 from MBD_system.transform_cs import gcs2lcs_z_axis
 from MBD_system.transform_cs import cad2cm_lcs
 
@@ -133,14 +133,14 @@ class ContactGeometry(object):
                             self.contact_normals.append(triangle.normal)
 
                         # create 2D edge object
-                        _edge = Edge(triangle._edge[0], triangle._edge[1], triangle.normal)
+                        _edge = Line(triangle._edge[0], triangle._edge[1], triangle.normal)
                         self.contact_profile.append(_edge)
 
                 else:
                     self.contact_nodes.append(triangle._edge[0])
                     self.contact_nodes.append(triangle._edge[1])
 
-                    _edge = Edge(triangle._edge[0], triangle._edge[1], triangle.normal)
+                    _edge = Line(triangle._edge[0], triangle._edge[1], triangle.normal)
                     self.profile.append(_edge)
 
         # remove duplicate nodes

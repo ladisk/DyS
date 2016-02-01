@@ -1,8 +1,8 @@
-'''
+"""
 Created on 12. okt. 2015
 
 @author: luka.skrinjar
-'''
+"""
 import os
 from pprint import pprint
 from PyQt4 import QtCore, QtGui

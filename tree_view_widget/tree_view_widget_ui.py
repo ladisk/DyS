@@ -40,6 +40,7 @@ class Ui_Form(object):
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.treeView = QtGui.QTreeView(Form)
         self.treeView.setAlternatingRowColors(True)
+        self.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.gridLayout_2.addWidget(self.treeView, 0, 0, 1, 1)
         self.gridLayout.addLayout(self.gridLayout_2, 0, 0, 1, 1)

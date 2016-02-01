@@ -1,1 +1,0 @@
-Eksperimentalna analiza optimalnega sinusnega vzbujanje glede na druge tipe vzbujanje: impulzno, širokospektralno, veè harmonikov

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 16. nov. 2013
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import os
 import itertools
 import numpy as np
@@ -13,13 +13,13 @@ import matplotlib.animation as animation
 
 from MBD_system.body.geometry.triangle.triangle import Triangle
 from MBD_system.body.geometry.node.node import Node
-from MBD_system.body.geometry.edge.edge import Edge
+from MBD_system.body.geometry.line.line import Line
 
 
 class ModelLoader(object):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self, file_):
         """
         loads a 3D file type .stl or .obj
@@ -228,8 +228,8 @@ class ModelLoader(object):
                 self.profile_nodes.append(triangle._edge[0])
                 self.profile_nodes.append(triangle._edge[1])
 
-                _edge = Edge(triangle._edge[0], triangle._edge[1], triangle.normal)
-                self.profile.append(_edge)
+                _line = Line(triangle._edge[0], triangle._edge[1], triangle.normal)
+                self.profile.append(_line)
                 
                 # for point in triangle._p:
                 #     #   if point is not already in list append it

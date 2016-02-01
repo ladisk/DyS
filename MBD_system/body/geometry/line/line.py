@@ -1,59 +1,63 @@
 """
-Created on 30. nov. 2013
+Created on 23. feb. 2015
 
 @author: lskrinjar
 """
-import os
-import ctypes
 from pprint import pprint
 from OpenGL import *
 from OpenGL.GL import *
 from OpenGL.GL.ARB.vertex_buffer_object import *
 from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
-
-
-import VBO_reshape.VBO_reshape as VBO_reshape
-from MBD_system.body.geometry.model_loader.model_loader import ModelLoader
 import numpy as np
-import vertices_offset.vertices_offset as vertices_offset
 
 
-class Geometry(object):
+from MBD_system.extract_from_dictionary_by_string_in_key import extract_from_dictionary_by_string_in_key
+from MBD_system.body.geometry.VBO_reshape.VBO_reshape import create_VBO_array
+
+class Line(object):
     """
     classdocs
     """
-    def __init__(self, filename, parent=None):
+    def __init__(self, node_i=None, node_j=None, normal=None, length=None, parent=None):
         """
         Constructor
-        Class constructor for OpenGL VBO
-        in:
-            CAD_LCS_GCS - array of center of body mass in GCS
-            geom_file - a body geometry full filename (filename = name + extension)
-            geom_file_extension - extension 
-            color_GL - a normalized array of RGB color vector for the body
-            transparent_GL - a transparency factor of a body between 0 and 1
-        out:
-            VBO interleaved array of data saved to GPU memory
         """
+        #   parent
         self._parent = parent
 
-        self.filename = filename
+        #   node coordinates
+        self.node_i = node_i
+        self.node_j = node_j
+        self.nodes = [self.node_i, self.node_j]
+        self.normal_2D = normal
 
-        self._filename, self._file_extension = os.path.splitext(filename)
+        #   length
+        self.length = length
 
-        #    read geom data from stl (geometry) geom_file with model_loader
-        if os.path.isfile(filename):
-            self.geom_data = ModelLoader(filename)
+        #   override parent transparent options
+        self._parent.transparent_GL = 1
 
+    def add_attributes_from_dict(self, dict):
+        """
+
+        :return:
+        """
+        for key in dict:
+            setattr(self, key, dict[key])
+
+    def _create_line_nodes(self):
+        """
+
+        :return:
+        """
+        if self.node_i is not None and self.node_j is not None:
+            nodes = np.array([np.append(self.node_i, self._parent.z_dim),
+                                np.append(self.node_j, self._parent.z_dim)], dtype='float32')
         else:
-            raise IOError, "File not found!"
-
-        #   created status
-        self.VBO_created = False
-
-        #   shift vertices that body center of mass is the origin
-        self.geom_data.vertices = vertices_offset.offset(self.geom_data.vertices, parent.CM_CAD_LCS)
+            nodes = np.array([[-self.length/2., 0, self._parent.z_dim],
+                                [self.length/2., 0, self._parent.z_dim]], dtype='float32')
+        return nodes
 
     def create_VBO(self):
         """
@@ -61,7 +65,7 @@ class Geometry(object):
         """
         #    generate a new VBO and get the associated vbo_id
         num_of_VBOs = 1
-        
+
         #    create buffer name
         self.vbo_id = GLuint()
         self.vbo_id = glGenBuffers(num_of_VBOs)
@@ -76,21 +80,21 @@ class Geometry(object):
             raise Error, "VBO not created!"
 
         #    number of vertices
-        self.N_vertices = len(self.geom_data.vertices)
+        self.vertices = self._create_line_nodes()
+        #   number of vertices
+        self.N_vertices = len(self.vertices)
 
         #    color vector
         #    check if color vector is a uniform color - every vertex has the same color or is a color vector different for every vertex
         if len(self._parent.color_GL) == 3:
             color_GL = np.array([np.append(self._parent.color_GL, self._parent.transparent_GL)], dtype='float32')
-            self.vertex_color = np.repeat(color_GL, self.N_vertices, axis=0)
-        elif color_GL.shape == color_GL.shape:
-            None
+            self.color = np.repeat(color_GL, self.N_vertices, axis=0)
         else:
             raise Error, "Color data shape not equal to vertices."
-        
+
         #    reshape VBO_data and create interleaved VBO
-        self.VBO_data = VBO_reshape.create_VBO_array(self._file_extension, self.geom_data.get_vertices_3D(), self.geom_data.get_normals_3D(), self.vertex_color, GL_primitive_type="triangle")
-        
+        self.VBO_data = create_VBO_array(None, self.vertices, None, self.color, GL_primitive_type="line")
+
         #    VBO_data size in bytes
         self.VBO_data_size_in_bytes = arrays.ArrayDatatype.arrayByteCount(self.VBO_data)
 
@@ -101,13 +105,11 @@ class Geometry(object):
         glBufferData(GL_ARRAY_BUFFER, self.VBO_data_size_in_bytes, self.VBO_data, GL_DYNAMIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-        if glGetError() == GL_NO_ERROR:
-            self.VBO_created = True
-
     def __del__(self):
         """
         Delete opengl object VBO from VRAM
         """
+        self.vbo_id = 1
         glDeleteBuffers(1, int(self.vbo_id))
 
     def _update_VBO_color(self, color, transparent):
@@ -118,7 +120,7 @@ class Geometry(object):
         _color = np.array([np.append(color, transparent)], dtype='float32').flatten()
 
         #   offset in bits
-        _offset = 24
+        _offset = 12
 
         #   size in bits, to be replaces
         _size = arrays.ArrayDatatype.arrayByteCount(_color)
@@ -126,8 +128,8 @@ class Geometry(object):
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
         #   loop through nodes
         for i in range(0, self.N_vertices):
-            glBufferSubData(GL_ARRAY_BUFFER, _offset+i*(_offset+16), _size, _color)
-        
+            glBufferSubData(GL_ARRAY_BUFFER, _offset+i*(_offset+16), _size, _color)#16
+
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def _paint_VBO(self):
@@ -141,33 +143,41 @@ class Geometry(object):
 
             #    pointer - offset in bits
             v_pointer = ctypes.c_void_p(0)
-            n_pointer = ctypes.c_void_p(12)
-            c_pointer = ctypes.c_void_p(24)
+            c_pointer = ctypes.c_void_p(12)
+            # c_pointer = ctypes.c_void_p(24)
 
             #    stride in bits (1 float = 4 bits)
-            stride_in_bits = 40
+            stride_in_bits = 28
+
+            glDisableClientState(GL_NORMAL_ARRAY)
 
             glVertexPointer(3, GL_FLOAT, stride_in_bits, v_pointer)
             glColorPointer(4, GL_FLOAT, stride_in_bits, c_pointer)
-            glNormalPointer(GL_FLOAT, stride_in_bits, n_pointer)
+            glNormalPointer(GL_FLOAT, stride_in_bits, 0)
+
+            glDisable(GL_LIGHTING)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+            glDrawArrays(GL_LINES, 0, self.N_vertices)
+            glEnable(GL_LIGHTING)
 
             #    draw (fill or wireframe)
-            if self._parent.display_style == "wireframe":
-                glDisable(GL_LIGHTING)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)  # GL_FRONT, GL_FRONT_AND_BACK
-                glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
-                glEnable(GL_LIGHTING)
-            elif self._parent.display_style == "filled":
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-                glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
-            elif self._parent.display_style == "points":
-                glDisable(GL_LIGHTING)
-                glPointSize(0.2)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT)
-                glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
-                glPointSize(1)
-                glEnable(GL_LIGHTING)
-            else:
-                None
+            # if self._parent.display_style == "wireframe":
+            #     glDisable(GL_LIGHTING)
+            #     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)  # GL_FRONT, GL_FRONT_AND_BACK
+            #     glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
+            #     glEnable(GL_LIGHTING)
+            # elif self._parent.display_style == "filled":
+            #     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+            #     glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
+            # elif self._parent.display_style == "points":
+            #     glDisable(GL_LIGHTING)
+            #     glPointSize(0.2)
+            #     glPolygonMode(GL_FRONT_AND_BACK, GL_POINT)
+            #     glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
+            #     glPointSize(1)
+            #     glEnable(GL_LIGHTING)
+            # else:
+            #     None
 
             glBindBuffer(GL_ARRAY_BUFFER, 0)
+

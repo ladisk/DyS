@@ -23,16 +23,16 @@ from gaussian_elimination import gaussian_elimination
 from MBD_system.force.force import Force
 
 
-class ODEfun(object):
+class DAEfun(object):
     """
     classdocs
     """
 
-    def __init__(self, MBD_system=[], parent=None):
+    def __init__(self, MBD_system, parent=None):
         """
-
+        DAE - Automatic generation of Differential Algebraic Equations
         """
-        # super(ODEfun, self).__init__(parent)
+        # super(DAEfun, self).__init__(MBD_system, parent)
 
         #   parent
         self._parent = parent

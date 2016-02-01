@@ -1,8 +1,8 @@
-'''
+"""
 Created on 10. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 
 from pprint import pprint
 import sys
@@ -13,6 +13,8 @@ from PyQt4.QtCore import *
 
 import numpy as np
 from solve_ODE import SolveODE
+from solve_dynamic_analysis import SolveDynamicAnalysis
+from solve_kinematic_analysis import SolveKinematicAnalysis
 
 
 class FinishedSignal(QtCore.QObject):
@@ -39,8 +41,13 @@ class Solver(QtCore.QThread):
         self.paused = False
          
         self.MBD_system = MBD_system
-        
+
+        #   solvers
         self.solveODE = SolveODE(MBD_system=self.MBD_system, parent=self._parent)
+        #   kinematic analysis
+        self.solve_kinematic_analysis = SolveKinematicAnalysis(self.MBD_system, parent=self._parent)
+        #   dynamic analysis
+        self.solve_dynamic_analysis = SolveDynamicAnalysis(self.MBD_system, parent=self._parent)
 
     def start_solver(self):
         """
@@ -48,8 +55,12 @@ class Solver(QtCore.QThread):
         """
         self.running_signal.signal_running.emit("Running")
 
-        while self.solveODE.running and not self.solveODE.stopped:
-            self.solveODE.solve_ODE()
+        if self.MBD_system.analysis_type == "kinematic":
+            self.solve_kinematic_analysis.solve()
+        if self.MBD_system.analysis_type == "dynamic":
+            self.solve_dynamic_analysis.solve()
+        # while self.solveODE.running and not self.solveODE.stopped:
+        #     self.solveODE.solve_ODE()
 
     def stop_solver(self):
         self.stopped_signal.signal_stopped.emit("Stopped")

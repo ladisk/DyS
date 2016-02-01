@@ -70,7 +70,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.resize_factor_height = 1
 
         #    coordinate system
-        self.GCS = CoordinateSystem()
+        self.GCS = CoordinateSystem()#parent=self
 
         # core profile
         glformat = QtOpenGL.QGLFormat()
@@ -386,12 +386,12 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.last_pos = QtCore.QPoint(event.pos())
         self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
 
-        print "event =", event
-        pprint(vars(event))
+        # print "event =", event
+        # pprint(vars(event))
         if event.button() == QtCore.Qt.LeftButton:
             print event.pos()
 
-        print "-------------------------------------------"
+        # print "-------------------------------------------"
 
     def _repaintGL(self):
         """
@@ -418,6 +418,8 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         popMenu.addAction(_show_GCSAction)
 
         popMenu.exec_(event.globalPos())
+
+        self.repaintGL()
 
     def mouseMoveEvent(self, event):
         """

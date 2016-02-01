@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
-    <height>579</height>
+    <width>360</width>
+    <height>627</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>317</width>
-    <height>579</height>
+    <width>360</width>
+    <height>627</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>360</width>
-    <height>598</height>
+    <height>627</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -230,54 +230,10 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Integration Settings</string>
+      <string>Simulation Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="2">
-       <widget class="QLabel" name="endTimeLabel_3">
-        <property name="text">
-         <string>Integration method</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="4">
-       <widget class="QLineEdit" name="Hmin">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="4">
-       <widget class="QLineEdit" name="Hmax">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="endTimeLabel">
-        <property name="text">
-         <string>End time, s</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="4">
-       <widget class="QLineEdit" name="relTol">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="4">
        <widget class="QLineEdit" name="absTol">
         <property name="enabled">
          <bool>true</bool>
@@ -287,49 +243,28 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="HminLabel">
-        <property name="text">
-         <string>Hmin</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLineEdit" name="endTime">
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2" colspan="3">
-       <widget class="Line" name="line_3">
+      <item row="8" column="2" colspan="3">
+       <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="6" column="2">
-       <widget class="QLabel" name="relTolLabel">
+      <item row="1" column="2">
+       <widget class="QLabel" name="endTimeLabel_3">
         <property name="text">
-         <string>RelTol</string>
+         <string>Integration method</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="absTolLabel">
+      <item row="2" column="2">
+       <widget class="QLabel" name="endTimeLabel">
         <property name="text">
-         <string>AbsTol</string>
+         <string>End time, s</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="HmaxLabel">
-        <property name="text">
-         <string>Hmax</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
+      <item row="1" column="3">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -342,7 +277,48 @@
         </property>
        </spacer>
       </item>
-      <item row="0" column="4">
+      <item row="7" column="4">
+       <widget class="QLineEdit" name="relTol">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="3">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLabel" name="relTolLabel">
+        <property name="text">
+         <string>RelTol</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="HmaxLabel">
+        <property name="text">
+         <string>Hmax</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="4">
+       <widget class="QLineEdit" name="Hmin">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
        <widget class="QComboBox" name="integrationMethodComboBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -368,14 +344,38 @@
         </item>
        </widget>
       </item>
-      <item row="7" column="2" colspan="3">
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="Hmax">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
         </property>
        </widget>
       </item>
-      <item row="8" column="2">
+      <item row="5" column="2">
+       <widget class="QLabel" name="HminLabel">
+        <property name="text">
+         <string>Hmin</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="absTolLabel">
+        <property name="text">
+         <string>AbsTol</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="endTime">
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
        <widget class="QCheckBox" name="loadSolutionFileStatus">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -391,6 +391,27 @@
         </property>
         <property name="text">
          <string>Load solution when finished</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="analysisTypeComboBox">
+        <item>
+         <property name="text">
+          <string>Kinematic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dynamic</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Analysis type</string>
         </property>
        </widget>
       </item>
