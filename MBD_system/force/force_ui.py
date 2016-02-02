@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'force.ui'
 #
-# Created: Mon Aug 10 20:55:07 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,14 +25,14 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(300, 516)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
+        Form.resize(306, 582)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QtCore.QSize(300, 516))
-        Form.setMaximumSize(QtCore.QSize(300, 516))
+        Form.setMinimumSize(QtCore.QSize(306, 582))
+        Form.setMaximumSize(QtCore.QSize(306, 582))
         self.formLayout_2 = QtGui.QFormLayout(Form)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))

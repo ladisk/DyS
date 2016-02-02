@@ -494,7 +494,7 @@ class MBDsystem(MBDsystemItem):
         """
         Create list of joint objects
         """
-        self.joints = list_of_joints.create_list(joints_=self.joints, filename=self.abs_path_to_joints, parent=self.Joints)
+        self.joints = list_of_joints.create_list(self.joints, self.abs_path_to_joints, parent=self.Joints)
 
         if self.joints == [] and os.path.isfile(self.abs_path_to_joints):
             print "No joints (objects) created when finished reading filename: joints.txt. Check file: %s" % self.abs_path_to_joints
@@ -503,27 +503,26 @@ class MBDsystem(MBDsystemItem):
         """
         Create list of force objects
         """
-        self.forces = list_of_forces.create_list(filename=self.abs_path_to_forces, parent=self.Forces)
+        self.forces = list_of_forces.create_list(self.abs_path_to_forces, parent=self.Forces)
 
     def create_motions(self):
         """
         Create list of motion objects
         """
-        self.motions = list_of_motions.create_list(filename=self.abs_path_to_motions, parent=self.Motions)
-        print "Motion objects created, number of motions =", len(self.motions)
+        self.motions = list_of_motions.create_list(self.abs_path_to_motions, parent=self.Motions)
 
     def create_springs(self):
         """
         Create list of spring objects
         """
-        self.springs = list_of_springs.create_list(filename=self.abs_path_to_springs, parent=self.Springs)
+        self.springs = list_of_springs.create_list(self.abs_path_to_springs, parent=self.Springs)
 
     def create_contacts(self):
         """
         Create list of contact objects
         """
         #    list of contact objects
-        self.contacts = list_of_contacts.create_list(filename=self.abs_path_to_contacts, parent=self.Contacts)
+        self.contacts = list_of_contacts.create_list(self.abs_path_to_contacts, parent=self.Contacts)
 
         #    for each contact object in a list do
         for contact in self.contacts:
@@ -673,3 +672,12 @@ class MBDsystem(MBDsystemItem):
 
                 else:
                     self.Hmin = Hmin
+
+    def evaluate_Hmax(self):
+        """
+
+        :return:
+        """
+        if self.MBD_system.t_n/10 < self.MBD_system.Hmax:
+            self.MBD_system.Hmax = 0.01*self.MBD_system.t_n
+            print "Hmax modified in %s"%self.__class__.__name__

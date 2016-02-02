@@ -9,17 +9,35 @@ import math
 
 class TreeItem(object):
     """
-    
+    classdocs
     """
     __id = itertools.count(0)
 
+    __MBD_ID = itertools.count(0)
+
     def __init__(self, name, parent=None):
+        """
+
+        :param name:
+        :param parent:
+        :return:
+        """
+        #   MBD ID
+        self._MBD_ID = self.__MBD_ID.next()
+
+        #   ma,e
         self._name = name
+        #   children
         self._children = []
+        #   parent object
         self._parent = parent
+        #   item type
         self._type = "node"
+        #   comments attribute can be edited by user input
         self._comments = ""
+        #   id
         self._id = self.__id.next()
+        #
         self._constructed = True
         self._selected = False
         self._save_options = None

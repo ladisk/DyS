@@ -11,7 +11,19 @@ class Measure(MeasureItem):
     """
     classdocs
     """
-    def __init__(self, element):
+    def __init__(self, ID, name, parent=None):
+        """
+        Constructor
+        """
+        super(Measure, self).__init__(name, parent)
+
+        #   parent
+        self._parent = parent
+
+
+    def _meaure(self, t=None):
         """
 
+        :param t:
+        :return:
         """

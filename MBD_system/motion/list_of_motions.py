@@ -28,7 +28,7 @@ def create_list(filename, parent=None):
             #    motion - predefine parameters
             __motion_name = _motion_name = None
             _body_id = None
-            _q0 = _q1 = _q2 = _q3 = _q4 = _q5 = None
+            _Rx = _Ry = _theta = _dRx = _dRy = _dtheta = None
 
             for i, line in enumerate(file_):
                 line = line.strip()
@@ -71,11 +71,11 @@ def create_list(filename, parent=None):
                         _motion_name = line[match_equal.start() + 1::]
 
                     if _body_id is not None:
-                        motion_ = Motion(__motion_name, _body_id, q0=_q0, q1=_q1, q2=_q2, q3=_q3, q4=_q4, q5=_q5, parent=parent)
+                        motion_ = Motion(__motion_name, _body_id, Rx=_Rx, Ry=_Ry, theta=_theta, dRx=_dRx, dRy=_dRy, dtheta=_dtheta, parent=parent)
                         motions.append(motion_)
 
                         _body_id = None
-                        _q0 = _q1 = _q2 = _q3 = _q4 = _q5 = None
+                        _Rx = _Ry = _theta = _dRx = _dRy = _dtheta = None
 
                 #   body id
                 elif line.startswith("body_id"):
@@ -89,40 +89,40 @@ def create_list(filename, parent=None):
                     _body_id = np.int(line[match_equal.start() +1::])
 
                 #   Rx
-                elif line.startswith("q0"):
+                elif line.startswith("Rx"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q0 = line[match_equal.start() + 1::]
+                    _Rx = line[match_equal.start() + 1::]
 
                 #   Ry
-                elif line.startswith("q1"):
+                elif line.startswith("Ry"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q1 = line[match_equal.start() + 1::]
+                    _Ry = line[match_equal.start() + 1::]
 
                 #   theta
-                elif line.startswith("q2"):
+                elif line.startswith("theta"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q2 = line[match_equal.start() + 1::]
+                    _theta = line[match_equal.start() + 1::]
 
                 #   dRx
-                elif line.startswith("q3"):
+                elif line.startswith("dRx"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q3 = line[match_equal.start() + 1::]
+                    _dRx = line[match_equal.start() + 1::]
 
                 #   dRy
-                elif line.startswith("q4"):
+                elif line.startswith("dRy"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q4 = line[match_equal.start() + 1::]
+                    _dRy = line[match_equal.start() + 1::]
 
                 #   theta
-                elif line.startswith("q5"):
+                elif line.startswith("dtheta"):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
-                    _q5 = line[match_equal.start() + 1::]
+                    _theta = line[match_equal.start() + 1::]
 
                 else:
                     pass

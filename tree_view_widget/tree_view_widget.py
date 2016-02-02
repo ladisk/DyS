@@ -1,8 +1,8 @@
-'''
+"""
 Created on 27. jan. 2014
 
 @author: lskrinjar
-'''
+"""
 import os
 import sys
 import subprocess
@@ -25,6 +25,7 @@ from tree_model import TreeModel
 from MBD_system.MBD_system_items import SolutionDataItem
 from analysis.analysis_widget import AnalysisWidget
 from MBD_system.MBD_system_widget import MBDSystemWidget
+from MBD_system.motion.motion_widget import MotionWidget
 
 class solutionFilenameSignal(QtCore.QObject):
     signal_filename = QtCore.pyqtSignal(str, name='')
@@ -223,7 +224,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 self.menu.addAction(show_marker_Action)
 
         elif self._item._typeInfo == "joint" or self._item._typeInfo == "spring":
-            for force, ID in zip(self._item.force_list, ["i", "j"]):
+            for force, ID in zip(self._item._Fn_list, ["i", "j"]):
                 show_force_Action = QtGui.QAction("Show force on Body "+ID, self, checkable=True, checked=force._visible)
                 show_force_Action.triggered.connect(force._show_force)
                 self.menu.addAction(show_force_Action)
@@ -302,14 +303,27 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 show_body_Action = QtGui.QAction("Show Body", self, checkable=True, checked=self._item._visible)
                 show_body_Action.triggered.connect(self._item._show)
                 self.menu.addAction(show_body_Action)
+                if self._item.VBO_created:
+                    show_body_Action.setEnabled(True)
+                else:
+                    show_body_Action.setEnabled(False)
 
                 show_LCS_Action = QtGui.QAction("Show LCS", self, checkable=True, checked=self._item.LCS._visible)
                 show_LCS_Action.triggered.connect(self._item.LCS._show)
                 self.menu.addAction(show_LCS_Action)
+                if self._item.LCS._VBO_created:
+                    show_LCS_Action.setEnabled(True)
+                else:
+                    show_LCS_Action.setEnabled(False)
 
                 show_CAD_CS_Action = QtGui.QAction("Show CAD CS", self, checkable=True, checked=self._item.CAD_CS._visible)
                 show_CAD_CS_Action.triggered.connect(self._item.CAD_CS._show)
                 self.menu.addAction(show_CAD_CS_Action)
+                if self._item.CAD_CS._VBO_created:
+                    show_CAD_CS_Action.setEnabled(True)
+                else:
+                    show_CAD_CS_Action.setEnabled(False)
+
                 self.menu.addSeparator()
 
                 getBody_q_Action = self.menu.addAction("Get body q")
@@ -503,6 +517,9 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         if self._item._typeInfo.lower() == "spring":
             self._widget = SpringWidget(self._parentNode, parent=self)
+
+        if self._item._typeInfo.lower() == "motion":
+            self._widget = MotionWidget(self._parentNode, parent=self)
 
         # if self._item._typeInfo.lower() == "MBDsystem":
         #     self._widget = MBDSystemWidget(self._item)

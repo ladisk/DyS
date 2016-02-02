@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>585</height>
+    <width>500</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
-    <height>585</height>
+    <width>500</width>
+    <height>668</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>300</width>
-    <height>585</height>
+    <width>500</width>
+    <height>668</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -45,6 +45,35 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="load_data_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="data_file_lineEdit"/>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="name_label">
         <property name="text">
@@ -59,44 +88,31 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="2">
        <widget class="QLineEdit" name="name_lineEdit"/>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
+      <item row="1" column="2">
        <widget class="QLineEdit" name="bodyID_lineEdit">
         <property name="enabled">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QPushButton" name="load_data_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="3" column="1">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="maximumSize">
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>16777215</width>
+          <width>100</width>
           <height>20</height>
          </size>
         </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="data_file_lineEdit"/>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -107,45 +123,12 @@
       <string>Simulation Parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="J_label">
-        <property name="text">
-         <string>J, kgm^2</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="R_label">
         <property name="text">
          <string>R, m</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="R_lineEdit"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="dR_label">
-        <property name="text">
-         <string>dR, m/s</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="dR_lineEdit"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="m_lineEdit"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="mass_label">
-        <property name="text">
-         <string>m, kg</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="J_lineEdit"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="theta_label">
@@ -154,8 +137,44 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="R_lineEdit"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="m_lineEdit"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="J_lineEdit"/>
+      </item>
+      <item row="3" column="2">
        <widget class="QLineEdit" name="theta_lineEdit"/>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLineEdit" name="dtheta_lineEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="J_label">
+        <property name="text">
+         <string>J, kgm^2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="dR_lineEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="mass_label">
+        <property name="text">
+         <string>m, kg</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="dR_label">
+        <property name="text">
+         <string>dR, m/s</string>
+        </property>
+       </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="dtheta_label">
@@ -164,8 +183,21 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="dtheta_lineEdit"/>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>130</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -190,10 +222,66 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="2" column="2">
        <widget class="QLineEdit" name="geometrySTLfile_lineEdit"/>
       </item>
-      <item row="8" column="1">
+      <item row="2" column="0">
+       <widget class="QLabel" name="geometrySTLfile_label">
+        <property name="text">
+         <string>Geometry STL file</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="display_style_label">
+        <property name="text">
+         <string>Display Style</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLineEdit" name="color_lineEdit"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="load_geometry_pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Load</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="centerOfMass_lineEdit"/>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLineEdit" name="transparent_lineEdit"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="color_label">
+        <property name="text">
+         <string>Color, RGB</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
        <widget class="QComboBox" name="display_style_comboBox">
         <item>
          <property name="text">
@@ -212,61 +300,21 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="geometrySTLfile_label">
-        <property name="text">
-         <string>Geometry STL file</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="color_lineEdit"/>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="display_style_label">
-        <property name="text">
-         <string>Display Style</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="color_label">
-        <property name="text">
-         <string>Color, RGB</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="centerOfMass_lineEdit"/>
-      </item>
-      <item row="7" column="1">
-       <widget class="QLineEdit" name="transparent_lineEdit"/>
-      </item>
-      <item row="4" column="1">
-       <widget class="QPushButton" name="load_geometry_pushButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="Line" name="line_2">
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>105</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 21. apr. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import numpy as np
 
 
@@ -19,11 +19,11 @@ def q2theta_i(q, body_id):
         None
     """
     if body_id == "ground":
-        dtheta_i_ = 0
+        theta_i_ = 0
     else:
-        dtheta_i_ = q[3*body_id+2]
+        theta_i_ = q[3*body_id+2]
         
-    return dtheta_i_
+    return theta_i_
 
 if __name__ == "__main__":
     N_b = 2

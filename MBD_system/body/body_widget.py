@@ -31,9 +31,9 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
     """
     
     def __init__(self, group_item, parent=None):
-        '''
+        """
         Constructor
-        '''
+        """
         super(BodyWidget, self).__init__(parent=parent)
         self._parent = parent
 

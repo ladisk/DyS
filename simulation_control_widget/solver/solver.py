@@ -43,22 +43,36 @@ class Solver(QtCore.QThread):
         self.MBD_system = MBD_system
 
         #   solvers
-        self.solveODE = SolveODE(MBD_system=self.MBD_system, parent=self._parent)
+        self._analysis_type()
+
+    def _analysis_type(self):
+        """
+        Select analysis type
+        :return:
+        """
         #   kinematic analysis
-        self.solve_kinematic_analysis = SolveKinematicAnalysis(self.MBD_system, parent=self._parent)
+        if self.MBD_system.analysis_type == "kinematic":
+            self.analysis = SolveKinematicAnalysis(self.MBD_system, parent=self._parent)
+
         #   dynamic analysis
-        self.solve_dynamic_analysis = SolveDynamicAnalysis(self.MBD_system, parent=self._parent)
+        elif self.MBD_system.analysis_type == "dynamic":
+            self.analysis = SolveDynamicAnalysis(self.MBD_system, parent=self._parent)
+
+        else:
+            raise ValueError, "Analysis type not defined!"
 
     def start_solver(self):
         """
         Method that starts the ODE solver (integrtor)
         """
+        self.analysis.solve()
+
         self.running_signal.signal_running.emit("Running")
 
-        if self.MBD_system.analysis_type == "kinematic":
-            self.solve_kinematic_analysis.solve()
-        if self.MBD_system.analysis_type == "dynamic":
-            self.solve_dynamic_analysis.solve()
+        # if self.MBD_system.analysis_type == "kinematic":
+        #     self.kinematic_analysis.solve()
+        # if self.MBD_system.analysis_type == "dynamic":
+        #     self.dynamic_analysis.solve()
         # while self.solveODE.running and not self.solveODE.stopped:
         #     self.solveODE.solve_ODE()
 

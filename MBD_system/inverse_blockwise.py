@@ -24,7 +24,10 @@ def inverse_blockwise(A_inv, B, C, D, Adim):
 #    C = matrix[dim_sub_mat_A:, 0:dim_sub_mat_A]
 #    D = matrix[dim_sub_mat_A:, dim_sub_mat_A:]
 
-    
+    # print "M_inv =", A_inv
+    # print "CqT =", B
+    # print "Cq =", C
+    # print "0 =", D
     #    inverse of submatrix A
 #     print "C =", C.shape
 #     print "A_inv =", A_inv.shape

@@ -144,7 +144,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         print "Simulation started: ", self.start_time_simulation_info
 
         #    create mass and inverse mass matrix (only once)
-        self.DAE_fun.create_M()
+        self.DAE_fun.evaluate_M()
         #    create array of initial conditions for differential equations
         if not self.MBD_system.q0_created:
             self.MBD_system.create_q0()
@@ -182,7 +182,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
 
     def solve_ODE_Euler(self, t_0, t_n, q0, Hmax):
         """
-
+        Euler method for time integration
         :param t_0:
         :param t_n:
         :param q0:
@@ -197,7 +197,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.Hmax = h = Hmax
         self.R = 0
 
-        while self.FLAG == 1 and self._no_error:
+        while self.FLAG == 1:
 
             if self.stopped:
                 self.update_GL_(t=t, q=w)
@@ -210,9 +210,9 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 self.update_GL_(t=t, q=w)
 
             self.t = t = t + h
-            # print "-------------------------------------"
-            # print "t =", t, "step =", self.step
-            w = w + h * self.DAE_fun.create_dq(h, t, w)
+            print "-------------------------------------"
+            print "t =", t, "step =", self.step
+            w = w + h * self.DAE_fun.evaluate_dq(h, t, w)
             # print "q =", w
             #    solve contacts here
             # time.sleep(100)
@@ -226,6 +226,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
             # self.__evaluate_contacts(h, t, w)
 
             h, t, w = self._track_data(h, t, w)
+            print "track data"
 
             self._info(t, w)
 
@@ -241,7 +242,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
 
     def solve_ODE_RK(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
         """
-        RKF - Runge-Kutta-Fehlberg
+        RKF - Runge-Kutta-Fehlberg method for time integration
         Based on Numerical Analysis 9th ed Burden & Faires
         Args:
         t_0 -
@@ -288,19 +289,19 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 h = Hmax
 
             # print "self.FLAG_contact =", self.FLAG_contact
-            # print "--------------------------------"
+            print "--------------------------------"
             # print "h =", h
-            # print "t =", t
+            print "t =", t
             # print "w =", w
-            # print "self.DAE_fun.create_dq(h, t, w) =", self.DAE_fun.create_dq(h, t, w)
-            K1 = h * self.DAE_fun.create_dq(h, t, w)
-            K2 = h * self.DAE_fun.create_dq(h, t + (1 / 4.) * h, w + (1 / 4.) * K1)
-            K3 = h * self.DAE_fun.create_dq(h, t + (3 / 8.) * h, w + (3 / 32.) * K1 + (9 / 32.) * K2)
-            K4 = h * self.DAE_fun.create_dq(h, t + (12 / 13.) * h, w + (1932 / 2197.) * K1 - (7200 / 2197.) * K2 + (7296 / 2197.) * K3)
-            K5 = h * self.DAE_fun.create_dq(h, t + h, w + (439 / 216.) * K1 - 8 * K2 + (3680 / 513.) * K3 - (845 / 4104.) * K4)
-            K6 = h * self.DAE_fun.create_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 + (1859 / 4104.) * K4 - (11 / 40.) * K5)
+            # print "self.DAE_fun.evaluate_dq(h, t, w) =", self.DAE_fun.evaluate_dq(h, t, w)
+            K1 = h * self.DAE_fun.evaluate_dq(h, t, w)
+            K2 = h * self.DAE_fun.evaluate_dq(h, t + (1 / 4.) * h, w + (1 / 4.) * K1)
+            K3 = h * self.DAE_fun.evaluate_dq(h, t + (3 / 8.) * h, w + (3 / 32.) * K1 + (9 / 32.) * K2)
+            K4 = h * self.DAE_fun.evaluate_dq(h, t + (12 / 13.) * h, w + (1932 / 2197.) * K1 - (7200 / 2197.) * K2 + (7296 / 2197.) * K3)
+            K5 = h * self.DAE_fun.evaluate_dq(h, t + h, w + (439 / 216.) * K1 - 8 * K2 + (3680 / 513.) * K3 - (845 / 4104.) * K4)
+            K6 = h * self.DAE_fun.evaluate_dq(h, t + (1 / 2.) * h, w - (8 / 27.) * K1 + 2 * K2 - (3544 / 2565.) * K3 + (1859 / 4104.) * K4 - (11 / 40.) * K5)
 
-            self.R = (1 / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
+            self.R = (1. / h) * np.linalg.norm((1 / 360.) * K1 - (128 / 4275.) * K3 - (2197 / 75240.) * K4 + (1 / 50.) * K5 + (2 / 55.) * K6)
             self.R = absTol
             #    if calculated difference is less the absTolerance limit accept the calculated solution
             if self.R <= absTol or self.FLAG_contact == 1:
@@ -712,9 +713,9 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
             return self.solution_data
 
     def __update_coordinates_and_angles_of_all_bodies(self, q):
-        '''
+        """
         Function updates MBD_system data before display
-        '''
+        """
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(q)
 
     def update_GL_(self, t, q):

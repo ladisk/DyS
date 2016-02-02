@@ -1,8 +1,8 @@
-'''
+"""
 Created on 17. apr. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 from cad2cm_lcs import cad2cm_lcs
 import numpy as np
 

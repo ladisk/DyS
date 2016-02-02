@@ -29,10 +29,10 @@ class Joint_Q_d_vector(object):
 
         
         if joint_type_ == "fixed":
-            self.joint_Q_d_vector = np.zeros(3)
+            self.Q_d = np.zeros(3)
         elif joint_type_ == "revolute":
-            self.joint_Q_d_vector = np.zeros(2)
+            self.Q_d = np.zeros(2)
         elif joint_type_ == "prismatic":
-            self.joint_Q_d_vector = np.zeros(2)
+            self.Q_d = np.zeros(2)
         else:
             raise ValueError, "Joint Q_d vector not constructed!"

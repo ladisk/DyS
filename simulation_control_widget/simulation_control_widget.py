@@ -135,12 +135,10 @@ class SimulationControlWidget(QtGui.QWidget):
         self._solver_thread.start()
         self.solver.moveToThread(self._solver_thread)
 
-
         #    update display on every i-th simulation step
-        self.ui.updateDisplayStep.setText(str(int(self.solver.solveODE.update_opengl_widget_every_Nth_step)))
+        self.ui.updateDisplayStep.setText(str(int(self.solver.analysis.update_opengl_widget_every_Nth_step)))
         self.ui.updateDisplayStep.setValidator(__validator_int)
-        self._delta_step = self.solver.solveODE.update_opengl_widget_every_Nth_step
-        
+        self._delta_step = self.solver.analysis.update_opengl_widget_every_Nth_step
         
         self.ui.currentStep.setEnabled(False)
         self.ui.currentStep.setValidator(__validator_int)
@@ -153,11 +151,11 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.simulationStopButton.clicked.connect(self.solver.stop_solver)
 
         
-        self.solver.solveODE.finished_signal.signal_finished.connect(self.simulationFinished)
-        self.solver.solveODE.filename_signal.signal_filename.connect(self.__automaticaly_load_solution_file)
+        self.solver.analysis.finished_signal.signal_finished.connect(self.simulationFinished)
+        self.solver.analysis.filename_signal.signal_filename.connect(self.__automaticaly_load_solution_file)
 
-        self.solver.solveODE.solution_signal.solution_data.connect(self.__automaticaly_load_solution_file)
-        self.solver.solveODE.solution_signal.solution_data.connect(self._parent.TreeViewWidget.add_solution_data)
+        self.solver.analysis.solution_signal.solution_data.connect(self.__automaticaly_load_solution_file)
+        self.solver.analysis.solution_signal.solution_data.connect(self._parent.TreeViewWidget.add_solution_data)
 
 
         self.ui.simulationResetButton.clicked.connect(self.simulationReset)
@@ -177,13 +175,13 @@ class SimulationControlWidget(QtGui.QWidget):
         
 
         #    signal repaintGL.signal_repaintGL from self.solver triggers self.OpenGLWidget.repaintGL
-        self.solver.solveODE.repaintGL_signal.signal_repaintGL.connect(self.OpenGLWidget.repaintGL)
+        self.solver.analysis.repaintGL_signal.signal_repaintGL.connect(self.OpenGLWidget.repaintGL)
 
         #   signal for take a snapshot
-        self.solver.solveODE.save_screenshot_signal.signal_saveScreenshot.connect(self.take_snapshot)
+        self.solver.analysis.save_screenshot_signal.signal_saveScreenshot.connect(self.take_snapshot)
 
         #   signal time integration error
-        self.solver.solveODE.error_time_integration_signal.signal_time_integration_error.connect(self._time_integration_error)
+        self.solver.analysis.error_time_integration_signal.signal_time_integration_error.connect(self._time_integration_error)
 
         #   change integration method
         self.ui.integrationMethodComboBox.currentIndexChanged.connect(self.selectedIntegrationMethod)
@@ -217,7 +215,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         print "profile here"
         self.profile.enable()
-        self.solver.solveODE.ode_fun.create_M()
+        self.solver.analysis.ode_fun.create_M()
         self.profile.disable()
         self.profile.print_stats()
 
@@ -269,14 +267,14 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         if solution_object_id is not None:
             #   assign solution data from solution data object to ne variable
-            solution_data = self.solver.solveODE._solution_data.load_solution_data()
+            solution_data = self.solver.analysis._solution_data.load_solution_data()
         elif filename is not None:
             pass
         else:
             print "Solution data not loaded!"
 
         # if filename is not None and solution_object_id is None:
-        #     solution_data = self.solver.solveODE.load_simulation_solution_from_file(filename)
+        #     solution_data = self.solver.analysis.load_simulation_solution_from_file(filename)
 
         #   assign a solution data object to pointer of object attribute
         for sol in self.MBD_system.solutions:
@@ -349,7 +347,7 @@ class SimulationControlWidget(QtGui.QWidget):
         Create a snapshot
         """
         captured_figure = self.OpenGLWidget.takeSnapShot()
-        captured_figure.save(self.solver.solveODE.screenshot_filename_abs_path + '.png', 'png')
+        captured_figure.save(self.solver.analysis.screenshot_filename_abs_path + '.png', 'png')
 
     def selectedIntegrationMethod(self, int):
         """
@@ -362,7 +360,7 @@ class SimulationControlWidget(QtGui.QWidget):
 
         :return:
         """
-        self.solver.solveODE.update_opengl_widget_every_Nth_step = int(self.ui.updateDisplayStep.text())
+        self.solver.analysis.update_opengl_widget_every_Nth_step = int(self.ui.updateDisplayStep.text())
         self._delta_step = int(self.ui.updateDisplayStep.text())
         self.MBD_system.updateEveryIthStep = self._delta_step
 
@@ -394,19 +392,19 @@ class SimulationControlWidget(QtGui.QWidget):
         super(SimulationControlWidget, self).setWindowFlags(flags)
 
     def simulationStart(self):
-        if not self.solver.solveODE.running:
+        if not self.solver.analysis.running:
             self.job_info_time_started = time.clock()
-            self.solver.solveODE.running = True
-            self.solver.solveODE.stopped = False
-            self.solver.solveODE.finished = False
+            self.solver.analysis.running = True
+            self.solver.analysis.stopped = False
+            self.solver.analysis.finished = False
 
             self.ui.simulationStartButton.setEnabled(False)
             self.ui.simulationResetButton.setEnabled(False)
             self.ui.simulationStopButton.setEnabled(True)
             
     def simulationStop(self):
-        if self.solver.solveODE.running:
-            self.solver.solveODE.stopped = True
+        if self.solver.analysis.running:
+            self.solver.analysis.stopped = True
             
             self.ui.simulationStartButton.setEnabled(True)
             self.ui.simulationStopButton.setEnabled(False)
@@ -418,7 +416,7 @@ class SimulationControlWidget(QtGui.QWidget):
         self.job_info_time_finished = time.clock()
 
     def simulationReset(self):
-        self.solver.solveODE.restore_initial_condition()
+        self.solver.analysis.restore_initial_condition()
         # self.ui.simulationResetButton.setEnabled(False)
         self.ui.simulationStartButton.setEnabled(True)
 

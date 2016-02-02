@@ -31,13 +31,55 @@ class SolveKinematicAnalysis(SolveDynamicAnalysis):
         #   parent
         self._parent = parent
 
+        #    DAE fun object
+        self.DAE_fun = DAEfun(self._MBD_system, parent=self)
+
     def solve(self):
         """
         Solves a kinematic system
         """
         print "solve()"
-        pprint(vars(self))
+        # pprint(vars(self))
 
         #   start solve
         self.start_solve()
+
+
+        self.simulation_id = 0
+        self.FLAG = 1
+
+
         # scipy.optimize.newton()
+
+        t = 0
+        h = self._MBD_system.Hmax
+        self.t_n = self._MBD_system.t_n
+
+        #   initial approximation
+        q = self.DAE_fun.evaluate_q0()
+
+        #   kinematic analysis
+        while self.FLAG == 1:
+            print "t =", t
+            if self.stopped:
+                # self.update_GL_(t=t, q=w)
+                self.stop_solve()
+                self.FLAG = 0
+
+            if t >= self.t_n:
+                self.FLAG = 0
+                self.finished = True
+                print "finished!"
+                # self.update_GL_(t=t, q=w)
+
+            if self.finished or self.failed:
+                self.finished_solve()
+
+
+            #   evaluate C vector
+            C = self.DAE_fun.evaluate_C(t, q)
+            print "C =", C
+
+
+            #   increase time step
+            self.t = t = t + h

@@ -19,12 +19,17 @@ class Motion(MotionItem):
     """
     classdocs
     """
+    __id = itertools.count(0)
 
-    def __init__(self, name, body_id, q0=None, q1=None, q2=None, q3=None, q4=None, q5=None, parent=None):
+    def __init__(self, name, body_id, Rx=None, Ry=None, theta=None, dRx=None, dRy=None, dtheta=None, parent=None):
         """
-        Constructor
+        Constructor of a class Motion that can be used in kinematic analysis of the system
+
         """
         super(Motion, self).__init__(name, parent)
+
+        #   motion id
+        self._id = self.__id.next()
 
         #   parent
         self._parent = parent
@@ -37,21 +42,21 @@ class Motion(MotionItem):
 
         #   generalized coordinates of a body
         #   explicit function of time
-        #   R_x
-        self.q0 = q0
-        #   R_y
-        self.q1 = q1
+        #   Rx
+        self.Rx = Rx
+        #   Ry
+        self.Ry = Ry
         #   theta
-        self.q2 = q2
-        #   dR_x
-        self.q3 = q3
-        #   dR_y
-        self.q4 = q4
+        self.theta = theta
+        #   dRx
+        self.dRx = dRx
+        #   dRy
+        self.dRy = dRy
         #   dtheta
-        self.q5 = q5
+        self.dtheta = dtheta
 
         #   generalized displacements and velocites vector of a body
-        self.q = [self.q0, self.q1, self.q2, self.q3, self.q4, self.q5]
+        self.q = [self.Rx, self.Ry, self.theta, self.dRx, self.dRy, self.dtheta]
 
     def _evaluate(self, t, q):
         """

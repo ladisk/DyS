@@ -17,11 +17,11 @@ from MBD_system.Ai_hi import Ai_hi
 from MBD_system.Ai_theta_hi import Ai_theta_hi
 from MBD_system.hi_Ai_theta_ui_P import hi_Ai_theta_ui_P_constant
 from MBD_system.r_ij_P_Ai_theta_hi import r_ij_P_Ai_theta_hi_constant
+from MBD_system.r_ij_P import r_ij_P
 from MBD_system.u_P_cad2cm_lcs import u_P_cad2cm_lcs
 from MBD_system.q2dtheta_i import q2dtheta_i
 from MBD_system.q2R_i import q2R_i
 from MBD_system.q2dR_i import q2dR_i
-from MBD_system.r_ij_P import r_ij_P
 from MBD_system.MBD_system_items import JointItem
 from MBD_system.q2theta_i import q2theta_i
 from MBD_system.force.force import Force
@@ -37,10 +37,9 @@ class Joint(JointItem):
     __id = itertools.count(0)
 
     def __init__(self, joint_type, body_id_i, body_id_j, u_iP_CAD = np.array([0, 0]), u_jP_CAD=np.array([0, 0]),
-                 u_iQ=np.array([0, 0]), parent=None):
-        super(Joint, self).__init__(joint_type, parent)
+                 u_iQ_CAD=np.array([0, 0]), parent=None):
         """
-        creates a joint object between 2 bodies
+        Creates a joint object
         in:
             body_i = body_id
             body_j = body_id
@@ -48,14 +47,22 @@ class Joint(JointItem):
             u_iP_CAD - in CAD LCS of a body
             u_jP_CAD - in CAD LCS of a body
         """
+        super(Joint, self).__init__(joint_type, parent)
+
         #    number
         self.joint_id = self.__id.next()  # len(joints_list) + 1
         self._parent = parent
+        # print "self._parent =", self._parent._children
+        # print "self._parent._parent =", self._parent._parent
+        # pprint(vars(self._parent._parent))
+        # joints_list = self._parent._children
+        # print "joints_list =", joints_list
         joints_list = self._parent._parent.joints
-
         self.joint_type = joint_type
 
-        self.joint_types = ["fixed", "revolute", "prismatic"]
+        self.joint_types = ["fixed",
+                            "revolute",
+                            "prismatic"]
 
         #   create marker list
         self.markers = []
@@ -98,41 +105,42 @@ class Joint(JointItem):
         self.u_P_list = []
         #    only for prismatic joint - a normal vector to translational direction
         if self.joint_type == "prismatic":
-            self.u_iQ = u_iQ
+            self.u_iQ = u_iQ_CAD
         else:
             self.u_iQ = []
 
         self.z_dim = 0
 
         #   get q vector of current MBD system at joint object initialization
-        q0 = self._parent._parent.get_q()
+        self.q0 = self._parent._parent.get_q()
 
+        #   predefined variable of vector C(q, t) constraint equation
+        self.C0 = None
+        self.theta0 = None
 
-        #   initial calculation of vector C(q, t)
-        if self.body_id_i == "ground" or self.body_id_j == "ground":
-            _body_id = copy(self.body_id_list)
-            _body_id.remove("ground")
-            _body_id = _body_id[0]
-
-            indx = self.body_id_list.index(_body_id)
-            C1 = q2R_i(q0, _body_id) + Ai_ui_P_vector(self.u_P_CAD_list[indx], q2theta_i(q0, _body_id))
-
-            C2 = q2theta_i(q0, self.body_id_list[indx])
-
-            self.C = np.append(C1, C2)
-        else:
-            self.C = np.zeros(3)
+        # if self.body_id_i == "ground" or self.body_id_j == "ground":
+        #     _body_id = copy(self.body_id_list)
+        #     _body_id.remove("ground")
+        #     _body_id = _body_id[0]
+        #
+        #     indx = self.body_id_list.index(_body_id)
+        #     C1 = q2R_i(self.q0, _body_id) + Ai_ui_P_vector(self.u_P_CAD_list[indx], q2theta_i(self.q0, _body_id))
+        #
+        #     C2 = q2theta_i(self.q0, self.body_id_list[indx])
+        #
+        #     self.C0 = np.append(C1, C2)
+        # else:
+        #     self.C0 = np.zeros(3)
 
         # predefined empty list
-        self.joint_C_q_matrix_list = []
-        self.joint_Q_d_vector_list = []
+        self.C_q_list = []
+        self.Q_d_list = []
 
 
         #   pair of contact force list
         self.contact_bodies_added_to_list = False
         self.list_of_contact_force_objects_constructed = False
         self.force_list = []
-
 
         #   calculate u_P vector of every body in body LCS
         #   build constraint forces object
@@ -165,12 +173,11 @@ class Joint(JointItem):
             self.u_P_list.append(u_P_LCS)
 
         [self.u_iP, self.u_jP] = self.u_P_list
+        # print "self.u_iP, self.u_jP =", self.u_iP, self.u_jP
         self.list_of_contact_force_objects_constructed = True
+        self.additional_params_calulated = True
 
-
-
-
-    def create_joint_C_q_matrix(self, bodies, q):
+    def evaluate_C_q(self, q):
         """
         Function creates C_q matrix for the specified joint type.
         Args:
@@ -186,7 +193,7 @@ class Joint(JointItem):
         elif self.joint_type == "revolute":
             return self._create_revolute_joint_C_q(q)
         elif self.joint_type == "prismatic":
-            return self._create_prismatic_joint_C_q(q, bodies)
+            return self._create_prismatic_joint_C_q(q)
         else:
             raise IOError, "joint_type not correct. Please specify correct joint type."
 
@@ -207,7 +214,7 @@ class Joint(JointItem):
         #     self.additional_params_calulated = True
 
 
-        self.joint_C_q_matrix_list = []
+        self.C_q_list = []
         #    construct C_q matrix for fixed joint
         for body_id in self.body_id_list:
             if body_id == "ground":
@@ -219,9 +226,9 @@ class Joint(JointItem):
                     u_P=self.u_P_list[joint_C_q_matrix_body.id],
                     theta=q_[3 * self.body_id_list[joint_C_q_matrix_body.id] + 2], _id=joint_C_q_matrix_body.id)
 
-            self.joint_C_q_matrix_list.append(joint_C_q_matrix_body)
+            self.C_q_list.append(joint_C_q_matrix_body)
 
-        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.joint_C_q_matrix_list
+        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.C_q_list
 
         return i_joint_C_q_matrix, j_joint_C_q_matrix
 
@@ -231,7 +238,7 @@ class Joint(JointItem):
         """
         self.joint_DOF = 1
         #    predefine empty list to store joint C_q matrix for each body in joint
-        self.joint_C_q_matrix_list = []
+        self.C_q_list = []
         #    construct C_q matrix for revolute joint
         for body_id, _u_P, _id in zip(self.body_id_list, self.u_P_list, [0, 1]):
 
@@ -245,13 +252,13 @@ class Joint(JointItem):
                 joint_C_q_matrix_body.matrix[:, -1] = Ai_theta_ui_P_vector(_u_P, _theta, _id)
 
             # append joint C_q matrix to list
-            self.joint_C_q_matrix_list.append(joint_C_q_matrix_body)
+            self.C_q_list.append(joint_C_q_matrix_body)
 
-        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.joint_C_q_matrix_list
+        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.C_q_list
 
         return i_joint_C_q_matrix, j_joint_C_q_matrix
 
-    def _create_prismatic_joint_C_q(self, q_, bodies_):
+    def _create_prismatic_joint_C_q(self, q_):
         """
         Create prismatic joint matrix for each body connected with the joint.
         """
@@ -276,7 +283,7 @@ class Joint(JointItem):
         hi_x, hi_y = self.h_i
 
         #    predefine empty list to store joint C_q matrix for each body in joint
-        self.joint_C_q_matrix_list = []
+        self.C_q_list = []
         #    construct C_q matrix for prismatic joint
         for body_id in self.body_id_list:
 
@@ -312,13 +319,13 @@ class Joint(JointItem):
 
 
             # append joint C_q matrix to list
-            self.joint_C_q_matrix_list.append(joint_C_q_matrix_body)
+            self.C_q_list.append(joint_C_q_matrix_body)
 
-        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.joint_C_q_matrix_list
+        [i_joint_C_q_matrix, j_joint_C_q_matrix] = self.C_q_list
 
         return i_joint_C_q_matrix, j_joint_C_q_matrix
 
-    def create_joint_Q_d_vector(self, bodies, q, N_b):
+    def evaluate_Q_d(self, q):
         """
         Function creates Q_d vector for joint if joint type is fixed or revolute.
         Args:
@@ -332,7 +339,7 @@ class Joint(JointItem):
         if self.joint_type == "fixed":
             return self._create_fixed_joint_Q_d(bodies_=bodies, q_=q, N_b_=N_b)
         elif self.joint_type == "revolute":
-            return self._create_revolute_joint_Q_d(bodies_=bodies, q_=q, N_b_=N_b)
+            return self._create_revolute_joint_Q_d(q)
         elif self.joint_type == "prismatic":
             return self._create_prismatic_joint_Q_d(bodies_=bodies, q_=q, N_b_=N_b)
         else:
@@ -345,7 +352,7 @@ class Joint(JointItem):
         """
         #    if body i and j are not ground
         if self.body_id_i != "ground" and self.body_id_j != "ground":
-            self.joint_Q_d_vector_list = []
+            self.Q_d_list = []
 
             for body_id in self.body_id_list:
                 joint_Q_d_vector_body = Joint_Q_d_vector(joint_type_=self.joint_type, body_connected_to_ground=False)
@@ -358,10 +365,10 @@ class Joint(JointItem):
                 joint_Q_d_vector_body.joint_Q_d_vector[0:2] = Ai_ui_P_vector_ * (dtheta_body ** 2)
 
                 #    add calculated joint matrix of a body to list
-                self.joint_Q_d_vector_list.append(joint_Q_d_vector_body)
+                self.Q_d_list.append(joint_Q_d_vector_body)
 
             Q_d_vector_ = +(
-            self.joint_Q_d_vector_list[0].joint_Q_d_vector - self.joint_Q_d_vector_list[1].joint_Q_d_vector)
+            self.Q_d_list[0].joint_Q_d_vector - self.Q_d_list[1].joint_Q_d_vector)
 
 
         elif self.body_id_i == "ground":
@@ -398,28 +405,28 @@ class Joint(JointItem):
 
         return Q_d_vector_
 
-    def _create_revolute_joint_Q_d(self, bodies_, q_, N_b_):
+    def _create_revolute_joint_Q_d(self, q):
         """
         Q_d equation according to eq. 3.133 in Computational Dynamics 3rd Ed. (A.A.Shabana)
         """
         #    if body i and body j are not ground
         if self.body_id_i != "ground" and self.body_id_j != "ground":
 
-            self.joint_Q_d_vector_list = []
+            self.Q_d_list = []
             for body_id in self.body_id_list:
                 joint_Q_d_vector_body = Joint_Q_d_vector(joint_type_=self.joint_type)
 
                 Ai_ui_P_vector_ = Ai_ui_P_vector(u_P=self.u_P_list[joint_Q_d_vector_body.id],
-                                                 theta=q2theta_i(q_, body_id))
+                                                 theta=q2theta_i(q, body_id))
 
-                dtheta_body = q2dtheta_i(q_, body_id)
+                dtheta_body = q2dtheta_i(q, body_id)
 
                 joint_Q_d_vector_body.joint_Q_d_vector = Ai_ui_P_vector_ * (dtheta_body ** 2)
 
                 #    add calculated joint matrix of a body to list
-                self.joint_Q_d_vector_list.append(joint_Q_d_vector_body)
+                self.Q_d_list.append(joint_Q_d_vector_body)
 
-            Q_d_vector_ = self.joint_Q_d_vector_list[0].joint_Q_d_vector - self.joint_Q_d_vector_list[1].joint_Q_d_vector
+            Q_d_vector_ = self.Q_d_list[0].joint_Q_d_vector - self.Q_d_list[1].joint_Q_d_vector
 
 
         # construct Q_d vector if body i is ground
@@ -432,9 +439,9 @@ class Joint(JointItem):
 
             # _theta = q2theta_i(q_, _body_id)
             #    calculate Q_d vector of only non-ground body
-            Ai_ui_P_vector_ = Ai_ui_P_vector(u_P=self.u_P_list[joint_Q_d_vector_body.id], _theta=q2theta_i(q_, _body_id))
+            Ai_ui_P_vector_ = Ai_ui_P_vector(u_P=self.u_P_list[joint_Q_d_vector_body.id], _theta=q2theta_i(q, _body_id))
 
-            dtheta_body = q2dtheta_i(q_, _body_id)
+            dtheta_body = q2dtheta_i(q, _body_id)
 
             joint_Q_d_vector_body.joint_Q_d_vector = Ai_ui_P_vector_ * (dtheta_body ** 2)
 
@@ -450,11 +457,11 @@ class Joint(JointItem):
             #   get evaluated vector to point of kinematic constraint u_P
             _u_P = self.u_P_list[joint_Q_d_vector_body.id]
             #   theta of body from vector q
-            _theta = q2theta_i(q_, _body_id)
+            _theta = q2theta_i(q, _body_id)
             #    calculate Q_d vector of only non-ground body
             Ai_ui_P_vector_ = Ai_ui_P_vector(_u_P, _theta)
             #   omega of body from vector q
-            dtheta_body = q2dtheta_i(q_, _body_id)
+            dtheta_body = q2dtheta_i(q, _body_id)
 
             joint_Q_d_vector_body.joint_Q_d_vector = Ai_ui_P_vector_ * dtheta_body ** 2
 
@@ -492,7 +499,7 @@ class Joint(JointItem):
 
         return Q_d_vector_
 
-    def create_joint_C_vector(self, q_):
+    def evaluate_C(self, q_):
         """
         Function creates C vector for the specified joint type.
         Args:
@@ -566,6 +573,13 @@ class Joint(JointItem):
         
         """
 
+    def evaluate_rijP(self, q):
+        """
+
+        :param q:
+        :return:
+        """
+        return r_ij_P(q2R_i(q, self.body_id_i), q2theta_i(q, self.body_id_i), self.u_iP, q2R_i(q, self.body_id_j), q2theta_i(q, self.body_id_j), self.u_jP)
 
 if __name__ == "__main__":
     #     a = Joint(joint_type = "revolute", body_id_i = 1, body_id_j = 2, u_iP_CAD = np.array([1, 2]), u_jP_CAD = np.array([33, 44]))

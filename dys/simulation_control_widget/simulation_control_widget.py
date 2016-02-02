@@ -95,8 +95,7 @@ class SimulationControlWidget(QtGui.QWidget):
         # self.ui.simulation_progressBar.setValue(0)
         
         #    Hmax
-        if self.MBD_system.t_n/100 < self.MBD_system.Hmax:
-            self.MBD_system.Hmax = 0.01*self.MBD_system.t_n
+        self.MBD_system.evaluate_Hmin()
 
         #   Hmin
         self.MBD_system.evaluate_Hmin()

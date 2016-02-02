@@ -108,11 +108,12 @@ class MainWindow(QtGui.QMainWindow):
         MBD_folder_name_ = []
         self.MBD_file_abs_path_ = []
 
-
         # self.MBD_filename = "dys_0.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0"
         # self.MBD_filename = "dys_0_2_2.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0_2_2"
+        self.MBD_filename = "dys_0_3_prismatic_joint.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_3_prismatic_joint"
 #         self.MBD_filename = "dys_0_5.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_5"
 #         self.MBD_filename = "dys_0_6_1.dprj"
@@ -132,8 +133,8 @@ class MainWindow(QtGui.QMainWindow):
 #         self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
 
-        self.MBD_filename = "0_7_3_3_kinematic_analysis.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis"
+        # self.MBD_filename = "0_7_3_3_kinematic_analysis_4bar.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_4bar"
 
 #         self.MBD_filename = "dys_0_7_3_0.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
@@ -198,16 +199,16 @@ class MainWindow(QtGui.QMainWindow):
         self.create_status_bar()
         
         #    signals and connections
-        self.SimulationControlWidget.solver.solveODE.step_signal.signal_step.connect(self.update_statusbar_text2)
+        self.SimulationControlWidget.solver.analysis.step_signal.signal_step.connect(self.update_statusbar_text2)
 
         self.SimulationControlWidget.solver.running_signal.signal_running.connect(self.update_statusbar_text3)
         self.SimulationControlWidget.solver.stopped_signal.signal_stopped.connect(self.update_statusbar_text3)
-        self.SimulationControlWidget.solver.solveODE.finished_signal.signal_finished.connect(self.update_statusbar_text3)
+        self.SimulationControlWidget.solver.analysis.finished_signal.signal_finished.connect(self.update_statusbar_text3)
 
 
         # self.SimulationControlWidget.solver.solveODE.finished_signal.signal_finished.connect(self.update_statusbar_text3)
 
-        self.SimulationControlWidget.solver.solveODE.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
+        self.SimulationControlWidget.solver.analysis.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
         self.SimulationControlWidget.step_num_signal.signal_step.connect(self.update_statusbar_text2)
         self.SimulationControlWidget.status_signal.signal_status.connect(self.update_statusbar_text3)
         
@@ -216,7 +217,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.TreeViewWidget._widget.repaintGL_signal.signal_repaintGL.connect(self.SimulationControlWidget.OpenGLWidget._repaintGL)
         
         
-        self.SimulationControlWidget.solver.solveODE.energy_signal.signal_energy.connect(self.update_statusbar_text1)
+        self.SimulationControlWidget.solver.analysis.energy_signal.signal_energy.connect(self.update_statusbar_text1)
         self.SimulationControlWidget.energy_signal.signal_energy.connect(self.update_statusbar_text1)
 
     def create_actions(self):
@@ -523,7 +524,7 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().addWidget(self.infoText3, stretch=1)
   
         self.infoText1.setText("Energy (delta): ")
-        self.infoText2.setText("Step No.: " + str(self.SimulationControlWidget.solver.solveODE.step))
+        self.infoText2.setText("Step No.: " + str(self.SimulationControlWidget.solver.analysis.step))
         self.infoText3.setText("Status: Ready")
         self.repaint()
 
@@ -535,19 +536,19 @@ class MainWindow(QtGui.QMainWindow):
 
     def update_statusbar_text3(self, simulation_status_string):
         # print "simulation_status_string =", simulation_status_string
-        if self.SimulationControlWidget.solver.solveODE.running == True:
+        if self.SimulationControlWidget.solver.analysis.running == True:
             simulation_status_string = "Running"
 
-        elif self.SimulationControlWidget.solver.solveODE.stopped == True:
+        elif self.SimulationControlWidget.solver.analysis.stopped == True:
             simulation_status_string = "Stopped"
 
-        elif self.SimulationControlWidget.solver.solveODE.finished == True:
+        elif self.SimulationControlWidget.solver.analysis.finished == True:
             simulation_status_string = "Finished"
 
         else:
             simulation_status_string = simulation_status_string
         # print "animation"
-        self.SimulationControlWidget.solver.solveODE.finished_signal
+        self.SimulationControlWidget.solver.analysis.finished_signal
         simulation_status_string = simulation_status_string
 
         self.infoText3.setText("Status: " + QtCore.QString(simulation_status_string))

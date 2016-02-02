@@ -1,8 +1,8 @@
-'''
+"""
 Created on 18. feb. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import logging
 import os
 import re
@@ -22,10 +22,9 @@ def create_list(filename, MBD_folder_abs_path=[]):
         
         
     filename = os.path.join(MBD_folder_abs_path, filename)
-    
-    
+
     bodies = []
-    try:
+    if os.path.isfile(filename):
         with open(filename, "r") as file_:
         #    'r' - read
         #    'w' - write
@@ -51,9 +50,9 @@ def create_list(filename, MBD_folder_abs_path=[]):
             
         # logging.getLogger("DyS_logger").info("File %s found! Bodies created successfully!", filename)
                     
-    except:
+    else:
         logging.getLogger("DyS_logger").info("File %s not found! No bodies created!", filename)
-        raise IOError, "File %s not found!", filename
+        raise IOError, "File %s not found!"%filename
     
     return bodies
 

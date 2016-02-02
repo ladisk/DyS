@@ -50,7 +50,7 @@ class DAEfun(object):
         self.cols_C_q = 3 * self.MBD_system.number_of_bodies
         self.rows_C_q = self.MBD_system.C_q_number_of_rows
 
-    def create_M(self):
+    def evaluate_M(self):
         """
         Create mass matrix
         """
@@ -72,7 +72,7 @@ class DAEfun(object):
 
         self.M = M
         self.M_created = True
-        
+
         #    inverse mass matrix
         self.M_inv = np.linalg.inv(self.M)
 
@@ -90,18 +90,18 @@ class DAEfun(object):
         print "Number of coordinates =", num_C
         DOF = num_C - num_Cq_eq
         print "DOF =", DOF
-        
+
         _q0 = q0[0:0.5 * len(q0)]
         gaussian_elimination(C_q, None)
-        
+
         return C_q, C_qT
 
-    def create_C_q(self, t_, q_):
+    def evaluate_C_q(self, t, q):
         """
         Evaluate matrix C_q
         """
         #    predefine C_q matrix size
-        
+
         # #    C_q matrix if there are contacts in compression phase
         # if self._parent.FLAG_contact and any(contact._phase == "C" for contact in self.MBD_system.contacts):
         #
@@ -123,64 +123,53 @@ class DAEfun(object):
         #             C_q[i:self.rows_C_q + i + 3, 3 * contact.body_id_i:3 * contact.body_id_i + 3] = contact_matrix_body_i.matrix
         #             C_q[i:self.rows_C_q + i + 3, 3 * contact.body_id_j:3 * contact.body_id_j + 3] = contact_matrix_body_j.matrix
 
-            
+
         #    C_q matrix if there are no contacts in compression phase and only constraint equations
 
         self.__C_q_size()
-        C_q = np.zeros([self.rows_C_q, self.cols_C_q])  # self.rows_C_q depends on joint number and type
-
+        C_q = np.zeros([self.rows_C_q, self.cols_C_q])
         for joint in self.MBD_system.joints:
-
             #    creates a C_q matrix of a joint based on joint's properties (type, geometry, etc.)
-            joint_matrix_body_i, joint_matrix_body_j = joint.create_joint_C_q_matrix(bodies=self.MBD_system.bodies, q=q_)
+            C_q_i, C_q_j = joint.evaluate_C_q(q)
 
             #    C_q matrix for joint type: fixed
             if joint.joint_type == "fixed":
-
                 #    add matrix of body j to Cq matrix
                 if joint.body_id_i == "ground":
-                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
-
+                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body i to Cq matrix
                 elif joint.body_id_j == "ground":
-                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
-
+                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
                 #    add matrix of body i and j to Cq matrix
                 elif (joint.body_id_i != "ground") and (joint.body_id_j != "ground"):
-                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
-                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
+                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
+                    C_q[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
 
             #    C_q matrix for joint type: revolute
             elif joint.joint_type == "revolute":
-
                 #    add matrix of body i and j to Cq matrix
                 if (joint.body_id_i != "ground") and (joint.body_id_j != "ground"):
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
-
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body j to Cq matrix
                 elif joint.body_id_i == "ground":
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
-
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body i to Cq matrix
                 elif joint.body_id_j == "ground":
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
 
             #    C_q matrix for joint type: prismatic
             elif joint.joint_type == "prismatic":
-
                 #    add matrix of body i and j to Cq matrix
                 if (joint.body_id_i != "ground") and (joint.body_id_j != "ground"):
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
-
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body j to Cq matrix
                 elif joint.body_id_i == "ground":
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = joint_matrix_body_j.matrix
-
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body i to Cq matrix
                 elif joint.body_id_j == "ground":
-                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = joint_matrix_body_i.matrix
+                    C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
 
             else:
                 raise Exception, "C_q matrix not constructed. Unknown joint type!"
@@ -189,10 +178,10 @@ class DAEfun(object):
         C_q_trans = C_q.T
         #    size of C_q matrix
         [self.rows_C_q, self.col_C_q] = C_q.shape
-        
+
         return C_q, C_q_trans
-        
-    def create_Q_d(self, q_=[], dq_=[], t=0):
+
+    def evaluate_Q_d(self, q):
         """
         Evaluates vector of terms that are quadratic in the velocities
         """
@@ -213,14 +202,14 @@ class DAEfun(object):
         #         print "Q_d =", Q_d
         #         raise ValueError, "Vector Q_d not correct size."
         #     return Q_d
-        
+
         #    create Q_d vector as no contact is present
         # else:
         Q_d = np.zeros(self.rows_C_q)
 
         for joint in self.MBD_system.joints:
 
-            Q_d_joint_vector = joint.create_joint_Q_d_vector(bodies=self.MBD_system.bodies, q=q_, N_b=self.MBD_system.number_of_bodies)
+            Q_d_joint_vector = joint.evaluate_Q_d(q)
 
             if joint.joint_type == "fixed":
                 Q_d[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3] = Q_d_joint_vector
@@ -236,7 +225,7 @@ class DAEfun(object):
         else:
             raise ValueError, "Vector Q_d not correct size."
         return Q_d
-            
+
     def create_Q_e(self, t, q_):
         """
         Evaluate vector of generalized external forces of the system
@@ -250,7 +239,7 @@ class DAEfun(object):
         # print "q(in) =", q_
         #    vector of generalised external forces
         Q_e = np.zeros(3 * self.MBD_system.number_of_bodies)
-        
+
         #    add gravity forces
         if (self.gravity != np.zeros(3)).any():
             for body in self.MBD_system.bodies:
@@ -296,42 +285,37 @@ class DAEfun(object):
                 contact_matrix_body_i, contact_matrix_body_j = contact.create_contact_C_s_matrix()
 #                 print "contact_matrix_body_i ="
 #                 print contact_matrix_body_i.matrix
-#                 
+#
 #                 print "contact_matrix_body_j ="
 #                 print contact_matrix_body_j.matrix
 #                 print "==============================================="
                 C_s[i:i + 3, 2 * i] = contact_matrix_body_i.matrix[:, 0]
-                C_s[i:i + 3, 2 * i + 1] = contact_matrix_body_j.matrix[:, 0]  
-                
+                C_s[i:i + 3, 2 * i + 1] = contact_matrix_body_j.matrix[:, 0]
+
 #                 C_s[self.rows_C_q + i:self.rows_C_q + i + 3, 2 * i] = contact_matrix_body_i.matrix[:, 0]
-#                 C_s[self.rows_C_q + i:self.rows_C_q + i + 3, 2 * i + 1] = contact_matrix_body_j.matrix[:, 0]    
-                
-        
+#                 C_s[self.rows_C_q + i:self.rows_C_q + i + 3, 2 * i + 1] = contact_matrix_body_j.matrix[:, 0]
+
+
         #    size of C_q matrix
         [self.rows_C_s, self.cols_C_s] = C_s.shape
-        
+
         #    matrix C_q transposed
         C_s_trans = C_s.T
         return C_s, C_s_trans
 
-    def create_C(self, t, q_):
+    def evaluate_C(self, t, q_):
         """
         Function calculates C vector for every joint - this is used with Baumgarte's Stabilization Method - BSM
         """
         C = np.zeros(self.MBD_system.C_q_number_of_rows)
-
         for joint in self.MBD_system.joints:
-
-            C_joint_vector = joint.create_joint_C_vector(q_)
-
+            C_joint = joint.evaluate_C(q_)
             if joint.joint_type == "fixed":
-                C[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3] = C_joint_vector
-
+                C[3 * joint.fixed_joint_id:3 * joint.fixed_joint_id + 3] = C_joint
             if joint.joint_type == "revolute":
-                C[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2] = C_joint_vector
-
+                C[3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * joint.revolute_joint_id + 2] = C_joint
             if joint.joint_type == "prismatic":
-                C[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2] = C_joint_vector
+                C[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2] = C_joint
 
         if len(C) == self.MBD_system.C_q_number_of_rows:
             pass
@@ -348,18 +332,18 @@ class DAEfun(object):
         dC = np.dot(C_q, dq)
         return dC
 
-    def create_dq(self, h, t, q):
+    def evaluate_dq(self, h, t, q):
         """
-        
+
         """
         # print "t(sub) = ", t
         #    construct Cq matrix
-        self.C_q, self.C_qT = self.create_C_q(t, q)
+        self.C_q, self.C_qT = self.evaluate_C_q(t, q)
 
         #   size of C_s matrix
         self.rows_C_s = 0
         self.cols_C_s = 0
-                
+
         #    construct augmented matrix
         #    size of predefined empty matrix
         rows = self.M_dim + self.rows_C_q
@@ -375,15 +359,15 @@ class DAEfun(object):
 
         #    vector of elements, that are quadratic in velocities
         if self.MBD_system.use_BSM:
-            C = self.create_C(t, q)
+            C = self.evaluate_C(t, q)
             dC = self.create_dC(self.C_q, q)
 
             self.alpha = h#1./h
             self.beta = self.alpha #* np.sqrt(2)
 
-            Q_d = self.create_Q_d(q) - 2*self.alpha*dC - (self.beta**2)*C
+            Q_d = self.evaluate_Q_d(q) - 2*self.alpha*dC - (self.beta**2)*C
         else:
-            Q_d = self.create_Q_d(q)
+            Q_d = self.evaluate_Q_d(q)
 
         _vector[self.M_dim:rows] = Q_d
 

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 28. jul. 2015
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import datetime
 from pprint import pprint
 
@@ -28,9 +28,9 @@ class ForceWidget(QtGui.QDialog):
     """
     
     def __init__(self, parent_node=None, parent=None):
-        '''
+        """
         Constructor
-        '''
+        """
         super(ForceWidget, self).__init__(parent)
         self._parent = parent
 
@@ -148,7 +148,6 @@ class ForceWidget(QtGui.QDialog):
         #         "Input not correct!",
         #         QtGui.QMessageBox.Cancel, QtGui.QMessageBox.NoButton,
         #         QtGui.QMessageBox.NoButton)
-
 
     def _edit(self, item=None):
         """
