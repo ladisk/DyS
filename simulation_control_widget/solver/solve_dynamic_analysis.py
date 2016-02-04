@@ -120,7 +120,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         :return:
         """
         #    solution container variable
-        self.q0 = self._MBD_system.create_q0()
+        self.q0 = self._MBD_system.evaluate_q0()
         self.q_sol_matrix = np.array([self.q0])
         self.t_vector = np.array([[0]])
         self.R_vector = np.array([0])
@@ -147,10 +147,10 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.DAE_fun.evaluate_M()
         #    create array of initial conditions for differential equations
         if not self.MBD_system.q0_created:
-            self.MBD_system.create_q0()
+            self.MBD_system.evaluate_q0()
 
         #   get initial conditions
-        q0 = self._MBD_system.create_q0()
+        q0 = self._MBD_system.evaluate_q0()
 
         #   create solution data object to store data at each simulation start
         self._solution_data = SolutionData(MBD_system=self.MBD_system)#parent=self.MBD_system.Solution
@@ -226,7 +226,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
             # self.__evaluate_contacts(h, t, w)
 
             h, t, w = self._track_data(h, t, w)
-            print "track data"
+            # print "track data"
 
             self._info(t, w)
 
@@ -235,9 +235,10 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
 
         if self.finished or self.failed:
             self.finished_solve()
+            self.save_solution_data()
 
         #    save data to file
-        if self.MBD_system._save_options.lower() == "discard":
+        if self.MBD_system._save_options.lower() != "discard":
             self.write_simulation_solution_to_file()
 
     def solve_ODE_RK(self, t_0, t_n, q0, absTol, relTol, Hmax, Hmin):
@@ -634,21 +635,16 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         """
         Function writes solution data to solution data object
         """
-        #   reshape data to join in one matrix
-        #   step
-        _step = np.array([self.step_counter]).T
-        #   energy
-        _energy_data = np.array([self.energy_data]).T
-        #   add all solution data to one variable
-        solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol))
+        solution_data = self.collect_solution_data()
 
         #   write solution data and info to solution data object
         self._solution_data.set_filetype(self.MBD_system._solution_filetype)
 
-
         self.solution_filename = 'solution_data_%02d'%self.simulation_id#+self.MBD_system._solution_filetype
-        #   check filename if already exists
-        self.solution_filename = check_filename(self.solution_filename)
+
+        if self.MBD_system._save_options == "save to new":
+            #   check filename if already exists
+            self.solution_filename = check_filename(self.solution_filename)
 
         #   set solution data filename
         self._solution_data.setName(self.solution_filename)
@@ -667,6 +663,31 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         for contact in self.MBD_system.contacts:
             if contact.save_to_file:
                 contact.write_to_file()
+
+    def collect_solution_data(self):
+        """
+
+        :return:
+        """
+        #   reshape data to join in one matrix
+        #   step
+        _step = np.array([self.step_counter]).T
+        #   energy
+        _energy_data = np.array([self.energy_data]).T
+        #   add all solution data to one variable
+        solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol))
+
+        return solution_data
+
+    def save_solution_data(self):
+        """
+
+        :return:
+        """
+        data = self.collect_solution_data()
+        self._solution_data.add_data(data)
+
+        self.MBD_system.solutions.append(self._solution_data)
 
     def start_solve(self):
         """
@@ -700,6 +721,8 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.running = False
 
         self.finished_signal.signal_finished.emit("Finished")
+
+        self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._name)
 
         logging.getLogger("DyS_logger").info("Simulation finished successfully!")
 

@@ -12,7 +12,6 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import *
 
 import numpy as np
-from solve_ODE import SolveODE
 from solve_dynamic_analysis import SolveDynamicAnalysis
 from solve_kinematic_analysis import SolveKinematicAnalysis
 

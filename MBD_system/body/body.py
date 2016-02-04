@@ -186,7 +186,11 @@ class Body(BodyItem):
                 pass
             else:
                 self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
-
+            print "-----------------------------------"
+            print "name =", self._name
+            print "self.CAD_LCS_GCS =", self.CAD_LCS_GCS
+            print "self.CM_CAD_LCS =", self.CM_CAD_LCS
+            print "self.R =", self.R
             #   cad coordinate system of geometry
             self.CAD_CS = Marker(-self.CM_CAD_LCS, parent=self)#-self.CM_CAD_LCS-self.CAD_LCS_GCS
             self.CAD_CS._visible = False

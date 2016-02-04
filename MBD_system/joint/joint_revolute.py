@@ -40,6 +40,9 @@ class JointRevolute(Joint):
         self.C0 = self.evaluate_C(self.q0)
         print "self.C0 =", self.C0
 
+        #   list of markers
+        self.markers = self._create_markers()
+
     def evaluate_C_q(self, q):
         """
         Function evaluates C_q matrix
@@ -48,7 +51,7 @@ class JointRevolute(Joint):
         #    predefine empty list to store joint C_q matrix for each body in joint
         self.C_q_list = []
         #    construct C_q matrix for each body in joint
-        for body_id, _u_P, _id in zip(self.body_id_list, self.u_P_list, [0, 1]):
+        for body_id, _u_P, _id in zip(self.body_id_list, self.u_P_LCS_list, [0, 1]):
             if body_id == "ground":
                 C_q_body = Joint_C_q_matrix(self.joint_type)
             else:

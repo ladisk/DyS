@@ -551,7 +551,7 @@ class MBDsystem(MBDsystemItem):
 
         return __q.flatten()
 
-    def create_q0(self):
+    def evaluate_q0(self):
         self.q0 = np.zeros(6 * self.number_of_bodies)
 
         self.bodies.sort(key=lambda body: body.transparent_GL, reverse=False)

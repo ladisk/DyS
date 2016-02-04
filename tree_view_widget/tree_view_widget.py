@@ -40,7 +40,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
     """
     classdocs
     """
-    def __init__(self, MBD_system_=None, parent=None, flags=0):
+    def __init__(self, MBD_system, parent=None, flags=0):
         """
         Constructor
         """
@@ -55,7 +55,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         
         self._parent = parent
 
-        self.MBD_system = MBD_system_
+        self.MBD_system = MBD_system
         # _model = MBD_system.TreeModel(self.MBD_system)
         _model = TreeModel(self.MBD_system)
 
@@ -234,6 +234,27 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 show_marker_Action = QtGui.QAction("Show u_P on body "+ID, self, checkable=True, checked=marker._visible)
                 show_marker_Action.triggered.connect(marker._show)
                 self.menu.addAction(show_marker_Action)
+
+            if self._item._typeInfo == "joint":
+                if self._item.joint_type == "prismatic":
+                    marker = self._item.markers[-1]
+                    show_marker_uQ_Action = QtGui.QAction("Show u_Q on body "+"i", self, checkable=True, checked=marker._visible)
+                    show_marker_uQ_Action.triggered.connect(marker._show)
+                    self.menu.addAction(show_marker_uQ_Action)
+
+            self.menu.addSeparator()
+            if self._item._typeInfo == "joint":
+                evaluate_C_Action = QtGui.QAction("Evaluate C(q, t)", self)
+                evaluate_C_Action.triggered.connect(self.evaluate_C_joint)
+                self.menu.addAction(evaluate_C_Action)
+
+                evaluate_C_q_Action = QtGui.QAction("Evaluate C_q(q)", self)
+                evaluate_C_q_Action.triggered.connect(self.evaluate_C_q_joint)
+                self.menu.addAction(evaluate_C_q_Action)
+
+                evaluate_Q_d_Action = QtGui.QAction("Evaluate Q_d", self)
+                evaluate_Q_d_Action.triggered.connect(self.evaluate_Q_d_joint)
+                self.menu.addAction(evaluate_Q_d_Action)
 
         elif self._item._typeInfo == "contact":
             for force, ID in zip(self._item._Fn_list, ["i", "j"]):
@@ -513,6 +534,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             self._widget = ForceWidget(self._parentNode, parent=self)
 
         if self._item._typeInfo.lower() == "joint":
+            pprint(vars(self._item))
             self._widget = JointWidget(self._parentNode, parent=self)
 
         if self._item._typeInfo.lower() == "spring":
@@ -557,3 +579,37 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         print "exe in tree view widget"
         self.create_animation_file.signal_createAnimationFile.emit()
         print "signal emited!!!"
+
+    def evaluate_C_joint(self):
+        """
+
+        :return:
+        """
+        #   get current q vector of MBD system
+        q = self.MBD_system._children[0].evaluate_q0()
+
+        print self._item.evaluate_C(q)
+
+    def evaluate_C_q_joint(self):
+        """
+
+        :return:
+        """
+        #   get current q vector of MBD system
+        q = self.MBD_system._children[0].evaluate_q0()
+
+        C_q_list = self._item.evaluate_C_q(q)
+
+        for C_q, id in zip(C_q_list, ["i", "j"]):
+            print "C_q_i ="
+            print C_q
+
+    def evaluate_Q_d_joint(self):
+        """
+
+        :return:
+        """
+        #   get current q vector of MBD system
+        q = self.MBD_system._children[0].evaluate_q0()
+
+        print self._item.evaluate_Q_d(q)

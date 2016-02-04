@@ -129,9 +129,16 @@ class DAEfun(object):
         self.__C_q_size()
         C_q = np.zeros([self.rows_C_q, self.cols_C_q])
         for joint in self.MBD_system.joints:
+            # print "----------------------------------"
+            # print "joint._name =", joint._name
             #    creates a C_q matrix of a joint based on joint's properties (type, geometry, etc.)
             C_q_i, C_q_j = joint.evaluate_C_q(q)
-
+            # print "C_q_i ="
+            # print C_q_i
+            # print "C_q_j ="
+            # print C_q_j
+            # print "self.MBD_system.number_of_fixed_joints =", self.MBD_system.number_of_fixed_joints
+            # print "self.MBD_system.number_of_prismatic_joints =", self.MBD_system.number_of_prismatic_joints
             #    C_q matrix for joint type: fixed
             if joint.joint_type == "fixed":
                 #    add matrix of body j to Cq matrix
@@ -162,6 +169,7 @@ class DAEfun(object):
             elif joint.joint_type == "prismatic":
                 #    add matrix of body i and j to Cq matrix
                 if (joint.body_id_i != "ground") and (joint.body_id_j != "ground"):
+                    print C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3]
                     C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_i:3 * joint.body_id_i + 3] = C_q_i
                     C_q[3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id:3 * self.MBD_system.number_of_fixed_joints + 2 * self.MBD_system.number_of_revolute_joints + 2 * joint.prismatic_joint_id + 2, 3 * joint.body_id_j:3 * joint.body_id_j + 3] = C_q_j
                 #    add matrix of body j to Cq matrix
@@ -334,9 +342,8 @@ class DAEfun(object):
 
     def evaluate_dq(self, h, t, q):
         """
-
+        Function evaluates vector dq of MBD system
         """
-        # print "t(sub) = ", t
         #    construct Cq matrix
         self.C_q, self.C_qT = self.evaluate_C_q(t, q)
 

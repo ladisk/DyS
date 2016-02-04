@@ -145,12 +145,12 @@ class PinSlotClearanceJointLinear(Contact):
             _node = np.array(np.append(u_P, self.z_dim), dtype="float32")
 
             if i == 0:
-                _body_id = self.body_id_i
+                body_id = self.body_id_i
             if i == 1 or i == 2:
-                _body_id = self.body_id_j
+                body_id = self.body_id_j
 
             _marker = Marker(_node, visible=True)
-            self._parent._parent.bodies[_body_id].markers.append(_marker)
+            self._parent._parent.bodies[body_id].markers.append(_marker)
             markers.append(_marker)
 
         return markers

@@ -18,8 +18,10 @@ from matplotlib import pyplot as plt
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from moviepy.editor import ImageSequenceClip
-
+try:
+    from moviepy.editor import ImageSequenceClip
+except:
+    ImageSequenceClip = None
 
 
 from opengl_widget.opengl_widget import OpenGLWidget
@@ -280,6 +282,7 @@ class SimulationControlWidget(QtGui.QWidget):
         for sol in self.MBD_system.solutions:
             if id(sol) == solution_object_id:
                 self.MBD_system.loaded_solution = sol
+                solution_data = sol.solution_data
 
         self.step = solution_data[:, 0]
         self.energy = solution_data[:, 1]

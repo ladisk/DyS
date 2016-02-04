@@ -1,16 +1,14 @@
-'''
+"""
 Created on 17. apr. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 
 import numpy as np
 
 
-try:
-    from A import A_matrix
-except:
-    None
+from A import A_matrix
+
 
 def Ai_hi(h, theta):
     """

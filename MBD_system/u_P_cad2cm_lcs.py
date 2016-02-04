@@ -21,7 +21,6 @@ def u_P_cad2cm_lcs(_body_id, body, _u_P=np.zeros(2)):
     #    check if id of body i is ground
     if _body_id == "ground":
         _u_P_f_cm = _u_P
-
     else:
         _u_P_f_cm = cad2cm_lcs(_u_P, body.CM_CAD_LCS[0:2])
 

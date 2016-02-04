@@ -45,7 +45,9 @@ class JointFixed(Joint):
         #   initial evaluation of constraint equation for fixed joint
         self.C0 = self.evaluate_C0(self.q0)
         self.theta0 = self.C0[2]
-        print "self.C0 =", self.C0
+
+        #   list of markers
+        self.markers = self._create_markers()
 
     def evaluate_C_q(self, q):
         """
@@ -54,7 +56,7 @@ class JointFixed(Joint):
         """
         self.C_q_list = []
         #    construct C_q matrix for fixed joint
-        for body_id, _u_P in zip(self.body_id_list, self.u_P_list):
+        for body_id, _u_P in zip(self.body_id_list, self.u_P_LCS_list):
             if body_id == "ground":
                 joint_C_q_matrix_body = Joint_C_q_matrix(joint_type_=self.joint_type)
             else:
@@ -104,7 +106,7 @@ class JointFixed(Joint):
             body_id_ = self.body_id_list[Q_d_body.id]
 
             #    calculate Q_d vector of only non-ground body
-            Q_d_body.Q_d[0:2] = Ai_ui_P_vector(self.u_P_list[Q_d_body.id], q2theta_i(q, body_id_)) * (q2dtheta_i(q, body_id_) ** 2)
+            Q_d_body.Q_d[0:2] = Ai_ui_P_vector(self.u_P_LCS_list[Q_d_body.id], q2theta_i(q, body_id_)) * (q2dtheta_i(q, body_id_) ** 2)
 
             Q_d = Q_d_body.Q_d
         else:

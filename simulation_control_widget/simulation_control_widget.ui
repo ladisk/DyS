@@ -38,18 +38,42 @@
       <string>Animation Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="updateDisplayStep">
+      <item row="3" column="0">
+       <widget class="QLabel" name="numberOfSteps_label_2">
+        <property name="text">
+         <string>Playback speed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="numberOfSteps">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="inputMethodHints">
          <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="0">
+       <widget class="QLabel" name="currentStepLabel">
+        <property name="text">
+         <string>Current step </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
        <widget class="QLineEdit" name="currentStep">
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="updateDisplayStep">
         <property name="inputMethodHints">
          <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
         </property>
@@ -62,16 +86,6 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="numberOfSteps">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="numberOfSteps_label">
         <property name="text">
@@ -79,26 +93,25 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="currentStepLabel">
-        <property name="text">
-         <string>Current step </string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="3" column="2">
        <widget class="QDoubleSpinBox" name="playBackSpeed_doubleSpinBox">
         <property name="value">
          <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="numberOfSteps_label_2">
-        <property name="text">
-         <string>Playback speed</string>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>

@@ -60,7 +60,7 @@ def gcs2lcs_z_axis(Rz_body, z_gcs):
     z_lcs = z_gcs - Rz_body
     return z_lcs
 
-def u_P_cad2cm_lcs(_body_id, body, _u_P):
+def u_P_cad2cm_lcs(body_id, body, _u_P):
     """
     Function assigns the body properties to body (from list of bodies) and calculates u_P vector in CM LCS of a body for each body in joint
     Args:
@@ -72,7 +72,7 @@ def u_P_cad2cm_lcs(_body_id, body, _u_P):
         u_jP_f_cm_
     """
     #    check if id of body i is ground
-    if _body_id == "ground":
+    if body_id == "ground":
         _u_P_f_cm = _u_P
 
     else:

@@ -10,9 +10,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from pprint import pprint
 import subprocess
-from moviepy.editor import *
 import xlsxwriter
 import xlrd
+try:
+    from moviepy.editor import *
+except:
+    moviepy = None
 
 from MBD_system.MBD_system import *
 from MBD_system.MBD_system_items import SolutionDataItem

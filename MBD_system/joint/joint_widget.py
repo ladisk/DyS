@@ -1,8 +1,8 @@
-'''
+"""
 Created on 3. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import time
 from pprint import pprint
 
@@ -29,9 +29,9 @@ class JointWidget(QtGui.QDialog):
     """
     
     def __init__(self, parent_node=None, parent=None):
-        '''
+        """
         Constructor
-        '''
+        """
         super(JointWidget, self).__init__(parent)
         self._parent = parent
 
@@ -191,9 +191,12 @@ class JointWidget(QtGui.QDialog):
         self.ui.bodyIDj_lineEdit.setText(str(item.body_id_j))
 
         #   uPi
-        self.ui.uPi_lineEdit.setText(array2string(item.u_iP))
+        self.ui.uPi_lineEdit.setText(array2string(item.u_iP_LCS))
         #   uPj
-        self.ui.uPj_lineEdit.setText(array2string(item.u_jP))
+        self.ui.uPj_lineEdit.setText(array2string(item.u_jP_LCS))
+
+        if item.joint_type == "prismatic":
+            self.ui.uQi_lineEdit.setText(array2string(item.u_iQ_LCS))
 
 
         self.item = item

@@ -6,7 +6,7 @@ Created on 30. maj 2014
 import numpy as np
 
 
-def q2dR_i(q, body_id, N_b = None):
+def q2dR_i(q, body_id):
     """
     Function returns the velocity of a body from vector q and body_id.
     Args:
@@ -21,8 +21,7 @@ def q2dR_i(q, body_id, N_b = None):
     if body_id == "ground":
         dR_i_ = 0
     else:
-        if N_b is None:
-            N_b = len(q) / 6
+        N_b = len(q) / 6
         dR_i_ = q[(3 * N_b) + 3 * body_id:(3 * N_b) + 3 * body_id + 2]
         
     return dR_i_
