@@ -60,7 +60,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
     """
     __simulation_id = itertools.count(0)
 
-    def __init__(self, MBD_system=[], parent=None):
+    def __init__(self, MBD_system, parent=None):
         """
         Constructor
         """
@@ -114,6 +114,9 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.stop_time_simulation_info_in_sec_UTC = []
         self.stop_time_simulation_info = []
 
+        self.FLAG = 1
+        self.FLAG_contact = 0
+
     def _solution_containers(self):
         """
 
@@ -152,17 +155,11 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         #   get initial conditions
         q0 = self._MBD_system.evaluate_q0()
 
-        #   create solution data object to store data at each simulation start
-        self._solution_data = SolutionData(MBD_system=self.MBD_system)#parent=self.MBD_system.Solution
-        print "self._solution_data._name =", self._solution_data._name
-        self.MBD_system.solutions.append(self._solution_data)
-
         #   solution containers
         self._solution_containers()
 
         self.simulation_id = 0
-        self.FLAG = 1
-        self.FLAG_contact = 0  #    0 - no contact
+  #    0 - no contact
                                #    1 - contact detected
                                #    -1 - contact already happened - reduce integration step
         self.step = 0
@@ -235,7 +232,6 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
 
         if self.finished or self.failed:
             self.finished_solve()
-            self.save_solution_data()
 
         #    save data to file
         if self.MBD_system._save_options.lower() != "discard":
@@ -687,13 +683,18 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         data = self.collect_solution_data()
         self._solution_data.add_data(data)
 
-        self.MBD_system.solutions.append(self._solution_data)
 
     def start_solve(self):
         """
         Start solver (time integration process)
         """
         self.simulation_id = self.__simulation_id.next()
+
+        #   create solution data object to store data at each simulation start
+        self._solution_data = SolutionData(MBD_system=self.MBD_system)#parent=self.MBD_system.Solution
+        print "self._solution_data._name =", self._solution_data._name
+        self.MBD_system.solutions.append(self._solution_data)
+
         logging.getLogger("DyS_logger").info("Simulation started, simulation id: %s"%self.simulation_id)
 
         self.running = True
@@ -717,14 +718,17 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         Method sets some parameters when integration process is finished
         :return:
         """
+        if self.finished:
+            self.save_solution_data()
+            self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._name)
+            logging.getLogger("DyS_logger").info("Simulation finished successfully!")
+            self.finished_signal.signal_finished.emit("Finished")
+        else:
+            logging.getLogger("DyS_logger").info("Simulation failed!")
+
+        #   set booleans
         self.finished = True
         self.running = False
-
-        self.finished_signal.signal_finished.emit("Finished")
-
-        self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._name)
-
-        logging.getLogger("DyS_logger").info("Simulation finished successfully!")
 
     def load_simulation_solution_from_file(self, filename):
         """

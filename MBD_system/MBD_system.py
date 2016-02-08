@@ -39,7 +39,7 @@ class MBDsystem(MBDsystemItem):
         - gen_joint_list_func - function creates joints of body system between bodies
         """
         super(MBDsystem, self).__init__(MBD_filename, parent)
-        self.list_of_object_groups = ["Bodies", "Forces", "Motions", "Measures", "Joints", "Contacts", "Springs"]
+        self.list_of_object_groups = ["Bodies", "Forces", "Joints", "Contacts", "Springs", "Motions", "Measures"]
         
         self.get_folder_and_filename(MBD_file_abs_path)
 
@@ -159,7 +159,7 @@ class MBDsystem(MBDsystemItem):
         
         #    add ground name to the list of body names
         self.__list_of_body_names = []
-        self.ground = []
+        self.ground = None
         self.bodies = []
         self.number_of_bodies = len(self.bodies)
         self.forces = []
@@ -183,6 +183,12 @@ class MBDsystem(MBDsystemItem):
         self.Hmin = 0
         self.absTol = 0
         self.relTol = 0
+        #   epsilon tolerance for norm of newton differences vector
+        self.TOL_dq_i = 1E-9
+        #   epsilon tolerance for norm of constraint equations of MBS system - C(q, t)
+        self.TOL_C_i = 1E-9
+        #   tolerance for constraint equations - this is checked before numerical analysis starts
+        self.TOL_C = 1E-9
 
         #   visualization settings
         self.scale_GL = 1
@@ -428,7 +434,7 @@ class MBDsystem(MBDsystemItem):
         self._name = "Model_1"
         self.MBD_folder_abs_path_ = []
         
-        self.ground = []
+        self.ground = None
         for body in self.bodies:
             body.delete_VBO()
             
@@ -471,13 +477,11 @@ class MBDsystem(MBDsystemItem):
         else:
             None
 
-         
         #    number of all bodies
         self.number_of_bodies = len(self.bodies)
  
         if self.number_of_bodies == 0:
             print "No bodies (objects) created when finished reading folder:", self.MBD_folder_name
-
 
     def create_VBOs(self):
         for body in self.bodies:
@@ -624,13 +628,35 @@ class MBDsystem(MBDsystemItem):
         """
         Count number of joints by type.
         """
+        #   number of fixed joints
         self.number_of_fixed_joints = sum(1 for joint in self.joints if joint.joint_type == "fixed")
+        #   nuimber of revolute joints
         self.number_of_revolute_joints = sum(1 for joint in self.joints if joint.joint_type == "revolute")
+        #   nuimber of prismatic joints
         self.number_of_prismatic_joints = sum(1 for joint in self.joints if joint.joint_type == "prismatic")
         
-        
+        #   number of rows of
         self.C_q_number_of_rows = 2 * self.number_of_revolute_joints + 3 * self.number_of_fixed_joints + 2 * self.number_of_prismatic_joints
+
         self.joint_list_counted = True
+
+    def evaluate_C_number_of_rows(self):
+        """
+        Function evaluates number of rows of constraint vector equations, based on number of joints
+        and number of motions, if kinematic analysis is done (for kinematically driven mechanical systems)
+        :return:
+        """
+        self.C_number_of_rows_motions = 0
+        _q = 0
+        if self.analysis_type == "kinematic":
+            for motion in self.motions:
+                _q += motion.C_size
+
+            self.C_number_of_rows_motions = self.C_number_of_rows_motions + _q
+
+        C_q_number_of_rows = self.C_q_number_of_rows + self.C_number_of_rows_motions
+
+        return C_q_number_of_rows
 
     def evaluate_Hmin(self):
         """

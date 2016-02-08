@@ -11,7 +11,7 @@ import itertools
 import logging
 
 import numpy as np
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtOpenGL
 from OpenGL import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -113,7 +113,7 @@ class Body(BodyItem):
         self.contact_geometries = []
 
         #   geometry properties
-        self._geometry_type = ".stl"
+        self._geometry_type = None
         self._geometry_types = ["line", ".stl"]
         self.geometry = None
         self.geometry_filename = None
@@ -124,6 +124,7 @@ class Body(BodyItem):
         self._visible = visible
         self.geometry = None
         self.VBO_created = False
+        self._idVisible = False
 
         #    AABB tree object assigned to body object as attribute if body is specified to be in contact with other body
         self.AABBtree = None
@@ -186,11 +187,6 @@ class Body(BodyItem):
                 pass
             else:
                 self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
-            print "-----------------------------------"
-            print "name =", self._name
-            print "self.CAD_LCS_GCS =", self.CAD_LCS_GCS
-            print "self.CM_CAD_LCS =", self.CM_CAD_LCS
-            print "self.R =", self.R
             #   cad coordinate system of geometry
             self.CAD_CS = Marker(-self.CM_CAD_LCS, parent=self)#-self.CM_CAD_LCS-self.CAD_LCS_GCS
             self.CAD_CS._visible = False
@@ -265,6 +261,16 @@ class Body(BodyItem):
             self._visible = False
         else:
             self._visible = True
+
+    def _showID(self):
+        """
+
+        :return:
+        """
+        if self._idVisible:
+            self._idVisible = False
+        else:
+            self._idVisible = True
 
     def _show_AABB(self):
         """
@@ -361,21 +367,20 @@ class Body(BodyItem):
 
         self._paintGL_VBO_AABBtree(shader)
         
-        for contact_geometry in self.contact_geometries:
-            contact_geometry.paintGL_VBO()
+#         for contact_geometry in self.contact_geometries:
+#             contact_geometry.paintGL_VBO()
 
         if self._visible:
-
             for force in self.forces:
                 force._paint_GL(step)
-
+ 
             if self.LCS._visible and self.LCS._VBO_created:
                 self.LCS._paintGL_VBO()
 
             if hasattr(self, "CAD_CS"):
                 if self.CAD_CS._visible and self.CAD_CS._VBO_created:
                     self.CAD_CS._paintGL_VBO()
-
+ 
             #   display markers of a body
             for marker in self.markers:
                 if marker._VBO_created and marker._visible:
@@ -387,7 +392,10 @@ class Body(BodyItem):
                     marker._create_VBO()
 
             if self.VBO_created:
-                self.geometry._paint_VBO()
+                try:
+                    self.geometry._paint_VBO()
+                except:
+                    raise UserWarning, "something is wrong"
 #                 print "buffer check(body) =", glIsBuffer(self.geometry.vbo_id)
 
 

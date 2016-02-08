@@ -165,12 +165,19 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             getDOFsAction.triggered.connect(self.__getDOF)
 
             if self._item._typeInfo == "MBDsystem":
+                get_q_Action = self.menu.addAction("Get q")
+                get_q_Action.triggered.connect(self._get_q)
+
                 evaluate_C_Action = self.menu.addAction("C(q, t)")
                 evaluate_C_Action.triggered.connect(self._evaluate_C)
 
-                get_q_Action = self.menu.addAction("Get q")
-                get_q_Action.triggered.connect(self._get_q)
-                
+                evaluate_C_q_Action = self.menu.addAction("C_q(q)")
+                evaluate_C_q_Action.triggered.connect(self._evaluate_C_q)
+
+                evaluate_C_t_Action = self.menu.addAction("C_t(t)")
+                evaluate_C_t_Action.triggered.connect(self._evaluate_C_t)
+
+                self.menu.addSeparator()
                 list_parameters_Action = self.menu.addAction("List parameters")
                 list_parameters_Action.triggered.connect(self._list_parameters)
 
@@ -198,7 +205,6 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 saveAnimationFileAction.triggered.connect(self._create_animation_file)
 
         elif self._item._typeInfo == "group":
-
             propertiesAction = self.menu.addAction("Properties")
             propertiesAction.triggered.connect(self._properties)
 
@@ -245,16 +251,20 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             self.menu.addSeparator()
             if self._item._typeInfo == "joint":
                 evaluate_C_Action = QtGui.QAction("Evaluate C(q, t)", self)
-                evaluate_C_Action.triggered.connect(self.evaluate_C_joint)
+                evaluate_C_Action.triggered.connect(self.evaluate_C)
                 self.menu.addAction(evaluate_C_Action)
 
                 evaluate_C_q_Action = QtGui.QAction("Evaluate C_q(q)", self)
-                evaluate_C_q_Action.triggered.connect(self.evaluate_C_q_joint)
+                evaluate_C_q_Action.triggered.connect(self.evaluate_C_q)
                 self.menu.addAction(evaluate_C_q_Action)
 
                 evaluate_Q_d_Action = QtGui.QAction("Evaluate Q_d", self)
-                evaluate_Q_d_Action.triggered.connect(self.evaluate_Q_d_joint)
+                evaluate_Q_d_Action.triggered.connect(self.evaluate_Q_d)
                 self.menu.addAction(evaluate_Q_d_Action)
+
+            evaluate_rijP_Action = QtGui.QAction("Evaluate d", self)
+            evaluate_rijP_Action.triggered.connect(self.evaluate_d)
+            self.menu.addAction(evaluate_rijP_Action)
 
         elif self._item._typeInfo == "contact":
             for force, ID in zip(self._item._Fn_list, ["i", "j"]):
@@ -345,6 +355,10 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 else:
                     show_CAD_CS_Action.setEnabled(False)
 
+                show_ID_Action = QtGui.QAction("Show ID", self, checkable=True, checked=self._item._idVisible)
+                show_ID_Action.triggered.connect(self._item._showID)
+                self.menu.addAction(show_ID_Action)
+
                 self.menu.addSeparator()
 
                 getBody_q_Action = self.menu.addAction("Get body q")
@@ -356,9 +370,21 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 getBody_qdq_Action = self.menu.addAction("Get body [q dq]")
                 getBody_qdq_Action.triggered.connect(self._item.get_qdq)
                 self.menu.addSeparator()
+
+        elif self._item._typeInfo == "motion":
+            evaluate_C_Action = QtGui.QAction("Evaluate C(q, t)", self)
+            evaluate_C_Action.triggered.connect(self.evaluate_C)
+            self.menu.addAction(evaluate_C_Action)
+
+            evaluate_C_q_Action = QtGui.QAction("Evaluate C_q(q)", self)
+            evaluate_C_q_Action.triggered.connect(self.evaluate_C_q)
+            self.menu.addAction(evaluate_C_q_Action)
+
+            evaluate_C_t_Action = QtGui.QAction("Evaluate C_t(t)", self)
+            evaluate_C_t_Action.triggered.connect(self.evaluate_C_t)
+            self.menu.addAction(evaluate_C_t_Action)
         else:
             pass
-
 
         self.menu.exec_(event.globalPos())
         self._parent.SimulationControlWidget.OpenGLWidget.updateGL()
@@ -446,7 +472,10 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         MBD_system_item = self._item._children[0]
         # pprint(vars(MBD_system_item))
         #    solutions (group) item
-        _solution_group_item = MBD_system_item._children[6]
+        # _solution_group_item = MBD_system_item._children[6]
+
+
+        _solution_group_item = [child for child in MBD_system_item._children if child._name == "Solution"][0]
 
         #    add child (solution data) to solution item
         pos = len(_solution_group_item._children)
@@ -514,9 +543,28 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         """
         t = 0
-        q_ = self.MBD_system._children[0].get_q()
-        print "C(q, t)"
-        print self._parent.SimulationControlWidget.solver.solveODE.ode_fun.create_C(t, q_)
+        q = self.MBD_system._children[0].get_q()
+        print "C(q, t):"
+        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C(q, t)
+
+    def _evaluate_C_q(self):
+        """
+
+        :return:
+        """
+        q = self.MBD_system._children[0].get_q()
+        print "C_q(q, t):"
+        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_q(q, 0)
+
+    def _evaluate_C_t(self):
+        """
+
+        :return:
+        """
+        t = 0
+        q = self.MBD_system._children[0].get_q()
+        print "C_t(t):"
+        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_t(q, 0)
 
     def _edit(self, index):
         """
@@ -580,7 +628,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self.create_animation_file.signal_createAnimationFile.emit()
         print "signal emited!!!"
 
-    def evaluate_C_joint(self):
+    def evaluate_C(self):
         """
 
         :return:
@@ -590,7 +638,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         print self._item.evaluate_C(q)
 
-    def evaluate_C_q_joint(self):
+    def evaluate_C_q(self):
         """
 
         :return:
@@ -598,13 +646,26 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         #   get current q vector of MBD system
         q = self.MBD_system._children[0].evaluate_q0()
 
-        C_q_list = self._item.evaluate_C_q(q)
+        C_q = self._item.evaluate_C_q(q)
 
-        for C_q, id in zip(C_q_list, ["i", "j"]):
-            print "C_q_i ="
-            print C_q
+        if self._item._typeInfo == "joint":
+            for C_q_i, id in zip(C_q, ["i", "j"]):
+                print "C_q %s="%id
+                print C_q_i
+        else:
+            print "C_q =", C_q
 
-    def evaluate_Q_d_joint(self):
+    def evaluate_C_t(self):
+        """
+
+        :return:
+        """
+        #   get current q vector of MBD system
+        q = self.MBD_system._children[0].evaluate_q0()
+
+        print self._item.evaluate_C_t(q=q, t=0)
+
+    def evaluate_Q_d(self):
         """
 
         :return:
@@ -613,3 +674,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         q = self.MBD_system._children[0].evaluate_q0()
 
         print self._item.evaluate_Q_d(q)
+
+    def evaluate_d(self):
+        """
+
+        :return:
+        """
+        #   get current q vector of MBD system
+        q = self.MBD_system._children[0].evaluate_q0()
+        print self._item.evaluate_d(q)

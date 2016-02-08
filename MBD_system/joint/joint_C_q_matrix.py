@@ -1,17 +1,17 @@
-'''
+"""
 Created on 17. apr. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 
 import itertools
 import numpy as np
 
 
 class Joint_C_q_matrix(object):
-    '''
+    """
     classdocs
-    '''
+    """
     __id = itertools.cycle([0, 1])
     
     
@@ -44,8 +44,7 @@ class Joint_C_q_matrix(object):
                 self.matrix = -1 * self.matrix
             else:
                 raise ValueError, "Matrix for fixed joint not constructed."
-                
-                
+
         elif joint_type_ == "revolute":
             if self.id == 0:
                 self.matrix = np.hstack((np.eye(2), np.zeros([2, 1])))
@@ -53,12 +52,10 @@ class Joint_C_q_matrix(object):
                 self.matrix = -1 * np.hstack((np.eye(2), np.zeros([2, 1])))
             else:
                 raise ValueError, "Matrix for revolute joint not constructed."
-        
-        
+
         elif joint_type_ == "prismatic":
             self.matrix = np.zeros([2, 3])
-        
-        
+
         else:
             raise AttributeError, "Joint type not correct!"
             

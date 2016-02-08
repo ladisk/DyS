@@ -31,14 +31,12 @@ class JointRevolute(Joint):
         super(JointRevolute, self).__init__(joint_type, body_id_i, body_id_j, u_iP_CAD=u_iP_CAD, u_jP_CAD=u_jP_CAD, parent=parent)
 
         #   revolute joint id
-        print "revolute_joint_id =", self.revolute_joint_id
 
         #   joint DOF
         self.joint_DOF = 1
 
         #   initial evaluation of constraint equation for revolute joint
         self.C0 = self.evaluate_C(self.q0)
-        print "self.C0 =", self.C0
 
         #   list of markers
         self.markers = self._create_markers()
@@ -66,7 +64,7 @@ class JointRevolute(Joint):
 
         return C_qi.matrix, C_qj.matrix
 
-    def _evaluate_Q_d(self, q):
+    def evaluate_Q_d(self, q):
         """
         Function evaluates Q_d vector of a joint
         Q_d equation according to eq. 3.133 in Computational Dynamics 3rd Ed. (A.A.Shabana)
@@ -84,7 +82,7 @@ class JointRevolute(Joint):
                 #   vector Q_d object for each body
                 Q_d_body = Joint_Q_d_vector(self.joint_type)
                 #   evaluated for each body
-                Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_list[Q_d_body.id], q2theta_i(q, body_id)) * (q2dtheta_i(q, body_id) ** 2)
+                Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_LCS_list[Q_d_body.id], q2theta_i(q, body_id)) * (q2dtheta_i(q, body_id) ** 2)
                 #    add calculated joint matrix of a body to list
                 self.Q_d_list.append(Q_d_body)
 
@@ -104,7 +102,7 @@ class JointRevolute(Joint):
             # dtheta_body = q2dtheta_i(q_, _body_id)
             #
             # Q_d_body.Q_d = Ai_ui_P_vector_ * (dtheta_body ** 2)
-            Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_list[Q_d_body.id], q2theta_i(q, self.body_id_j)) * (q2dtheta_i(q, self.body_id_j) ** 2)
+            Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_LCS_list[Q_d_body.id], q2theta_i(q, self.body_id_j)) * (q2dtheta_i(q, self.body_id_j) ** 2)
 
             Q_d = Q_d_body.Q_d
 
@@ -127,7 +125,7 @@ class JointRevolute(Joint):
             # Q_d_body.Q_d = Ai_ui_P_vector_ * dtheta_body ** 2
 
 
-            Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_list[Q_d_body.id], q2theta_i(q, self.body_id_i)) * (q2dtheta_i(q, self.body_id_i) ** 2)
+            Q_d_body.Q_d = Ai_ui_P_vector(self.u_P_LCS_list[Q_d_body.id], q2theta_i(q, self.body_id_i)) * (q2dtheta_i(q, self.body_id_i) ** 2)
             Q_d = Q_d_body.Q_d
 
         else:

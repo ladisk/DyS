@@ -12,7 +12,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
-from ...paint_text_color_update import update_text_color
+from simulation_control_widget.opengl_widget.paint_text.paint_text import update_text_color
+# from ...paint_text_color_update import update_text_color
 
 
 #    packages

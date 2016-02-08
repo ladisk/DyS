@@ -21,7 +21,7 @@ class Marker(object):
     """
     __id = itertools.count(0)
 
-    def __init__(self, node, visible=True, scale=2E-3, parent=None):
+    def __init__(self, node, visible=False, scale=2E-3, parent=None):
         """
         Class constructor of VBO marker
         :param node:
@@ -148,6 +148,7 @@ class Marker(object):
         """
 
         if self._visible and self._VBO_created:
+            
             #   bind buffer to id
             glBindBuffer(GL_ARRAY_BUFFER, self.vbo_id)
             
@@ -155,6 +156,7 @@ class Marker(object):
             stride_in_bits = 24
             
             #   pointers
+            glDisableClientState(GL_NORMAL_ARRAY)
             glVertexPointer(3, GL_FLOAT, stride_in_bits, self.__v_pointer)
             glColorPointer(3, GL_FLOAT, stride_in_bits, self.__c_pointer)
             glDisable(GL_LIGHTING)

@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
-    <height>627</height>
+    <width>300</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+   <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>360</width>
-    <height>627</height>
+    <width>300</width>
+    <height>685</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>360</width>
-    <height>627</height>
+    <height>685</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -38,6 +38,13 @@
       <string>Animation Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="updateDisplayStepLabel">
+        <property name="text">
+         <string>Update disp. on i-th stp</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0">
        <widget class="QLabel" name="numberOfSteps_label_2">
         <property name="text">
@@ -45,44 +52,13 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="2" column="1">
        <widget class="QLineEdit" name="numberOfSteps">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="inputMethodHints">
          <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="currentStepLabel">
-        <property name="text">
-         <string>Current step </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="currentStep">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="updateDisplayStep">
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="updateDisplayStepLabel">
-        <property name="text">
-         <string>Update disp. on i-th stp</string>
         </property>
        </widget>
       </item>
@@ -93,25 +69,36 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
+      <item row="1" column="0">
+       <widget class="QLabel" name="currentStepLabel">
+        <property name="text">
+         <string>Current step </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="updateDisplayStep">
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="playBackSpeed_doubleSpinBox">
         <property name="value">
          <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="currentStep">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
         </property>
-       </spacer>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -246,6 +233,13 @@
       <string>Simulation Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="2" colspan="3">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="4">
        <widget class="QLineEdit" name="absTol">
         <property name="enabled">
@@ -256,24 +250,10 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="2" colspan="3">
+      <item row="10" column="2" colspan="3">
        <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="endTimeLabel_3">
-        <property name="text">
-         <string>Integration method</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="endTimeLabel">
-        <property name="text">
-         <string>End time, s</string>
         </property>
        </widget>
       </item>
@@ -289,47 +269,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="7" column="4">
-       <widget class="QLineEdit" name="relTol">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="3">
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2">
-       <widget class="QLabel" name="relTolLabel">
-        <property name="text">
-         <string>RelTol</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="HmaxLabel">
-        <property name="text">
-         <string>Hmax</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="4">
-       <widget class="QLineEdit" name="Hmin">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
-        </property>
-       </widget>
       </item>
       <item row="1" column="4">
        <widget class="QComboBox" name="integrationMethodComboBox">
@@ -357,8 +296,15 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="4">
-       <widget class="QLineEdit" name="Hmax">
+      <item row="5" column="2">
+       <widget class="QLabel" name="HminLabel">
+        <property name="text">
+         <string>Hmin</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="4">
+       <widget class="QLineEdit" name="relTol">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -367,10 +313,10 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="HminLabel">
+      <item row="0" column="2">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Hmin</string>
+         <string>Analysis type</string>
         </property>
        </widget>
       </item>
@@ -381,6 +327,30 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="4">
+       <widget class="QLineEdit" name="Hmin">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="analysisTypeComboBox">
+        <item>
+         <property name="text">
+          <string>Kinematic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dynamic</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="2" column="4">
        <widget class="QLineEdit" name="endTime">
         <property name="inputMethodHints">
@@ -388,7 +358,28 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="2">
+      <item row="7" column="2">
+       <widget class="QLabel" name="relTolLabel">
+        <property name="text">
+         <string>RelTol</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="endTimeLabel">
+        <property name="text">
+         <string>End time, s</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="endTimeLabel_3">
+        <property name="text">
+         <string>Integration method</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="2">
        <widget class="QCheckBox" name="loadSolutionFileStatus">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -407,24 +398,54 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QComboBox" name="analysisTypeComboBox">
-        <item>
-         <property name="text">
-          <string>Kinematic</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dynamic</string>
-         </property>
-        </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="HmaxLabel">
+        <property name="text">
+         <string>Hmax</string>
+        </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label">
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="Hmax">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="4">
+       <widget class="QLineEdit" name="TOL_dq_i">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLabel" name="TOL_dq_i_Label">
         <property name="text">
-         <string>Analysis type</string>
+         <string>TOL dq_i</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QLabel" name="TOL_C_Label">
+        <property name="text">
+         <string>TOL C(q, t)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="4">
+       <widget class="QLineEdit" name="TOL_C">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
         </property>
        </widget>
       </item>

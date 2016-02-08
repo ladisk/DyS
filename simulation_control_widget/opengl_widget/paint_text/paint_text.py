@@ -15,7 +15,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
 import numpy as np
-from ..paint_text_color_update import update_text_color
+from simulation_control_widget.opengl_widget.paint_text_color_update import update_text_color
 
 
 def text(self, resize_factor_width, resize_factor_height, filename, simulation_time=0, simulation_step_number=0):

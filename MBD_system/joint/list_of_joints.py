@@ -99,10 +99,6 @@ def create_list(joints, filename, parent=None):
                 #   create prismatic joint
                 elif (_joint_type == "prismatic") and (_body_i != None) and (_body_j != None) and (_u_iP != None) and (_u_jP != None) and (_u_iQ != None):
                     #    create joint object
-                    print "input"
-                    print "_u_iP =", _u_iP
-                    print "_u_jP =", _u_jP
-                    print "_u_iQ =", _u_iQ
                     joint = JointPrismatic(_joint_type, _body_i, _body_j, u_iP_CAD=_u_iP, u_jP_CAD=_u_jP, u_iQ_CAD=_u_iQ, parent=parent)
                     joints.append(joint)
                     

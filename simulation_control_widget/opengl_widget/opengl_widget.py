@@ -81,6 +81,9 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #    context menu properties
         self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # NoContextMenu, CustomContextMenu
 
+        #   font
+        self._font = QFont("Consolas", 10)
+
     def update_data(self, bodies):
         """
         
@@ -156,7 +159,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         Display geometry
         """
         # Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
                 
         #    setup camera
         #    projection matrix
@@ -196,15 +199,18 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         #   display main CS (GCS) as coordinate system VBO does not have normals it has
         #   to be displayed before normals are enabled in OpenGL
-        if self.GCS._visible:
-            self.GCS._paintGL_VBO()
+#         if self.GCS._visible:
+#             self.GCS._paintGL_VBO()
 
         glEnableClientState(GL_NORMAL_ARRAY)
 
         #    display main GCS
-#         if self.GCS._visible:
-#             self.GCS._paintGL_VBO()
+        if self.GCS._visible:
+            self.GCS._paintGL_VBO()
 
+        self.MBD_system.ground.paintGL_VBO()
+
+        #   sort by value of transparency
         self.MBD_system.bodies.sort(key=lambda body: body.transparent_GL, reverse=True)
 
         for body in self.MBD_system.bodies:
@@ -215,12 +221,16 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
             #   paint VBO of global coordinate system
             # try:
-            # self.GCS._paintGL_VBO()
+            self.GCS._paintGL_VBO()
             # except:
             #     pass
 
             #   paint body geometry
             body.paintGL_VBO(self.step, self.shader_program)
+
+            #   paint body name
+            if body._idVisible:#self.nameVisible:
+                self.renderText(0, 0, 0, QString("ID ") + QString(str(body.body_id)), font=QFont("Consolas", 8))
             #   paint body AABB tree
             # body._paintGL_VBO_AABBtree(self.shader_program)
             # glUseProgram(0)
@@ -261,7 +271,14 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         
         #    display text
         paint_text.text(self, self.resize_factor_width, self.resize_factor_height, filename=self.MBD_system._name, simulation_time=self.MBD_system.time, simulation_step_number=self.MBD_system.step_num)
-    
+
+    def paintOverlayGL(self):
+        """
+
+        :return:
+        """
+        print "paintOverlayGL()"
+
     def repaintGL(self, step = None):
         """
         Repaint - update opengl

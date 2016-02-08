@@ -24,6 +24,7 @@ from tree_view_widget.tree_view_widget import TreeViewWidget
 from MBD_system import read_and_write
 from options_widget.options_widget import OptionsWidget
 
+
 import qrc_resources
 
 
@@ -112,8 +113,8 @@ class MainWindow(QtGui.QMainWindow):
         # MBD_folder_name_ = "dynamic_systems\\0"
         # self.MBD_filename = "dys_0_2_2.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0_2_2"
-        self.MBD_filename = "dys_0_3_prismatic_joint.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_3_prismatic_joint"
+#         self.MBD_filename = "dys_0_3_prismatic_joint.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_3_prismatic_joint"
 #         self.MBD_filename = "dys_0_5.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_5"
 #         self.MBD_filename = "dys_0_6_1.dprj"
@@ -133,8 +134,17 @@ class MainWindow(QtGui.QMainWindow):
 #         self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
 
-        # self.MBD_filename = "0_7_3_3_kinematic_analysis_4bar.dprj"
-        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_4bar"
+        # self.MBD_filename = "0_7_3_3_kinematic_analysis_1arm.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_1arm"
+
+        # self.MBD_filename = "0_7_3_3_kinematic_analysis_2arm.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_2arm"
+
+        # self.MBD_filename = "0_7_3_3_kinematic_analysis_slider_crank.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_slider_crank"
+
+        self.MBD_filename = "0_7_3_3_kinematic_analysis_4bar.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_4bar"
 
 #         self.MBD_filename = "dys_0_7_3_0.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"

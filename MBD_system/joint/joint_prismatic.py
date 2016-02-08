@@ -43,10 +43,6 @@ class JointPrismatic(Joint):
         :param parent:
         :return:
         """
-        print "JointPrismatic()"
-        print "u_iP_CAD =", u_iP_CAD
-        print "u_jP_CAD =", u_jP_CAD
-        print "u_iQ_CAD =", u_iQ_CAD
         self.joint_type = "prismatic"
         super(JointPrismatic, self).__init__(joint_type, body_id_i, body_id_j, u_iP_CAD=u_iP_CAD, u_jP_CAD=u_jP_CAD, u_iQ_CAD=u_iQ_CAD, parent=parent)
 
@@ -68,7 +64,6 @@ class JointPrismatic(Joint):
 
         #   markers
         self.markers = self._create_markers()
-        print "self.markers =", self.markers
 
     def _create_markers(self):
         """
@@ -143,7 +138,6 @@ class JointPrismatic(Joint):
                     C_q_body.matrix[0, 2] = - np.dot(self.h_i, np.dot(A_theta_matrix(q2theta_i(q, body_id)), self.u_jP_LCS))
                     #hi_Ai_theta_ui_P_constant(self.h_i, q2theta_i(q, self.body_id_list[0]), self.u_P_LCS_list[self.body_id_list.index(body_id)])
 
-
             #   append joint C_q matrix to list
             self.C_q_list.append(C_q_body)
         [C_qi, C_qj] = self.C_q_list
@@ -206,7 +200,6 @@ class JointPrismatic(Joint):
 
         #   angle between connected bodies is constant
         C[1] = q2theta_i(q, self.body_id_i) - q2theta_i(q, self.body_id_j) - self.theta0
-
         return C
 
     def evaluate_hi(self, q):

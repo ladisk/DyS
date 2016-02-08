@@ -130,6 +130,10 @@ class SimulationControlWidget(QtGui.QWidget):
         #    rel tol
         self.ui.relTol.setText(str(self.MBD_system.relTol))
         self.ui.relTol.setValidator(__validator_dbl)
+        #   tolerance for newton differences
+        self.ui.TOL_dq_i.setText(str(self.MBD_system.TOL_dq_i))
+        #   tolerance for constraint equations C
+        self.ui.TOL_C.setText(str(self.MBD_system.TOL_C))
 
         #    create solver thread
         self.solver = Solver(MBD_system=MBD_system, parent=self)#parent
@@ -161,7 +165,7 @@ class SimulationControlWidget(QtGui.QWidget):
 
 
         self.ui.simulationResetButton.clicked.connect(self.simulationReset)
-        self.ui.endTime.textChanged.connect(self.__update_endTime)
+
         self.ui.Hmax.textChanged.connect(self.__update_Hmax)
         self.ui.Hmin.textChanged.connect(self.__update_Hmin)
         
@@ -169,6 +173,7 @@ class SimulationControlWidget(QtGui.QWidget):
         
         self.ui.currentStep.textChanged.connect(self.__update_currentStep)
         self.ui.updateDisplayStep.textChanged.connect(self.__update_updateDisplayStep)
+        self.ui.endTime.textChanged.connect(self.__update_endTime)
 
 
         self.ui.backwardButton.clicked.connect(self.animation_backward) #clicked
@@ -368,6 +373,10 @@ class SimulationControlWidget(QtGui.QWidget):
         self.MBD_system.updateEveryIthStep = self._delta_step
 
     def __update_Hmax(self):
+        """
+
+        :return:
+        """
         try:
             self.Hmax = float(self.ui.Hmax.text()) 
             self.MBD_system.Hmax = self.Hmax
@@ -384,12 +393,12 @@ class SimulationControlWidget(QtGui.QWidget):
             None
 
     def __update_endTime(self):
-        try:
-            self.endTime = float(self.ui.endTime.text())
-            self.MBD_system.t_n = self.endTime
-        except:
-#             QtGui.QMessageBox.about(self, 'Error', 'Input can only be a number')
-            pass
+        """
+
+        :return:
+        """
+        self.endTime = float(self.ui.endTime.text())
+        self.MBD_system.t_n = self.endTime
 
     def setWindowFlags(self, flags):
         super(SimulationControlWidget, self).setWindowFlags(flags)
@@ -450,7 +459,7 @@ class SimulationControlWidget(QtGui.QWidget):
         #   predefine empty list to store image objects
         # images = []
         for _step in xrange(0, len(self.step), int(self._delta_step)):
-            filename = "V1_step=%03d"%_step+".png"
+            filename = "step_%06d"%_step+".png"
 
             #   assign step and repaint GL widget
             self.__step = int(_step)
