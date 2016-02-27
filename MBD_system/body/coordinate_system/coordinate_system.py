@@ -3,15 +3,9 @@ Created on 9. jul. 2015
 
 @author: reti-luka
 '''
-import sys
-import os
-from pprint import pprint
 import itertools
-import logging
 
 import numpy as np
-from PyQt4 import QtCore, QtGui
-from OpenGL import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -72,8 +66,8 @@ class CoordinateSystem(object):
         """
         Function creates VBO of coordinate system
         """
-        self.__v_pointer = ctypes.c_void_p(0)
-        self.__c_pointer = ctypes.c_void_p(12)
+        v_pointer = ctypes.c_void_p(0)
+        c_pointer = ctypes.c_void_p(12)
         
         #    generate a new VBO and get the associated vbo_id
         num_of_VBOs = 1
@@ -111,8 +105,8 @@ class CoordinateSystem(object):
         stride_in_bits = 24
 
         #   pointers
-        glVertexPointer(3, GL_FLOAT, stride_in_bits, self.__v_pointer)
-        glColorPointer(3, GL_FLOAT, stride_in_bits, self.__c_pointer)
+        glVertexPointer(3, GL_FLOAT, stride_in_bits, v_pointer)
+        glColorPointer(3, GL_FLOAT, stride_in_bits, c_pointer)
 
         glDisable(GL_LIGHTING)
 

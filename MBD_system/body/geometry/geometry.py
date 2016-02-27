@@ -4,19 +4,15 @@ Created on 30. nov. 2013
 @author: lskrinjar
 """
 import os
-import ctypes
-from pprint import pprint
-from OpenGL import *
+
+import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.ARB.vertex_buffer_object import *
-from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 
-
 import VBO_reshape.VBO_reshape as VBO_reshape
-from MBD_system.body.geometry.model_loader.model_loader import ModelLoader
-import numpy as np
 import vertices_offset.vertices_offset as vertices_offset
+from model_loader.model_loader import ModelLoader
 
 
 class Geometry(object):
@@ -54,7 +50,15 @@ class Geometry(object):
 
         #   shift vertices that body center of mass is the origin
         self.geom_data.vertices = vertices_offset.offset(self.geom_data.vertices, parent.CM_CAD_LCS)
-
+        
+#         print "self.geom_data.vertices ="
+#         print self.geom_data.vertices
+#         
+#         print len(self.geom_data.vertices)
+#         print np.shape(self.geom_data.vertices)
+#         triangles = np.arange(0, len(self.geom_data.vertices)).reshape(3, len(self.geom_data.vertices)/3)+0
+#         np.savetxt(filename+"triagnles.txt", triangles, "%4i", delimiter=",", newline=";\n")
+        
     def create_VBO(self):
         """
         Method creates a Vertex Buffer Object and writes it to VRAM on GPU
@@ -108,7 +112,10 @@ class Geometry(object):
         """
         Delete opengl object VBO from VRAM
         """
-        glDeleteBuffers(1, int(self.vbo_id))
+        try:
+            glDeleteBuffers(1, int(self.vbo_id))
+        except:
+            pass
 
     def _update_VBO_color(self, color, transparent):
         """
@@ -149,17 +156,20 @@ class Geometry(object):
 
             glVertexPointer(3, GL_FLOAT, stride_in_bits, v_pointer)
             glColorPointer(4, GL_FLOAT, stride_in_bits, c_pointer)
+            glEnableClientState(GL_NORMAL_ARRAY)
             glNormalPointer(GL_FLOAT, stride_in_bits, n_pointer)
 
-            #    draw (fill or wireframe)
+            #    draw by type of visualization
             if self._parent.display_style == "wireframe":
                 glDisable(GL_LIGHTING)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)  # GL_FRONT, GL_FRONT_AND_BACK
                 glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
                 glEnable(GL_LIGHTING)
+                
             elif self._parent.display_style == "filled":
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
                 glDrawArrays(GL_TRIANGLES, 0, self.N_vertices)
+                
             elif self._parent.display_style == "points":
                 glDisable(GL_LIGHTING)
                 glPointSize(0.2)
@@ -171,3 +181,4 @@ class Geometry(object):
                 None
 
             glBindBuffer(GL_ARRAY_BUFFER, 0)
+            

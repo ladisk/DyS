@@ -4,14 +4,9 @@ Created on 10. mar. 2014
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
 """
 
-from pprint import pprint
-import sys
-import time
-
 from PyQt4 import QtCore
 from PyQt4.QtCore import *
 
-import numpy as np
 from solve_dynamic_analysis import SolveDynamicAnalysis
 from solve_kinematic_analysis import SolveKinematicAnalysis
 
@@ -42,7 +37,7 @@ class Solver(QtCore.QThread):
         self.MBD_system = MBD_system
 
         #   solvers
-        self._analysis_type()
+        self.analysis = self._analysis_type()
 
     def _analysis_type(self):
         """
@@ -51,19 +46,24 @@ class Solver(QtCore.QThread):
         """
         #   kinematic analysis
         if self.MBD_system.analysis_type == "kinematic":
-            self.analysis = SolveKinematicAnalysis(self.MBD_system, parent=self._parent)
+            analysis = SolveKinematicAnalysis(self.MBD_system, parent=self._parent)
 
         #   dynamic analysis
         elif self.MBD_system.analysis_type == "dynamic":
-            self.analysis = SolveDynamicAnalysis(self.MBD_system, parent=self._parent)
+            analysis = SolveDynamicAnalysis(self.MBD_system, parent=self._parent)
 
         else:
             raise ValueError, "Analysis type not defined!"
+
+        return analysis
 
     def start_solver(self):
         """
         Method that starts the ODE solver (integrtor)
         """
+        #   solver
+        # self.analysis = self._analysis_type()
+
         self.analysis.solve()
 
         self.running_signal.signal_running.emit("Running")

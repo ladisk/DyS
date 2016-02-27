@@ -11,7 +11,7 @@ class Measure(MeasureItem):
     """
     classdocs
     """
-    def __init__(self, ID, name, parent=None):
+    def __init__(self, ID, name, measurement_type, parent=None):
         """
         Constructor
         """
@@ -19,7 +19,22 @@ class Measure(MeasureItem):
 
         #   parent
         self._parent = parent
-
+        
+        #    id of item to measure its property value
+        self.id = ID
+        
+        #    variable to measure
+        self.measurement_type = measurement_type
+        self.measurement_types = ["Rx",
+                                  "Ry",
+                                  "theta",
+                                  "dRx",
+                                  "dRy",
+                                  "dtheta",
+                                  "Fx",
+                                  "Fy",
+                                  "F",
+                                  "Mz"]
 
     def _meaure(self, t=None):
         """

@@ -3,31 +3,23 @@ Created on 21. feb. 2014
 
 @author: lskrinjar
 """
-import logging
-import itertools
-import time
-from operator import attrgetter
 from pprint import pprint
-import numpy as np
-from matplotlib import pyplot as plt
 
-from MBD_system.contact.distance.distance import Distance
-from MBD_system.force.force import Force
-from MBD_system.q2R_i import q2R_i
-from MBD_system.q2theta_i import q2theta_i
+import numpy as np
+
+from MBD_system.A import A_matrix
+from MBD_system.contact.contact import Contact
+from MBD_system.contact.distance.distance_revolute_clearance_joint import DistanceRevoluteClearanceJoint
+from MBD_system.contact_model.contact_model_cylinder import ContactModelCylinder
+from MBD_system.dr_contact_point_uP import dr_contact_point_uP
 from MBD_system.q2dR_i import q2dR_i
 from MBD_system.q2dtheta_i import q2dtheta_i
 from MBD_system.q2q_body import q2q_body
+from MBD_system.q2theta_i import q2theta_i
 from MBD_system.transform_cs import cm_lcs2gcs, gcs2cm_lcs
-from MBD_system.dr_contact_point_uP import dr_contact_point_uP
-from MBD_system.contact_model.contact_model import ContactModel
-from MBD_system.contact_model.contact_model_cylinder import ContactModelCylinder
-from MBD_system.contact.contact import Contact
-from MBD_system.A import A_matrix
-from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.transform_cs import uP_gcs2lcs
 from simulation_control_widget.opengl_widget.marker.marker import Marker
-from MBD_system.contact.distance.distance_revolute_clearance_joint import DistanceRevoluteClearanceJoint
+
 
 class RevoluteClearanceJoint(Contact):
     """
@@ -50,7 +42,7 @@ class RevoluteClearanceJoint(Contact):
 #         self.contact_id = self.__id.next()
         #    name as string
         self._name = "RC_Joint_"# + str(self.contact_id)
-        
+
         #    this has to be after attributes contact_id and _name as name is constructed from contact_id and _name
         super(RevoluteClearanceJoint, self).__init__(_type, body_id_i, body_id_j, name=self._name, properties_dict=properties_dict, parent=parent)
 
@@ -63,14 +55,15 @@ class RevoluteClearanceJoint(Contact):
         self.u_iP = u_iP
         self.u_jP = u_jP
         #   predefined empty list of center point or clearance joint (to center of pin/hole) in body LCS
-        self.u_CP_list_LCS = [self.u_iP, self.u_jP]
+        self.u_CP_LCS_list = [self.u_iP, self.u_jP]
         #   centers of revolute clearance joint in GCS
-        self.u_CP_list_GCS = []
+        self.u_CP_GCS_list = []
         #   predefined empty list of contact point in body LCS
-        self.u_P_list_LCS = []
+        self.u_P_LCS_list = []
 
         #   contact point in GCS
         self.u_P_GCS = None
+        self.u_P_GCS_list = [None, None]
 
         #   clearance parameters
         self.R0_i = R0_i
@@ -90,11 +83,28 @@ class RevoluteClearanceJoint(Contact):
         self.body_id_j = body_id_j
         self.body_id_list = [self.body_id_i, self.body_id_j]
 
-        for _body_id, _u_P in zip(self.body_id_list, self.u_CP_list_LCS):
-            _node = np.array(np.append(_u_P, self.z_dim), dtype='float32')
-            _marker = Marker(_node, visible=True)
-            self._parent._parent.bodies[_body_id].markers.append(_marker)
-            self.markers.append(_marker)
+        #   list of markers
+        self.markers = self._create_markers()
+
+    def _create_markers(self):
+        """
+        Function creates markers
+        :return:
+        """
+        markers = []
+        for body, _u_P in zip(self.body_list, self.u_CP_LCS_list):
+            #    node coordinates
+            node = np.array(np.append(_u_P, self.z_dim), dtype='float32')
+            
+            #    create marker object
+            _marker = Marker(node, visible=True, parent=body)
+            
+            #    append marker to list of body markers
+            body.markers.append(_marker)
+            #    append marker to list of revolute clearance joint markers
+            markers.append(_marker)
+
+        return markers
 
     def check_for_contact(self, q):
         """
@@ -173,9 +183,8 @@ class RevoluteClearanceJoint(Contact):
             self._contact_point_found = False
             self.initial_contact_velocity_calculated = False
 
-            for _force_n, _force_t in zip(self._Fn_list, self._Ft_list):
-                _force_n.update(self._step)
-                _force_t.update(self._step)
+            self.no_contact()
+
         return self.status
 
     def _get_contact_geometry_data(self, q):
@@ -184,7 +193,7 @@ class RevoluteClearanceJoint(Contact):
         """
         #   tangent is calculated from rotation of normal for 90deg in CCW direction
         self._t = np.dot(A_matrix(np.pi/2), self._n)
-        self._t_list = [self._t, -self._t]
+        self._t_LCS_list = [self._t, -self._t]
 
     def _contact_geometry_CP_GCS(self, q):
         """
@@ -193,18 +202,18 @@ class RevoluteClearanceJoint(Contact):
         :return u_CP_list_GCS:  a list of two arrays (vectors) of
         """
         #   calculate position of pin/hole centers of each body in GCS
-        u_CP_list_GCS = []
-        for body_id, u_P in zip(self.body_id_list, self.u_CP_list_LCS):
+        u_CP_GCS_list = []
+        for body_id, u_P in zip(self.body_id_list, self.u_CP_LCS_list):
             #   q of a body
             q_body = q2q_body(q, body_id)
 
             #   axis center of revolute joint of each body in GCS
             u_P_GCS = cm_lcs2gcs(u_P, q_body[0:2], q_body[2])
 
-            u_CP_list_GCS.append(u_P_GCS)
+            u_CP_GCS_list.append(u_P_GCS)
 
         #   reformat to 32bit float to display in opengl scene
-        return np.array(u_CP_list_GCS, dtype="float32")
+        return np.array(u_CP_GCS_list, dtype="float32")
 
     def _contact_geometry_GCS(self, q):
         """
@@ -212,10 +221,10 @@ class RevoluteClearanceJoint(Contact):
         :param q:
         :return distance_obj:   distance object of calculated data in GCS
         """
-        self.u_CP_list_GCS = self._contact_geometry_CP_GCS(q)
+        self.u_CP_GCS_list = self._contact_geometry_CP_GCS(q)
 
         #   calculate distance between axis of both bodies in revolute joint
-        self._distance_obj = DistanceRevoluteClearanceJoint(self.u_CP_list_GCS[0], self.u_CP_list_GCS[1], parent=self)
+        self._distance_obj = DistanceRevoluteClearanceJoint(self.u_CP_GCS_list[0], self.u_CP_GCS_list[1], parent=self)
 
         #   penetration depth is difference between nominal radial clearance and actual calculated clearance at time t
         self._distance = self._distance_obj._distance
@@ -225,7 +234,7 @@ class RevoluteClearanceJoint(Contact):
         # if _distance >= self._radial_clearance and abs(_delta) >= self.distance_TOL:
         # print "contact is present"
         #   unit vector in direction from one center to enother (pin to hole)
-        self._n = self._distance_obj._distance_vector/self._distance_obj._distance
+        self._n_GCS = self._distance_obj._distance_vector / self._distance_obj._distance
         # print "--------------------------------"
         # print "step =", self._step
         # print "n =", self._n
@@ -235,33 +244,34 @@ class RevoluteClearanceJoint(Contact):
         #     print "n =", self._n
 
         #   create normal list in LCS
-        self._n_list_GCS = [-self._n, +self._n]
-        self._n_list = []
-        for body_id, _normal in zip(self.body_id_list, self._n_list_GCS):
+        self._n_GCS_list = [-self._n, +self._n]
+        self._n_LCS_list = []
+        for body_id, _normal in zip(self.body_id_list, self._n_GCS_list):
             #   normal in LCS
             _theta = q2theta_i(q, body_id)
             _normal_LCS = uP_gcs2lcs(u_P=_normal, theta=_theta)
             #   append normal to list
-            self._n_list.append(_normal_LCS)
+            self._n_LCS_list.append(_normal_LCS)
 
         #   calculate a actual contact point in revolute clearance joint of each body in GCS
         #   and vector of contact point in LCS
-        self.u_P_list = []
-        self.u_P_list_LCS = []
-        plot = False#[False, self.status==2] #False
-        if plot:
-            print "*************************"
-            fig = plt.gcf()
-            plt.xlim([0.0, 0.01])
-            plt.ylim([0.0, 0.01])
-            ax = plt.gca()
-            # ax.relim()
-            ax.autoscale_view(True,True,True)
-            ax.set_aspect('equal')
+        self.u_P_GCS_list = []
+        self.u_P_LCS_list = []
+        # plot = False#[False, self.status==2] #False
+        # if plot:
+        #     print "*************************"
+        #     fig = plt.gcf()
+        #     plt.xlim([0.0, 0.01])
+        #     plt.ylim([0.0, 0.01])
+        #     ax = plt.gca()
+        #     # ax.relim()
+        #     ax.autoscale_view(True,True,True)
+        #     ax.set_aspect('equal')
 
-        self.u_P_list_LCS = []
+        self.u_P_LCS_list = []
         #   evaluate actual contact point in LCS of each body and in GCS
-        for body_id, _u_CP_GCS, _u_CP_LCS, _R0 in zip(self.body_id_list, self.u_CP_list_GCS, self.u_CP_list_LCS, self.R0_list):
+        for body_id, _u_CP_GCS, _u_CP_LCS, _R0 in zip(self.body_id_list, self.u_CP_GCS_list, self.u_CP_LCS_list, self.R0_list):
+            print "body_id =", body_id
             #   q of a body
             q_body = q2q_body(q, body_id)
 
@@ -270,39 +280,39 @@ class RevoluteClearanceJoint(Contact):
 
             #   contact point in body LCS
             _u_P_LCS = gcs2cm_lcs(_u_P_GCS, q_body[0:2], q_body[2])
-            self.u_P_list_LCS.append(_u_P_LCS)
+            self.u_P_LCS_list.append(_u_P_LCS)
 
-            if plot:
-                print "----------------------------------"
-                print "body =", self._parent._parent.bodies[body_id]._name
-
-                R = q_body[0:2]
-                print "q_body[0:2] =", q_body[0:2]
-                print "joint center =", _u_CP_LCS
-                print "contact point GCS =", _u_P_GCS
-                print "contact point LCS =", _u_P_LCS
-                _color = np.random.rand(3)
-                circle=plt.Circle((_u_CP_LCS[0]+R[0],_u_CP_LCS[1]+R[1]),_R,color=_color, fill=False)
-                #   center of axis
-                ax.plot(_u_CP_LCS[0], _u_CP_LCS[1], "o", color=_color)
-                #   contact point
-                ax.plot(_u_P_LCS[0]+R[0], _u_P_LCS[1]+R[1], "x", color=_color)
-                #   LCS
-                ax.plot(R[0], R[1], "s", color=_color)
-                fig.gca().add_artist(circle)
+            # if plot:
+            #     print "----------------------------------"
+            #     print "body =", self._parent._parent.bodies[body_id]._name
+            #
+            #     R = q_body[0:2]
+            #     print "q_body[0:2] =", q_body[0:2]
+            #     print "joint center =", _u_CP_LCS
+            #     print "contact point GCS =", _u_P_GCS
+            #     print "contact point LCS =", _u_P_LCS
+            #     _color = np.random.rand(3)
+            #     circle=plt.Circle((_u_CP_LCS[0]+R[0],_u_CP_LCS[1]+R[1]),_R,color=_color, fill=False)
+            #     #   center of axis
+            #     ax.plot(_u_CP_LCS[0], _u_CP_LCS[1], "o", color=_color)
+            #     #   contact point
+            #     ax.plot(_u_P_LCS[0]+R[0], _u_P_LCS[1]+R[1], "x", color=_color)
+            #     #   LCS
+            #     ax.plot(R[0], R[1], "s", color=_color)
+            #     fig.gca().add_artist(circle)
 
         #   transform to 32bit float to display in opengl
-        self.u_P_list = np.array(self.u_P_list, dtype="float32")
-        self.u_P_list_LCS = np.array(self.u_P_list_LCS, dtype="float32")
-        self.u_P_GCS = np.array(_u_P_GCS, dtype="float32")
+        self.u_P_GCS_list = np.array(self.u_P_GCS_list, dtype="float32")
+        self.u_P_LCS_list = np.array(self.u_P_LCS_list, dtype="float32")
+        # self.u_P_GCS = np.array(_u_P_GCS, dtype="float32")
 
         # if self._step_solution_accepted:
         #     self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
 
-        if plot:
-            plt.grid()
-            plt.show()
-            fig.savefig('testing.png')
+        # if plot:
+        #     plt.grid()
+        #     plt.show()
+        #     fig.savefig('testing.png')
 
         return self._distance, self._delta
 
@@ -312,7 +322,8 @@ class RevoluteClearanceJoint(Contact):
         :param q:   array of coordinates (r, theta) and velocities (dR, dhete=omega) of MBD system
         """
         dr_P = []
-        for body_id, u_P in zip(self.body_id_list, self.u_P_list_LCS):
+        print "self.u_P_LCS_list =", self.u_P_LCS_list, type(self.u_P_LCS_list)
+        for body_id, u_P in zip(self.body_id_list, self.u_P_LCS_list):
             dR = q2dR_i(q, body_id)
             theta = q2theta_i(q, body_id)
             #    dtheta - omega

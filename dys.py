@@ -3,32 +3,28 @@ Created on 30. sep. 2013
 
 @author: lskrinjar
 """
-import warnings
+import ctypes
+import logging
+import logging.handlers
 import os
 import sys
-import inspect
-import time
+import warnings
+
+import dill
 import numpy as np
-import ctypes
-from pprint import pprint
 from PyQt4 import QtCore, QtGui
-import subprocess
+from binaryornot.check import is_binary
 
-
-from MBD_system.MBD_system import MBDsystem
 from MBD_system import MBD_system_items
+from MBD_system import convert_bytes_to_
+from MBD_system import read_and_write
+from MBD_system.MBD_system import MBDsystem
 from job_list_widget.job_list_widget import JobListWidget
-from output_widget.output_widget import OutputWidget
+from options_widget.options_widget import OptionsWidget
 from simulation_control_widget.simulation_control_widget import SimulationControlWidget
 from tree_view_widget.tree_view_widget import TreeViewWidget
-from MBD_system import read_and_write
-from options_widget.options_widget import OptionsWidget
 
-
-import qrc_resources
-
-
-np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, suppress=False, nanstr=None, infstr=None)
+np.set_printoptions(precision=6, threshold=None, edgeitems=100, linewidth=1000, suppress=False, nanstr=None, infstr=None)
 # sys.setrecursionlimit(3000)
 # print sys.getrecursionlimit()
 
@@ -39,12 +35,14 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+
 # define authorship information
 __authors__ = ['Luka Skrinjar', 'Ales Turel', 'Janko Slavic']
 __author__ = ','.join(__authors__)
 __credits__ = []
 __copyright__ = 'Copyright (c) 2015'
 __license__  = 'GPL'
+
 
 # maintenance information
 __maintainer__ = 'Luka Skrinjar'
@@ -56,6 +54,7 @@ filename = os.path.relpath(__file__)
 current_working_directory = os.getcwd()
 job_data_folder = ""
 
+
 warnings.filterwarnings("ignore")
 
 
@@ -63,6 +62,7 @@ class MainWindow(QtGui.QMainWindow):
     """
     classdocs
     """
+    
     def __init__(self):
         """
         Class constructor
@@ -99,7 +99,7 @@ class MainWindow(QtGui.QMainWindow):
         screen = QtGui.QDesktopWidget().screenGeometry()
         #    move
         # self.move(self.window_offset_x, self.window_offset_y)
-        dy = .1*screen.height()
+        dy = .05*screen.height()
 
         #   size of application
         #   position main widget on screen
@@ -107,7 +107,7 @@ class MainWindow(QtGui.QMainWindow):
 
         #    MBD system
         MBD_folder_name_ = []
-        self.MBD_file_abs_path_ = []
+        self.MBD_file_abs_path = []
 
         # self.MBD_filename = "dys_0.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0"
@@ -125,14 +125,9 @@ class MainWindow(QtGui.QMainWindow):
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_1"
 #         self.MBD_filename = "dys_0_7_0_2.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_0_2"
-#         self.MBD_filename = "dys_0_7_2_revolute_clearence_joint.dprj"
-#         MBD_folder_name_ = "dynamic_systems\\0_7_2_revolute_clearence_joint"
+
 #         self.MBD_filename = "0_7_3_0_contact_models.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models"
-#         self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
-#         MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
-#         self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
-#         MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
 
         # self.MBD_filename = "0_7_3_3_kinematic_analysis_1arm.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_1arm"
@@ -143,8 +138,17 @@ class MainWindow(QtGui.QMainWindow):
         # self.MBD_filename = "0_7_3_3_kinematic_analysis_slider_crank.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_slider_crank"
 
-        self.MBD_filename = "0_7_3_3_kinematic_analysis_4bar.dprj"
-        MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_4bar"
+#         self.MBD_filename = "0_7_3_3_kinematic_analysis_4bar.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_4bar"
+
+        # self.MBD_filename = "0_7_3_3_kinematic_analysis_efi.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_kinematic_analysis_efi"
+
+        # self.MBD_filename = "0_7_3_3_dynamic_analysis_efi.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_3_dynamic_analysis_efi"
+    
+#         self.MBD_filename = "0_7_3_3_dynamic_analysis_efi_V2.dprj"
+#         MBD_folder_name_ = "dynamic_systems\\0_7_3_3_dynamic_analysis_efi_V2"
 
 #         self.MBD_filename = "dys_0_7_3_0.dprj"
 #         MBD_folder_name_ = "dynamic_systems\\0_7_3_0"
@@ -152,23 +156,36 @@ class MainWindow(QtGui.QMainWindow):
         # self.MBD_filename = "0_7_3_0_plane_sphere.dprj"
         # MBD_folder_name_ = "dynamic_systems\\0_7_3_0_plane_sphere"
 
+        # self.MBD_filename = "dys_0_7_2_revolute_clearence_joint.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_2_revolute_clearence_joint"
+
+        # self.MBD_filename = "0_7_3_0_contact_models_cylinder.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_0_contact_models_cylinder"
+
+        self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint.dprj"
+        MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint"
+
+        # self.MBD_filename = "0_7_3_2_pin_slot_clearance_joint_paper.dprj"
+        # MBD_folder_name_ = "dynamic_systems\\0_7_3_2_pin_slot_clearance_joint_paper"
+
         if MBD_folder_name_ == []:
-            MBD_folder_abs_path_ = os.getcwd()
+            self.MBD_folder_abs_path = os.getcwd()
             project_filename = "Model_1"
         else:
             self._working_directory = os.path.join(os.getcwd(), "..")
-            self.MBD_file_abs_path_ = os.path.abspath(os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename))
+            self.MBD_file_abs_path = os.path.abspath(os.path.join(self._working_directory, MBD_folder_name_, self.MBD_filename))
 
-            MBD_folder_abs_path_ = os.path.join(self._working_directory, MBD_folder_name_)
-            project_filename = os.path.basename(MBD_folder_abs_path_)
+            self.MBD_folder_abs_path = os.path.join(self._working_directory, MBD_folder_name_)
+            project_filename = os.path.basename(self.MBD_folder_abs_path)
 
-        projectNode = MBD_system_items.MBDsystemItem("projectNode")
-
-
-        self.MBD_system = MBDsystem(MBD_file_abs_path=self.MBD_file_abs_path_, MBD_folder_name=MBD_folder_name_, MBD_folder_abs_path=MBD_folder_abs_path_, MBD_filename=project_filename, parent=projectNode)
+        self._file_types = "Dynamic System Project File (*.dprj);;Multibody System File (*.mbd)"
+        self.project = MBD_system_items.MBDsystemItem("self.project")
+        
+        
+        self.MBD_system = MBDsystem(MBD_file_abs_path=self.MBD_file_abs_path, MBD_folder_name=MBD_folder_name_, MBD_folder_abs_path=self.MBD_folder_abs_path, MBD_filename=project_filename, parent=self.project)
 
         #   tree view widget
-        self.TreeViewWidget = TreeViewWidget(projectNode, parent=self)
+        self.TreeViewWidget = TreeViewWidget(self.project, self.MBD_system, parent=self)
         self.TreeViewWidget.setWindowFlags(self.flags)
         self.TreeViewWidget.show()
         #    move
@@ -207,8 +224,15 @@ class MainWindow(QtGui.QMainWindow):
         
         #    create status bar
         self.create_status_bar()
-        
+
         #    signals and connections
+        self.connect_signals()
+
+    def connect_signals(self):
+        """
+
+        :return:
+        """
         self.SimulationControlWidget.solver.analysis.step_signal.signal_step.connect(self.update_statusbar_text2)
 
         self.SimulationControlWidget.solver.running_signal.signal_running.connect(self.update_statusbar_text3)
@@ -218,7 +242,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # self.SimulationControlWidget.solver.solveODE.finished_signal.signal_finished.connect(self.update_statusbar_text3)
 
-        self.SimulationControlWidget.solver.analysis.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
+        # self.SimulationControlWidget.solver.analysis.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
         self.SimulationControlWidget.step_num_signal.signal_step.connect(self.update_statusbar_text2)
         self.SimulationControlWidget.status_signal.signal_status.connect(self.update_statusbar_text3)
         
@@ -229,6 +253,9 @@ class MainWindow(QtGui.QMainWindow):
         
         self.SimulationControlWidget.solver.analysis.energy_signal.signal_energy.connect(self.update_statusbar_text1)
         self.SimulationControlWidget.energy_signal.signal_energy.connect(self.update_statusbar_text1)
+
+        #   save file
+        # self.connect(QtGui.QShortcut(QtGui.QKeySequence.Save, self), QtCore.SIGNAL('activated()'), self.saveFile)
 
     def create_actions(self):
         """
@@ -241,16 +268,20 @@ class MainWindow(QtGui.QMainWindow):
         self.newAction.triggered.connect(self.createNewProject)
         #    open
         self.openAction = QtGui.QAction('Open', self, shortcut='Ctrl+O', statusTip='Open')
-        self.openAction.triggered.connect(self.showOpenFileDialog)
+        self.openAction.triggered.connect(self.openFile)
         #    close
         self.closeAction = QtGui.QAction('Close Project', self, statusTip='Close Project')
         self.closeAction.triggered.connect(self.closeProjectFile)
-        
+        #   save
+        self.saveAction = QtGui.QAction('Save', self)
+        self.saveAction.setStatusTip("Save file")
+        self.saveAction.setShortcut("Ctrl+S")
+        self.saveAction.triggered.connect(self.saveFile)
+
         #    exit
         self.exitAction = QtGui.QAction('Exit', self, shortcut='Ctrl+Q', statusTip='Exit Application')
         self.exitAction.triggered.connect(self.close)
-        
-        
+
         #    view - menu
         #    view
         self.viewActionFront = QtGui.QAction('Front', self, shortcut='Ctrl+F', statusTip='Front view')
@@ -351,7 +382,7 @@ class MainWindow(QtGui.QMainWindow):
         openFile = QtGui.QAction('Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open Project')
-        openFile.triggered.connect(self.showOpenFileDialog)
+        openFile.triggered.connect(self.openFile)
         self.fileMenu.addAction(openFile)
         self.fileMenu.addSeparator()
 
@@ -359,6 +390,7 @@ class MainWindow(QtGui.QMainWindow):
         saveFile = QtGui.QAction('Save', self)
         saveFile.setShortcut('Ctrl+S')
         saveFile.setStatusTip('Save Project')
+        saveFile.triggered.connect(self.saveFile)
         self.fileMenu.addAction(saveFile)
 
         #    save as file
@@ -425,35 +457,6 @@ class MainWindow(QtGui.QMainWindow):
         self.SimulationControlWidget.OpenGLWidget.update_data(self.MBD_system.bodies)
         self.SimulationControlWidget.OpenGLWidget.repaintGL()
 
-    def showOpenFileDialog(self):
-
-        _open_file_ = QtGui.QFileDialog()
-        _open_file_.setDirectory(self._working_directory)
-        
-        filename, file_type = _open_file_.getOpenFileNameAndFilter(self, 'Open file', self.current_working_directory, ("DyS Project Files (*.dprj)"))
-        
-        self.MBD_system = read_and_write.read(filename)
-        
-        self.MBD_system.construct_MBD_system()
-        
-        self.update_data()
-#            pprint(vars(body))
-#            pprint(vars(body.geom))
-#        #    absolute file path of opened file
-#        try:         
-#            self.MBD_file_abs_path = _open_file[0]
-#            print "MBD_file_name =", self.MBD_file_abs_path
-#        except:
-#            None
-#        
-#        
-#        if os.path.exists(self.MBD_file_abs_path):
-#            project_folder_abs_path, MBD_filename = os.path.split(str(self.MBD_file_abs_path))
-#
-#            project_folder_name = os.path.basename(project_folder_abs_path)
-#
-        self.MBD_system.construct_MBD_system(MBD_file_abs_path=filename, _name=filename)
-
     def showSaveAsFileDialog(self):
         """
         
@@ -479,11 +482,75 @@ class MainWindow(QtGui.QMainWindow):
         self.MBD_system.delete_MBD_system()
         self.TreeViewWidget.repaint()
 
+    def openFile(self):
+        """
+        Open file
+        :return:
+        """
+        file_dialog = QtGui.QFileDialog()
+
+        filename, file_type = file_dialog.getOpenFileNameAndFilter(self,
+                                                                   caption='Open file',
+                                                                   directory=QtCore.QString(self.MBD_folder_abs_path),
+                                                                   filter=self._file_types)
+
+        filename = str(filename)
+        if filename:
+            if is_binary(filename):
+                with open(filename, 'rb') as _file:
+                    print "_file =", _file
+                    self.MBD_system = dill.load(_file)
+            else:
+                pass
+        # self.MBD_system = read_and_write.read(filename)
+        #
+        # self.MBD_system.construct_MBD_system()
+        #
+        # self.update_data()
+#            pprint(vars(body))
+#            pprint(vars(body.geom))
+#        #    absolute file path of opened file
+#        try:
+#            self.MBD_file_abs_path = _open_file[0]
+#            print "MBD_file_name =", self.MBD_file_abs_path
+#        except:
+#            None
+#
+#
+#        if os.path.exists(self.MBD_file_abs_path):
+#            project_folder_abs_path, MBD_filename = os.path.split(str(self.MBD_file_abs_path))
+#
+#            project_folder_name = os.path.basename(project_folder_abs_path)
+#
+        # self.MBD_system.construct_MBD_system(MBD_file_abs_path=filename, _name=filename)
+
     def saveFile(self):
         """
-        
+        Save MBD system object to file
         """
-        filename = QtGui.QFileDialog.getSaveFileNameAndFilter(self)
+        if not self.MBD_system.saved:
+            #   file dialog
+            file_dialog = QtGui.QFileDialog()
+            file_dialog.setFileMode(QtGui.QFileDialog.ExistingFiles)
+
+            self.MBD_file_abs_path = file_dialog.getSaveFileName(self,
+                                                    caption=QtCore.QString("Save file"),
+                                                    directory=QtCore.QString(self.MBD_folder_abs_path),
+                                                    filter=QtCore.QString(self._file_types))
+
+            self.MBD_file_abs_path = str(self.MBD_file_abs_path)
+
+        if self.MBD_file_abs_path:
+            with open(self.MBD_file_abs_path, "wb") as _file:
+                save_data = self.MBD_system
+                # pickle.dump(MBD_system, save, -1)
+                dill.dump(save_data, _file)
+
+                _file.close()
+                self.MBD_system.saved = True
+
+                logging.getLogger("DyS_logger").info("Project saved to file: %s. Size is %s", self.MBD_file_abs_path, convert_bytes_to_.convert_size(os.path.getsize(self.MBD_file_abs_path)))
+
 
     def show_change_background_color_dialog(self):
         color = QtGui.QColorDialog.getColor()
@@ -517,10 +584,10 @@ class MainWindow(QtGui.QMainWindow):
         captured_figure = self.SimulationControlWidget.OpenGLWidget.takeSnapShot()
 
         _save_file = QtGui.QFileDialog()
-        _save_file.setDirectory(self.MBD_system.MBD_folder_abs_path_)
-        abs_save_file_path = _save_file.getSaveFileNameAndFilter(self, "Save file", self.MBD_system.MBD_folder_abs_path_, ("png (*.png)"))
-        abs_save_file_path.replace("/", "\\")
-        captured_figure.save(abs_save_file_path, 'png')
+        _save_file.setDirectory(self.MBD_system.self.MBD_folder_abs_path)
+        abs_save_file_path, filetype = _save_file.getSaveFileNameAndFilter(self, "Save file", self.MBD_system.self.MBD_folder_abs_path, ("png (*.png)"))
+        abs_save_file_path = str(abs_save_file_path).replace("/", "\\")
+        captured_figure.save(abs_save_file_path)
 
     def create_status_bar(self):
         """

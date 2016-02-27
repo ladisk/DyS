@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file 'body.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Tue Feb 16 12:28:59 2016
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -79,6 +80,9 @@ class Ui_Form(object):
         self.groupBox_simulationParameters.setObjectName(_fromUtf8("groupBox_simulationParameters"))
         self.gridLayout_2 = QtGui.QGridLayout(self.groupBox_simulationParameters)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.transformCS_label = QtGui.QLabel(self.groupBox_simulationParameters)
+        self.transformCS_label.setObjectName(_fromUtf8("transformCS_label"))
+        self.gridLayout_2.addWidget(self.transformCS_label, 6, 0, 1, 1)
         self.R_label = QtGui.QLabel(self.groupBox_simulationParameters)
         self.R_label.setObjectName(_fromUtf8("R_label"))
         self.gridLayout_2.addWidget(self.R_label, 2, 0, 1, 1)
@@ -115,6 +119,11 @@ class Ui_Form(object):
         self.dtheta_label = QtGui.QLabel(self.groupBox_simulationParameters)
         self.dtheta_label.setObjectName(_fromUtf8("dtheta_label"))
         self.gridLayout_2.addWidget(self.dtheta_label, 5, 0, 1, 1)
+        self.transformCS_comboBox = QtGui.QComboBox(self.groupBox_simulationParameters)
+        self.transformCS_comboBox.setObjectName(_fromUtf8("transformCS_comboBox"))
+        self.transformCS_comboBox.addItem(_fromUtf8(""))
+        self.transformCS_comboBox.addItem(_fromUtf8(""))
+        self.gridLayout_2.addWidget(self.transformCS_comboBox, 6, 2, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(130, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
         self.gridLayout_2.addItem(spacerItem1, 0, 1, 1, 1)
         self.verticalLayout.addWidget(self.groupBox_simulationParameters)
@@ -213,12 +222,15 @@ class Ui_Form(object):
         self.name_label.setText(_translate("Form", "Name", None))
         self.bodyID_label_2.setText(_translate("Form", "Load from .dat file", None))
         self.groupBox_simulationParameters.setTitle(_translate("Form", "Simulation Parameters", None))
+        self.transformCS_label.setText(_translate("Form", "Transform to", None))
         self.R_label.setText(_translate("Form", "R, m", None))
         self.theta_label.setText(_translate("Form", "theta, deg", None))
         self.J_label.setText(_translate("Form", "J, kgm^2", None))
         self.mass_label.setText(_translate("Form", "m, kg", None))
         self.dR_label.setText(_translate("Form", "dR, m/s", None))
         self.dtheta_label.setText(_translate("Form", "dtheta, deg/s", None))
+        self.transformCS_comboBox.setItemText(0, _translate("Form", "LCS", None))
+        self.transformCS_comboBox.setItemText(1, _translate("Form", "CAD", None))
         self.groupBox_Geometry.setTitle(_translate("Form", "Visualization (Geometry)", None))
         self.centerOfMass_label.setText(_translate("Form", "CM (in CAD), m", None))
         self.transparent_label.setText(_translate("Form", "Transparent", None))

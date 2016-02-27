@@ -3,30 +3,22 @@ Created on 9. maj. 2013
 
 @author: luka.skrinjar
 """
-import time
-import sys
+import itertools
 import os
 from pprint import pprint
-import itertools
-import logging
 
 import numpy as np
-from PyQt4 import QtCore, QtGui, QtOpenGL
-from OpenGL import *
 from OpenGL.GL import *
-from OpenGL.GLU import *
+from PyQt4 import QtGui
 
-
-from geometry.geometry import Geometry
-from geometry.line.line import Line
 import read_body_data_file.read_body_data_file as read_body_data_file
-from simulation_control_widget.opengl_widget.coordinate_system.coordinate_system import CoordinateSystem
-from simulation_control_widget.opengl_widget.marker.marker import Marker
-
-
 from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.MBD_system_items import BodyItem
 from MBD_system.extract_from_dictionary_by_string_in_key import extract_from_dictionary_by_string_in_key
+from geometry.geometry import Geometry
+from geometry.line.line import Line
+from simulation_control_widget.opengl_widget.coordinate_system.coordinate_system import CoordinateSystem
+from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 
 class Body(BodyItem):
@@ -57,6 +49,8 @@ class Body(BodyItem):
         :param geometry_data_file:      a path to geometry .stl or .obj file (todo)
         """
         super(Body, self).__init__(name, parent)
+
+        #   parent
         self._parent = parent
 
         #    set working directory
@@ -88,13 +82,17 @@ class Body(BodyItem):
             #    override default geometry and physical properties
             self.mass = 0
             self.J_zz = 0
-            
+
+        #   material and geometry properties
         self.density = density
         self.volume = volume
         self.CM_CAD_LCS = CM_CAD_LCS
         self.CAD_LCS_GCS = CAD_LCS_GCS
 
         #    dynamic properties
+        #    transform with respect to selected CS
+        #    options: CAD, LCS
+        self.transformCS = "CAD"
         self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
         #    (initial) coordinates and angles (in degrees)
         self.theta = theta
@@ -107,14 +105,18 @@ class Body(BodyItem):
 
         #   list of forces
         self.forces = []
+
         #   list for markers
         self.markers = []
+
         #   list of contact geometry data (nodes, edges) objects that are created for contact detection
         self.contact_geometries = []
 
         #   geometry properties
         self._geometry_type = None
-        self._geometry_types = ["line", ".stl"]
+        self._geometry_types = ["line", 
+                                ".stl",
+                                "lines"] #    todo: lines - for complex parametric models
         self.geometry = None
         self.geometry_filename = None
         self.geometry_file_extension = ".stl"
@@ -131,7 +133,7 @@ class Body(BodyItem):
         self.AABBtree_created = False
         
         #    file properties
-        if hasattr(self._parent, "_typeInfo"):  # == 
+        if hasattr(self._parent, "_typeInfo"):
             if self._parent._typeInfo == "MBDsystem":  #    ground body object has parent MBD system
                 self.properties_file_extension = self._parent._project_filetype
             
@@ -181,12 +183,24 @@ class Body(BodyItem):
                             raise IOError, "Geometry file %s not found!"%self.geometry_filename
 
             # self.CM_CAD_LCS_ = self.CM_CAD_LCS
-            self.CM_CAD_LCS[0:2] = Ai_ui_P_vector(self.CM_CAD_LCS[0:2], self.theta[2])  # np.deg2rad(self.theta[2])
+#             print "self.CM_CAD_LCS ="
+#             print self.CM_CAD_LCS
+#             
+#             print "self.CAD_LCS_GCS ="
+#             print self.CAD_LCS_GCS
+            #    additional translation due to rotation with respect to CAD CS
+            self.CM_CAD_LCS[0:2] = Ai_ui_P_vector(self.CM_CAD_LCS[0:2], 0)#self.theta[2]
+            # print "self.CAD_LCS_GCS =", self.CAD_LCS_GCS
+            # print "self.theta[2] =", self.theta[2]
+            __dR = self.CM_CAD_LCS - Ai_ui_P_vector(self.CM_CAD_LCS, self.theta[2])#np.zeros(3)#
+            # print "__dR =", __dR
 
             if all(self.CM_CAD_LCS == np.zeros(3)) and all(self.CAD_LCS_GCS == np.zeros(3)):
                 pass
             else:
-                self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS
+                self.R = self.CM_CAD_LCS + self.CAD_LCS_GCS - __dR
+#             print "self.R ="
+#             print self.R
             #   cad coordinate system of geometry
             self.CAD_CS = Marker(-self.CM_CAD_LCS, parent=self)#-self.CM_CAD_LCS-self.CAD_LCS_GCS
             self.CAD_CS._visible = False
@@ -196,11 +210,14 @@ class Body(BodyItem):
             if self.geometry_filename is not None:
                 if os.path.isfile(self.geometry_filename):
                     self.geometry = Geometry(self.geometry_filename, parent=self)
+                    #   get extension
+                    self._geometry_type = os.path.splitext(self.geometry_filename)[1]
+
             elif self._geometry_type == "line":
                 self.geometry = Line(parent=self)
             else:
                 if self.geometry is None:
-                    print "Body geometry file not found! Attribute self.geometry not created."
+                    print "Body geometry file %s not found! Attribute self.geometry for body %s not created."%(self.geometry_filename, self._name)
 
             #   add additional attributes to geometry object
             _dict_geometry = extract_from_dictionary_by_string_in_key(_dict, "geometry.")
@@ -227,7 +244,7 @@ class Body(BodyItem):
         """
         for key in dict:
             val = dict[key]
-            if key == "theta":
+            if key == "theta" and self._parent._parent._angle_units == "deg":
                 val = np.deg2rad(val)
 
             setattr(self, key, val)
@@ -237,13 +254,15 @@ class Body(BodyItem):
         Function finds max coordinate of a point of body geometry in x and y axis
         :return:
         """
+        self.uP_i_max = np.zeros(3)
         if self.geometry is not None:
             if self._geometry_type == ".stl":
                 self.uP_i_max = np.amax(abs(self.geometry.geom_data.vertices), axis=0)
             elif self._geometry_type == "line":
                 self.uP_i_max = np.amax(abs(self.geometry.vertices), axis=0)
-        else:
-            self.uP_i_max = np.zeros(3)
+            else:
+                print "uPmax not evaluated"
+            
 
     def get_uP_i_max(self):
         """
@@ -287,7 +306,12 @@ class Body(BodyItem):
 
         :return:
         """
-        print np.append(self.R[0:2], self.theta[2])
+        theta = self.theta[2]
+        #    check angle units for display
+        if self._parent._parent._angle_units == "deg":
+            theta = np.rad2deg(theta)
+    
+        print np.append(self.R[0:2], theta)
 
     def get_dq(self):
         """
@@ -360,11 +384,15 @@ class Body(BodyItem):
         """
         Paint body VBO
         """
+        #    translations
         glTranslatef(self.R[0], self.R[1], self.R[2])
+        
+        #    rotations
         glRotatef(np.rad2deg(self.theta[2]), 0, 0, 1)
         glRotatef(np.rad2deg(self.theta[0]), 1, 0, 0)
         glRotatef(np.rad2deg(self.theta[1]), 0, 1, 0)
 
+        
         self._paintGL_VBO_AABBtree(shader)
         
 #         for contact_geometry in self.contact_geometries:
@@ -373,7 +401,7 @@ class Body(BodyItem):
         if self._visible:
             for force in self.forces:
                 force._paint_GL(step)
- 
+            
             if self.LCS._visible and self.LCS._VBO_created:
                 self.LCS._paintGL_VBO()
 
@@ -395,7 +423,7 @@ class Body(BodyItem):
                 try:
                     self.geometry._paint_VBO()
                 except:
-                    raise UserWarning, "something is wrong"
+                    raise UserWarning, "VBO object created but not displayed!"
 #                 print "buffer check(body) =", glIsBuffer(self.geometry.vbo_id)
 
 

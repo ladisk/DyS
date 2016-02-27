@@ -1,11 +1,10 @@
 __author__ = 'lskrinjar'
 
-from pprint import pprint
 import numpy as np
 from matplotlib import pyplot as plt
 
 from MBD_system.A import A_matrix
-from MBD_system.contact.distance.distance import Distance
+
 
 class DistanceLineNode(object):#Distance
     """
@@ -14,10 +13,10 @@ class DistanceLineNode(object):#Distance
     def __init__(self, u_iP, u_jP, normal=None, u_iR=None, tangent=None, parent=None):
         # super(DistancePlaneNode, self).__init__(self._name, parent)
         """
-        :param u_iP:        free a point in GCS
-        :param u_jP:        line point in GCS
+        :param u_iP:        free a point in GCS on body i
+        :param u_jP:        line point in GCS on body j
         :param normal:      normal in GCS
-        :param u_iR:        a point in GCS
+        :param u_iR:        line point in GCS on body j
         :param tangent:     tangent in GCS
         """
         #   parent
@@ -37,7 +36,7 @@ class DistanceLineNode(object):#Distance
             self.edge = None
 
         #   distance
-        self._distance_vector = u_iP - u_jP
+        self._distance_vector = u_jP - u_iP
 
         #   tangent
         if tangent is None and normal is None:
@@ -54,7 +53,7 @@ class DistanceLineNode(object):#Distance
             self.normal = normal
 
         #   distance projection
-        _distance_vector_projection = normal * np.dot(self._distance_vector, normal)
+        _distance_vector_projection = self.normal * np.dot(self._distance_vector, self.normal)
 
         #   distance
         self._distance = np.linalg.norm(_distance_vector_projection, ord=2)
@@ -74,7 +73,7 @@ class DistanceLineNode(object):#Distance
 
         :return:
         """
-        self.CP = np.dot(self._distance_vector, self.tangent) * self.tangent + self.u_iR
+        self.CP = self.u_iP + np.dot(self._distance_vector, self.tangent) * self.tangent
 
     def contact_point_on_line_GCS(self):
         """

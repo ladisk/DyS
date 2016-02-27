@@ -4,10 +4,7 @@ created by: lskrinjar
 date of creation: 28/01/2016
 time of creation: 14:00
 """
-import os
-from pprint import pprint
-from PyQt4 import QtCore, QtGui
-
+from PyQt4 import QtGui
 
 from options_widget_ui import Ui_Form
 
@@ -28,6 +25,7 @@ class OptionsWidget(QtGui.QWidget):
         self.ui.setupUi(self)
 
         #todo - to create functional preferences widget see qstackwidget in sandbox/pyqt/qstackedwidget/example_2.py
+        self.ui.listWidget.currentRowChanged.connect(self.options)
 
         #    signals
         self.ui.buttonBox.button(QtGui.QDialogButtonBox.Cancel).clicked.connect(self._cancel)
@@ -37,3 +35,6 @@ class OptionsWidget(QtGui.QWidget):
 
         """
         self.close()
+
+    def options(self, i):
+        self.ui.stackedWidget.setCurrentIndex(i)

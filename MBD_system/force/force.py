@@ -3,11 +3,8 @@ Created on 21. feb. 2014
 
 @author: lskrinjar
 """
-import numpy as np
 
-import itertools
 from OpenGL.GL import *
-import numpy as np
 from sympy import Symbol
 from sympy.parsing.sympy_parser import parse_expr
 
@@ -186,7 +183,7 @@ class Force(ForceItem):
         vector = np.dot(matrix, force)
         return vector
 
-    def update(self, step, F = np.zeros(3), u_P = np.zeros(2)):
+    def update(self, step, F=np.zeros(3), u_P=np.zeros(2)):
         """
 
         :param step:
@@ -217,7 +214,7 @@ class Force(ForceItem):
         self.u_iP_f = u_P
         self._u_iP_f_solution_container.append(u_P)
 
-    def _reset_to_initial_state(self):
+    def reset(self):
         """
 
         :return:

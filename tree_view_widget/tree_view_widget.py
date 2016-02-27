@@ -3,29 +3,32 @@ Created on 27. jan. 2014
 
 @author: lskrinjar
 """
+import inspect
 import os
-import sys
 import subprocess
 from pprint import pprint
-import numpy as np
 
+import numpy as np
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from tree_view_widget_ui import Ui_Form
-from MBD_system.solution_data.solution_data import SolutionData
-from MBD_system.body.body_widget import BodyWidget
-from MBD_system.force.force_widget import ForceWidget
-from MBD_system.joint.joint_widget import JointWidget
-from MBD_system.contact.contact_widget import ContactWidget
-from MBD_system.spring.spring_widget import SpringWidget
-from MBD_system.item_widget import ItemWidget
-from tree_model import TreeModel
-from MBD_system.MBD_system_items import SolutionDataItem
-from analysis.analysis_widget import AnalysisWidget
+from MBD_system import read_and_write
 from MBD_system.MBD_system_widget import MBDSystemWidget
+from MBD_system.body.body_widget import BodyWidget
+from MBD_system.contact.contact_widget import ContactWidget
+from MBD_system.force.force_widget import ForceWidget
+from MBD_system.item_widget import ItemWidget
+from MBD_system.joint.joint_widget import JointWidget
 from MBD_system.motion.motion_widget import MotionWidget
+from MBD_system.q2R_i import q2R_i
+from MBD_system.q2theta_i import q2theta_i
+from MBD_system.solution_data.solution_data import SolutionData
+from MBD_system.spring.spring_widget import SpringWidget
+from analysis.analysis_widget import AnalysisWidget
+from tree_model import TreeModel
+from tree_view_widget_ui import Ui_Form
+
 
 class solutionFilenameSignal(QtCore.QObject):
     signal_filename = QtCore.pyqtSignal(str, name='')
@@ -40,7 +43,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
     """
     classdocs
     """
-    def __init__(self, MBD_system, parent=None, flags=0):
+    def __init__(self, project_item, MBD_system, parent=None, flags=0):
         """
         Constructor
         """
@@ -52,12 +55,15 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self.filename_signal = solutionFilenameSignal()
         self.load_loadSolutionFile = loadSolutionFile()
         self.create_animation_file = CreateAnimationFile()
-        
+
+        #   parent
         self._parent = parent
 
-        self.MBD_system = MBD_system
+        self.project_item = project_item
         # _model = MBD_system.TreeModel(self.MBD_system)
-        _model = TreeModel(self.MBD_system)
+        _model = TreeModel(self.project_item)
+
+        self.MBD_system = MBD_system
 
         self.ui.treeView.setModel(_model)
         
@@ -145,6 +151,9 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             deleteAction.setEnabled(True)
             deleteAction.triggered.connect(self._delete)
 
+            saveAction = self.menu.addAction("Save")
+            saveAction.triggered.connect(self._save)
+
             self.menu.addSeparator()
 
         if self._item._typeInfo == "MBDsystem" or self._item._typeInfo == "settings":
@@ -165,8 +174,16 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             getDOFsAction.triggered.connect(self.__getDOF)
 
             if self._item._typeInfo == "MBDsystem":
-                get_q_Action = self.menu.addAction("Get q")
+                get_q_Action = self.menu.addAction("q")
                 get_q_Action.triggered.connect(self._get_q)
+                
+                save_q_Action = self.menu.addAction("Save q")
+                save_q_Action.triggered.connect(self._save_q)
+                
+                load_q_Action = self.menu.addAction("Load q")
+                load_q_Action.triggered.connect(self._load_q)
+                
+                self.menu.addSeparator()
 
                 evaluate_C_Action = self.menu.addAction("C(q, t)")
                 evaluate_C_Action.triggered.connect(self._evaluate_C)
@@ -176,6 +193,9 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
                 evaluate_C_t_Action = self.menu.addAction("C_t(t)")
                 evaluate_C_t_Action.triggered.connect(self._evaluate_C_t)
+                
+                evaluate_M_Action = self.menu.addAction("M")
+                evaluate_M_Action.triggered.connect(self.evaluate_M)
 
                 self.menu.addSeparator()
                 list_parameters_Action = self.menu.addAction("List parameters")
@@ -236,8 +256,13 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
                 self.menu.addAction(show_force_Action)
 
             self.menu.addSeparator()
-            for marker, ID in  zip(self._item.markers, ["i", "j"]):
-                show_marker_Action = QtGui.QAction("Show u_P on body "+ID, self, checkable=True, checked=marker._visible)
+            for marker, ID, body_id in  zip(self._item.markers, ["i", "j"], self._item.body_id_list):
+                if isinstance(body_id, int):
+                    name = self.MBD_system.bodies[body_id]._name
+                else:
+                    name = "ground"
+                
+                show_marker_Action = QtGui.QAction("Show u_P on body "+ID+" id = "+str(body_id)+" ("+name+")", self, checkable=True, checked=marker._visible)
                 show_marker_Action.triggered.connect(marker._show)
                 self.menu.addAction(show_marker_Action)
 
@@ -267,8 +292,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             self.menu.addAction(evaluate_rijP_Action)
 
         elif self._item._typeInfo == "contact":
-            for force, ID in zip(self._item._Fn_list, ["i", "j"]):
-                show_force_Action = QtGui.QAction("Show Fn on body "+ID, self, checkable=True, checked=force._visible)
+            for force, ID, body_id in zip(self._item._Fn_list, ["i", "j"], self._item.body_id_list):
+                if isinstance(body_id, int):
+                    name = self.MBD_system.bodies[body_id]._name
+                else:
+                    name = "ground"
+                show_force_Action = QtGui.QAction("Show Fn on body "+ID+" id = "+str(body_id)+" ("+name+")", self, checkable=True, checked=force._visible)
                 show_force_Action.triggered.connect(force._show_force)
                 self.menu.addAction(show_force_Action)
 
@@ -312,6 +341,11 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
             contactForceAction = self.menu.addAction("Contact force")
             contactForceAction.triggered.connect(self._item.get_contact_force)
+
+            contactPointAction = QtGui.QAction("Contact point in GCS", self)
+            # contactPointAction.setEnabled(self._item._contact_point_found)
+            contactPointAction.triggered.connect(self._contact_point)
+            self.menu.addAction(contactPointAction)
 
             self.menu.addSeparator()
 
@@ -420,7 +454,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         #   this has to be put in a thread
         # data = self._item._load_dat_file()
-        self._parent.SimulationControlWidget.load_solution_file(filename = self._item._name, solution_data=data)
+        self._parent.SimulationControlWidget.load_solution_file(filename=self._item._name)
 
     def _load_solution_file_to_project(self):
         """
@@ -464,6 +498,12 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         Function adds created solution object item in tree view in folder solutions
         """
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+#         print 'caller name:', calframe
+        # pprint(vars(calframe))
+
+#         print "add_solution_data()"
         #   root index
         root_index = self.ui.treeView.rootIndex()
 
@@ -534,16 +574,84 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
 
         """
-        q = self.MBD_system._children[0].get_q()
+        q = self.MBD_system.get_q()
         print "q ="
         print q
+    
+    def _load_q(self):
+        """
+        Function loads vector q from solution file to MBD system object and its bodies
+        """
+        _path = self.MBD_system.MBD_folder_abs_path_
+        _load_file = QtGui.QFileDialog(self)
+        _load_file.setDirectory(_path)
+
+        _supported_types = self.__supported_types_solution()
+
+        #   get file path from open file dialog
+        file_path = _load_file.getOpenFileName(parent=self._parent, caption=QString("Load q"), directory=QString(_path), filter=QString(_supported_types))
+        file_path.replace("/", "\\")
+
+        #   load file data if file is selected
+        if file_path:
+            #   read data file and store data to solution data object
+            solution_data = SolutionData(_file=file_path, MBD_system=self.MBD_system)
+
+            q = self.MBD_system.q0 = solution_data._q_sol_container
+
+            for body in self.MBD_system.bodies:
+                #   q to body
+                body.R[0:2] = q2R_i(q, body.body_id)
+                #   dq to body
+                body.theta[2] = q2theta_i(q, body.body_id) 
+
+    def _save_q(self):
+        """
+        Function saves curent vector q to solution file
+        """
+        _path = self.MBD_system.MBD_folder_abs_path_
+        _save_file = QtGui.QFileDialog(self)
+        _save_file.setDirectory(_path)
+        
+        #    get supported types as string
+        _supported_types = self.__supported_types_solution()
+        
+        #    filepath and filetype
+        file_path, filetype = _save_file.getSaveFileNameAndFilter(parent=self._parent, caption=QString("Save q"), directory=QString(_path), filter=QString(_supported_types))
+        
+        #    get current vector q of MBD system
+        q = self.MBD_system.get_q()
+        
+        #    create solution data object to store vector q to file
+        solution_data = SolutionData(name=None, _file=str(file_path), MBD_system=self.MBD_system)
+       
+        _data = np.array([np.concatenate((np.zeros(5), q), axis=0)])
+        solution_data.add_data(_data)
+        
+        solution_data.write_to_file(_file_abs_path=file_path)
+        
+    def __supported_types_solution(self):
+        """
+        
+        """
+        #   predefine empty string
+        _supported_types = ""
+        for solution_type, type_name in zip(self.MBD_system._solution_filetypes, self.MBD_system._soltuion_filetype_software):
+            _supported_type = type_name + " (*" + solution_type + ")" +";;"
+
+            _supported_types = _supported_types + _supported_type
+
+        #   remove last ;;
+        _supported_types = _supported_types[0:-2]
+        
+        return _supported_types
 
     def _evaluate_C(self):
         """
 
         """
         t = 0
-        q = self.MBD_system._children[0].get_q()
+        q = self.MBD_system.get_q()
         print "C(q, t):"
         print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C(q, t)
 
@@ -552,7 +660,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         :return:
         """
-        q = self.MBD_system._children[0].get_q()
+        q = self.MBD_system.get_q()
         print "C_q(q, t):"
         print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_q(q, 0)
 
@@ -562,7 +670,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         :return:
         """
         t = 0
-        q = self.MBD_system._children[0].get_q()
+        q = self.MBD_system.get_q()
         print "C_t(t):"
         print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_t(q, 0)
 
@@ -577,6 +685,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         if self._item._typeInfo.lower() == "contact":
             self._widget = ContactWidget(self._parentNode, parent=self)
+            pprint(vars(self._item))
 
         if self._item._typeInfo.lower() == "force":
             self._widget = ForceWidget(self._parentNode, parent=self)
@@ -606,6 +715,15 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self._item._parent.removeChild(pos)
         del(self._item)
 
+    def _save(self):
+        """
+
+        :return:
+        """
+        obj = self._item
+        name = self._item._name+".dprj"
+        read_and_write.write(obj, name)
+
     def _properties(self, index):
         """
         Open properties window
@@ -634,7 +752,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         :return:
         """
         #   get current q vector of MBD system
-        q = self.MBD_system._children[0].evaluate_q0()
+        q = self.MBD_system.evaluate_q0()
 
         print self._item.evaluate_C(q)
 
@@ -644,16 +762,17 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         :return:
         """
         #   get current q vector of MBD system
-        q = self.MBD_system._children[0].evaluate_q0()
+        q = self.MBD_system.evaluate_q0()
 
         C_q = self._item.evaluate_C_q(q)
-
+        print "self._item =", self._item
         if self._item._typeInfo == "joint":
             for C_q_i, id in zip(C_q, ["i", "j"]):
                 print "C_q %s="%id
                 print C_q_i
         else:
-            print "C_q =", C_q
+            print "C_q ="
+            print C_q
 
     def evaluate_C_t(self):
         """
@@ -683,3 +802,23 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         #   get current q vector of MBD system
         q = self.MBD_system._children[0].evaluate_q0()
         print self._item.evaluate_d(q)
+    
+    def evaluate_M(self):
+        """
+        
+        :return:
+        """
+        self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_M()
+        M = self._parent.SimulationControlWidget.solver.analysis.DAE_fun.M
+        print "M ="
+        print M
+
+    def _contact_point(self):
+        """
+        Method gets information of point of contact
+        :return:
+        """
+        if self._parent.SimulationControlWidget._status == "animation":
+            self._item.get_contact_point(step=self._parent.SimulationControlWidget._step)
+
+

@@ -6,9 +6,8 @@ Created on 17. apr. 2014
 
 import numpy as np
 
-
-from A import A_matrix
 from A import A_3D_matrix
+from A import A_matrix
 
 
 def Ai_ui_P_vector(u_P, theta):
@@ -66,15 +65,17 @@ def Ai_ui_P_vector(u_P, theta):
 if __name__ == "__main__":
 
     #    vector 2D(x, y)
-    # uP = np.random.rand(2)
+#     uP = np.random.rand(2)
     #   vector 3D(x, y, z)
     # uP = np.random.rand(3)
     #    matrix of 2D vectors
     # uP = np.random.rand(10, 2)
     #    matrix of 3D vectors
-    uP = np.random.rand(10, 3)
+#     uP = np.random.rand(10, 3)
 
-    theta = 0
+    theta = np.deg2rad(-45)
+    uP = np.array([-3.28262,
+                   -.2972708])
     print "input ="
     print uP
     _uP = Ai_ui_P_vector(uP, theta)

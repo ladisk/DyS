@@ -5,26 +5,17 @@ date of creation: 01/02/2016
 time of creation: 10:11
 """
 
-
 import numpy as np
 
-
-from MBD_system.joint.joint import Joint
 from MBD_system.A import A_matrix
 from MBD_system.A_theta import A_theta_matrix
-from MBD_system.Ai_ui_P import Ai_ui_P_vector
-from MBD_system.Ai_theta_ui_P import Ai_theta_ui_P_vector
+from MBD_system.joint.joint import Joint
 from MBD_system.joint.joint_C_q_matrix import Joint_C_q_matrix
-from MBD_system.joint.joint_Q_d_vector import Joint_Q_d_vector
-from MBD_system.q2R_i import q2R_i
 from MBD_system.q2dR_i import q2dR_i
-from MBD_system.q2theta_i import q2theta_i
 from MBD_system.q2dtheta_i import q2dtheta_i
-from simulation_control_widget.opengl_widget.marker.marker import Marker
+from MBD_system.q2theta_i import q2theta_i
 from MBD_system.transform_cs import u_P_cad2cm_lcs
-from MBD_system.Ai_hi import Ai_hi
-from MBD_system.hi_Ai_theta_ui_P import hi_Ai_theta_ui_P_constant
-from MBD_system.r_ij_P_Ai_theta_hi import r_ij_P_Ai_theta_hi_constant
+from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 
 class JointPrismatic(Joint):
@@ -79,9 +70,12 @@ class JointPrismatic(Joint):
             if i == 1:
                 body_id = self.body_id_j
             #   create marker object
-            marker = Marker(_node, visible=True)
+            marker = Marker(_node)
             #   append marker object to body markers
-            self._parent._parent.bodies[body_id].markers.append(marker)
+            if isinstance(body_id, int):
+                self._parent._parent.bodies[body_id].markers.append(marker)
+            else:
+                self._parent._parent.ground.markers.append(marker)
             #   append marker object to joint markers
             markers.append(marker)
 

@@ -193,9 +193,9 @@ class TreeModel(QtCore.QAbstractItemModel):
         """
 
         """
-        print "treeView.model().insertRow()"
-
-        print "child =", child, id(child)
+#         print "treeView.model().insertRow()"
+# 
+#         print "child =", child, id(child)
         self.beginInsertRows(QtCore.QModelIndex(), parent.row() + len(parent._children), parent.row() + len(parent._children) + 1)
 
         success = parent.insertChild(QtCore.QModelIndex().row() + len(parent._children) + 1, child)

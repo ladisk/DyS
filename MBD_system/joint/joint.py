@@ -3,30 +3,16 @@ Created on 18. mar. 2014
 
 @author: lskrinjar
 """
-import time
 import itertools
-from copy import copy
-from pprint import pprint
 
 import numpy as np
 
-
-from MBD_system.Ai_ui_P import Ai_ui_P_vector
-from MBD_system.Ai_theta_ui_P import Ai_theta_ui_P_vector
-from MBD_system.Ai_hi import Ai_hi
-from MBD_system.Ai_theta_hi import Ai_theta_hi
-from MBD_system.hi_Ai_theta_ui_P import hi_Ai_theta_ui_P_constant
-from MBD_system.r_ij_P_Ai_theta_hi import r_ij_P_Ai_theta_hi_constant
+from MBD_system.MBD_system_items import JointItem
+from MBD_system.force.force import Force
+from MBD_system.q2R_i import q2R_i
+from MBD_system.q2theta_i import q2theta_i
 from MBD_system.r_ij_P import r_ij_P
 from MBD_system.u_P_cad2cm_lcs import u_P_cad2cm_lcs
-from MBD_system.q2dtheta_i import q2dtheta_i
-from MBD_system.q2R_i import q2R_i
-from MBD_system.q2dR_i import q2dR_i
-from MBD_system.MBD_system_items import JointItem
-from MBD_system.q2theta_i import q2theta_i
-from MBD_system.force.force import Force
-from MBD_system.joint.joint_C_q_matrix import Joint_C_q_matrix
-from MBD_system.joint.joint_Q_d_vector import Joint_Q_d_vector
 from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 
@@ -83,6 +69,8 @@ class Joint(JointItem):
         else:
             raise ValueError, "Joint type not correct!"
 
+        # print "name =", self._name
+        
         # swap body_id that if body is connected to ground that ground is always the last item in list
         if body_id_i == "ground":
             self.body_id_i = body_id_j
@@ -98,6 +86,7 @@ class Joint(JointItem):
 
         #   body id list
         self.body_id_list = [self.body_id_i, self.body_id_j]
+        self.body_list = []
 
         #   list of point vectors to joint constraint in CAD lCS of a body
         self.u_P_CAD_list = [self.u_iP_CAD, self.u_jP_CAD]
@@ -149,21 +138,24 @@ class Joint(JointItem):
         for body_id, _u_P in zip(self.body_id_list, self.u_P_CAD_list):
             if body_id == "ground" or body_id == -1:
                 # print "ground"
-                u_P_LCS = u_P_cad2cm_lcs(body_id, self._parent._parent.ground, _u_P)
+                # u_P_LCS = u_P_cad2cm_lcs(body_id, self._parent._parent.ground, _u_P)
                 u_P_LCS = _u_P
+                _body = self._parent._parent.ground
             else:
-
                 #   pointer to body object
                 _body = self._parent._parent.bodies[body_id]
                 #   calculate point vector in body LCS (center of gravity)
-                u_P_LCS = u_P_cad2cm_lcs(body_id, _body, _u_P)
-                if body_id == 1:
-                    print "_u_P(CAD) =", _u_P
-                    print "u_P_LCS =", u_P_LCS
+                u_P_LCS = u_P_cad2cm_lcs(body_id, _body, _u_P, 0)#_body.theta[2]
+                # u_P_LCS = _u_P - _body.R[0:2]
+            
+            # print "u_P_LCS =", u_P_LCS
             self.u_P_LCS_list.append(u_P_LCS)
 
-        [self.u_iP_LCS, self.u_jP_LCS] = self.u_P_LCS_list
+            self.body_list.append(_body)
 
+        [self.u_iP_LCS, self.u_jP_LCS] = self.u_P_LCS_list
+        
+        
         self.list_of_contact_force_objects_constructed = True
         self.additional_params_calulated = True
 
@@ -201,11 +193,11 @@ class Joint(JointItem):
         :return:
         """
         markers = []
-        for body_id, u_P in zip(self.body_id_list, self.u_P_LCS_list):
+        for body, body_id, u_P in zip(self.body_list, self.body_id_list, self.u_P_LCS_list):
             _node = np.array(np.append(u_P, self.z_dim), dtype="float32")
 
             #   create marker object
-            marker = Marker(_node)
+            marker = Marker(_node, parent=body)
             #   append marker object to body markers
             if body_id == "ground":
                 self._parent._parent.ground.markers.append(marker)

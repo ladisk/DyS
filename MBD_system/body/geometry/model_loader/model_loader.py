@@ -3,17 +3,15 @@ Created on 16. nov. 2013
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
 """
-import os
 import itertools
-import numpy as np
-import matplotlib
+import os
+
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import numpy as np
 
-
-from MBD_system.body.geometry.triangle.triangle import Triangle
-from MBD_system.body.geometry.node.node import Node
 from MBD_system.body.geometry.line.line import Line
+from MBD_system.body.geometry.node.node import Node
+from MBD_system.body.geometry.triangle.triangle import Triangle
 
 
 class ModelLoader(object):
@@ -48,7 +46,7 @@ class ModelLoader(object):
             raise IOError, "file_extension not correct, check file_extension."
 
         #   close file
-        self.geom_file.close
+        self.geom_file.close()
         
     def load_stl(self):
         #    predefine parameters
@@ -82,13 +80,11 @@ class ModelLoader(object):
                 _triangle.add_node(_node)
                 
                 self.nodes.append(_node)
-                
 
         #    reshape
         self.vertices = np.array(self.vertices) * 1E-3
         self.vertices[np.abs(self.vertices) < self.eps] = 0
         self.normals = np.array(self.normals)
-
 
         #    check if number of vertices is equal to the number of normals
         N_vertices = len(self.vertices)
@@ -99,29 +95,24 @@ class ModelLoader(object):
         else:
             raise IOError, "number of normals and vertices do not a match, check file."
 
-
     def get_vertices_3D(self):
         return self.vertices
-        
-        
+
     def get_vertices_2D(self):
         return self.vertices[:, 0:2] 
-        
-        
+
     def get_normals_3D(self):
         if np.shape(self.vertices) == np.shape(self.normals):
             return self.normals
         else:
             return np.repeat(self.normals, repeats=3, axis=0)
-        
-        
+
     def get_normals_2D(self):
         if np.shape(self.vertices) == np.shape(self.normals):
             return self.normals[:, 0:2]
         else:
             return np.repeat(self.normals, repeats=3, axis=0)[:, 0:2]
-        
-        
+
     def remove_joined_duplicate(self):
         """
         Function removes duplicate joined nodes and normals
@@ -136,7 +127,6 @@ class ModelLoader(object):
         __normals = unique_data[:, 3:6]
         return __vertices, __normals
 
-
     def remove_duplicate_2D(self):
         """
         Remove duplicate nodes that have same x,y coordinates and different z coordinate
@@ -147,7 +137,6 @@ class ModelLoader(object):
         _vertices = self.get_vertices_3D()[np.sort(idx)]
         _normals = self.get_normals_3D()[np.sort(idx)]
         return _vertices, _normals
-
 
     def remove_duplicate_3D(self):
         """
@@ -161,7 +150,6 @@ class ModelLoader(object):
         _normals = self.get_normals_3D()[np.sort(idx)]
         return _vertices, _normals
 
-        
     def load_obj(self):
         #    predefine parameters
         self.vertices = []

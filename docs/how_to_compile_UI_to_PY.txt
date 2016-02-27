@@ -23,6 +23,6 @@ pyuic4.bat spring.ui > spring_ui.py
 
 pyuic4.bat MBD_system.ui > MBD_system_ui.py
 
-pyuic4.bat preferences_widget.ui > preferences_widget_ui.py
+pyuic4.bat options_widget.ui > options_widget_ui.py
 
 pyuic4.bat motion.ui > motion_ui.py

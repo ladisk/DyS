@@ -3,13 +3,7 @@ Created on 9. jul. 2014
 
 @author: lskrinjar
 """
-import time
 import numpy as np
-from matplotlib import pyplot as plt
-from pprint import pprint
-import scipy
-import scipy.optimize
-
 
 from MBD_system.fix_string import fix_string
 
@@ -39,6 +33,7 @@ class ContactModel(object):
         :param  c_r     coefficient of restitution
         :parem  parent  pointer to the parent object
         """
+        #   parent
         self._parent = parent
 
         #   sub string
@@ -47,7 +42,7 @@ class ContactModel(object):
         #   coefficient of restitution
         self.c_r = c_r
 
-        #   nonlinear power
+        #   nonlinear power exponent
         self.n = 3/2.   #default is 3/2
 
         #   length of contact (required for some types)
@@ -95,7 +90,6 @@ class ContactModel(object):
         if self.properties is not []:
             self._add_aditional_parameters(self.properties)
 
-        pprint(vars(self))
         #   if parent is specified (if exists)
         if self._parent is not None:
             #   get attributes from parent
@@ -124,7 +118,6 @@ class ContactModel(object):
 
         :return:
         """
-        print
         if self._type.lower() in self._types:
             pass
         else:

@@ -5,19 +5,15 @@ date of creation: 01/02/2016
 time of creation: 10:11
 """
 
-
 import numpy as np
 
-
-from MBD_system.joint.joint import Joint
-from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.Ai_theta_ui_P import Ai_theta_ui_P_vector
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
+from MBD_system.joint.joint import Joint
 from MBD_system.joint.joint_C_q_matrix import Joint_C_q_matrix
 from MBD_system.joint.joint_Q_d_vector import Joint_Q_d_vector
-from MBD_system.q2R_i import q2R_i
-from MBD_system.q2dR_i import q2dR_i
-from MBD_system.q2theta_i import q2theta_i
 from MBD_system.q2dtheta_i import q2dtheta_i
+from MBD_system.q2theta_i import q2theta_i
 
 
 class JointFixed(Joint):
@@ -81,7 +77,7 @@ class JointFixed(Joint):
             for body_id in self.body_id_list:
                 Q_d_body = Joint_Q_d_vector(self.joint_type)
 
-                Q_d_body.Q_d[0:2] = Ai_ui_P_vector(self.u_P_list[Q_d_body.id], q2theta_i(q, body_id)) * (q2dtheta_i(q, body_id) ** 2)
+                Q_d_body.Q_d[0:2] = Ai_ui_P_vector(self.u_P_LCS_list[Q_d_body.id], q2theta_i(q, body_id)) * (q2dtheta_i(q, body_id) ** 2)
 
                 #    add calculated joint matrix of a body to list
                 self.Q_d_list.append(Q_d_body)

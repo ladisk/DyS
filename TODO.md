@@ -3,7 +3,6 @@
 *In progress*
 
 - [AT] decrease-increase time step size 
-- [LS] kinematic motors-motions (drives) – df/dt = ?
 
 *Info*
 
@@ -24,10 +23,10 @@ negative the bodies are separating, which corresponds to the restitution phase.
 
 *ToDo*
 
-- [ ] two/multiple points body contact with penalty method (at the moment only one contact point is supported)
-- [ ] before simulation starts evaluates C(q, t) vector and stops the simulation if there are non-zero elements in the array
-- [ ] update display on delta time, not number of time steps (display opengl based on simulation time, not simulation step number)
 - [ ] find and update (location of) new contact point between two bodies
+- [ ] two/multiple points body contact with penalty method (at the moment only one contact point is supported)
+- [ ] update display on delta time, not number of time steps (display opengl based on simulation time, not simulation step number)
+- [ ] prismatic clearance joint
 - [ ] pause simulation
 - [ ] write predictor corrector method (variable order of numerical method)
 - [ ] Graphical representation of springs (translational, torsional)
@@ -37,6 +36,8 @@ negative the bodies are separating, which corresponds to the restitution phase.
 
 *Done*
 
+- [x] before simulation starts evaluates C(q, t) vector and stops the simulation if there are non-zero elements in the array
+- [x] kinematic motors-motions (drives) – df/dt = ?
 - [x] increase time step after contact has happened
 - [x] visualize parameterized (with lines) geometry models
 - [x] Menu to edit (create, delete) in tree model view and automatic update in opengl widget

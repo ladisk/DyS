@@ -123,6 +123,13 @@
       <string>Simulation Parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="6" column="0">
+       <widget class="QLabel" name="transformCS_label">
+        <property name="text">
+         <string>Transform to</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="R_label">
         <property name="text">
@@ -181,6 +188,20 @@
         <property name="text">
          <string>dtheta, deg/s</string>
         </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QComboBox" name="transformCS_comboBox">
+        <item>
+         <property name="text">
+          <string>LCS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CAD</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="1">

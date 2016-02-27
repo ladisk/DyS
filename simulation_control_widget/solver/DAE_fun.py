@@ -4,23 +4,11 @@ Created on 13. mar. 2014
 @author: luka.skrinjar
 """
 import logging
-from pprint import pprint
-import sys
-import time
-import cProfile
 
 import numpy as np
-import scipy as sp
-from scipy.sparse import linalg
-from scipy.sparse import find
-from scipy.sparse import issparse
-from scipy.sparse import csr_matrix
-from scipy.sparse import csc_matrix
-
 
 from MBD_system import inverse_blockwise
 from gaussian_elimination import gaussian_elimination
-from MBD_system.force.force import Force
 
 
 class DAEfun(object):
@@ -74,9 +62,12 @@ class DAEfun(object):
         self.M_created = True
 
         #    inverse mass matrix
-        self.M_inv = np.linalg.inv(self.M)
+        try:
+            self.M_inv = np.linalg.inv(self.M)
+        except:
+            print "Mass matrix inverse not calculated!"
 
-    def getDOF(self):
+    def getDOF(self, q):
         """
         Evaluate degrees of freedom
         """
@@ -123,12 +114,18 @@ class DAEfun(object):
         :return:
         """
         C = self.evaluate_C(q, t)
-
+        print "C =", C
         #   all elements of vector C have to be under specified tolerance defined by used
-        #   and number of elementc of C has to be equal to number of absolute coordinates of MBD system
-        if (abs(C) < self.MBD_system.TOL_C).all() and (len(C) == 3*self.MBD_system.number_of_bodies):
-            logging.getLogger("DyS_logger").info("C(q, t) check - proceed with simulation run!")
-            return False
+        if self.MBD_system.analysis_type == "kinematic":
+            #   and number of elementc of C has to be equal to number of absolute coordinates of MBD system
+            if (abs(C) < self.MBD_system.TOL_C).all() and (len(C) == 3*self.MBD_system.number_of_bodies):
+                logging.getLogger("DyS_logger").info("C(q, t) check - proceed with simulation run!")
+                return False
+        
+        elif self.MBD_system.analysis_type == "dynamic":
+            if (abs(C) < self.MBD_system.TOL_C).all():
+                logging.getLogger("DyS_logger").info("C(q, t) check - proceed with simulation run!")
+                return False
         else:
             logging.getLogger("DyS_logger").info("C(q, t) check - tolerances violated!")
             return True
@@ -284,11 +281,11 @@ class DAEfun(object):
 
         return Q_d
 
-    def create_Q_e(self, t, q_):
+    def evaluate_Q_e(self, t, q_):
         """
         Evaluate vector of generalized external forces of the system
         """
-        # print "create_Q_e()"
+        # print "evaluate_Q_e()"
         # print "t =", t
         if self._parent.FLAG_contact == 1:
             self.solve_contacts(t, q_)
@@ -328,7 +325,7 @@ class DAEfun(object):
         # print "Q_e =", Q_e
         return Q_e
 
-    def create_C_s(self, q):
+    def evaluate_C_s(self, q):
         """
         Function creates C_s matrix of a contact
         """
@@ -361,7 +358,7 @@ class DAEfun(object):
         C_s_trans = C_s.T
         return C_s, C_s_trans
 
-    def create_dC(self, C_q, q):
+    def evaluate_dC(self, C_q, q):
         """
 
         """
@@ -374,7 +371,7 @@ class DAEfun(object):
         Function evaluates vector dq of MBD system
         """
         #    construct Cq matrix
-        self.C_q = self.evaluate_C_q(q)
+        self.C_q = self.evaluate_C_q(q, t)
         #    matrix C_q transposed
         self.C_qT = self.C_q.T
 
@@ -391,14 +388,14 @@ class DAEfun(object):
         _vector = np.empty([rows])
 
         #    vector of external and contact forces
-        Q_e = self.create_Q_e(t, q)
+        Q_e = self.evaluate_Q_e(t, q)
         _vector[0:self.M_dim] = Q_e
         # print "%2.10f"%t, Q_e, "FLAG =", self._parent.FLAG_contact
 
         #    vector of elements, that are quadratic in velocities
         if self.MBD_system.use_BSM:
             C = self.evaluate_C(q, t)
-            dC = self.create_dC(self.C_q, q)
+            dC = self.evaluate_dC(self.C_q, q)
 
             self.alpha = h#1./h
             self.beta = self.alpha #* np.sqrt(2)

@@ -59,7 +59,7 @@ def create_list(filename, parent=None):
                     match_equal = re.search(r"=", line)
                     match_newline = re.search(r"\n", line)
 
-                    if _body_id is None:
+                    if _body_id is None and i > 1:
                         __motion_name = line[match_equal.start() + 1::]
 
                     else:

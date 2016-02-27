@@ -3,30 +3,23 @@ Created on 17. nov. 2013
 
 @author: lskrinjar
 """
-import warnings
-import time
 import copy
-import numpy as np
+import itertools
+import warnings
+from pprint import pprint
+
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
-from pprint import pprint
-import ctypes
-from OpenGL import *
+import numpy as np
 from OpenGL.GL import *
-from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
-from dxfwrite import DXFEngine as dxf
-import itertools
 
-
-from bounding_box_data_container import DataContainerAABB
 from MBD_system.A import A_matrix
-from MBD_system.MBD_system_items import AABBItem
-from MBD_system.transform_cs import gcs2lcs_z_axis
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.q2R_i import q2R_i
 from MBD_system.q2theta_i import q2theta_i
-from MBD_system.Ai_ui_P import Ai_ui_P_vector
+from MBD_system.transform_cs import gcs2lcs_z_axis
+from bounding_box_data_container import DataContainerAABB
 
 np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, suppress=False, nanstr=None, infstr=None)
 
@@ -34,6 +27,7 @@ np.set_printoptions(precision=4, threshold=None, edgeitems=100, linewidth=1000, 
 class AABB(object):  # AABBItem or object - for testing
     """
     classdocs
+    https://en.wikipedia.org/wiki/K-d_tree
     """
     __level = 1
     __id = itertools.count(1)

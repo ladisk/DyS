@@ -6,8 +6,8 @@ Created on 20. apr. 2015
 """
 import numpy as np
 
-from A_inv import A_inv_matrix
 from A import A_matrix
+from A_inv import A_inv_matrix
 from cad2cm_lcs import cad2cm_lcs
 
 def uP_gcs2lcs(u_P, theta):
@@ -18,7 +18,7 @@ def uP_lcs2gcs(u_P, theta):
     _u_P = np.dot(A_matrix(theta), u_P)
     return _u_P
 
-def gcs2cm_lcs(r_P, R, theta):
+def gcs2cm_lcs(r_P, R=np.zeros(2), theta=0):
     """
     Function calculates a coordinate of a point P in GCS - global coordinate system
     from given coordinate in LCS - local coordinate system
@@ -76,6 +76,6 @@ def u_P_cad2cm_lcs(body_id, body, _u_P):
         _u_P_f_cm = _u_P
 
     else:
-        _u_P_f_cm = cad2cm_lcs(_u_P, body.CM_CAD_LCS[0:2])
+        _u_P_f_cm = cad2cm_lcs(_u_P, body.CM_CAD_LCS[0:2], 0)
 
     return _u_P_f_cm

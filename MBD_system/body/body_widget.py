@@ -1,22 +1,19 @@
-'''
+"""
 Created on 3. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 import os
-import datetime
 from pprint import pprint
 
 import numpy as np
 from PyQt4 import QtCore, QtGui
 
-
-from body_ui import Ui_Form
-from MBD_system.body.body import Body
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
 from MBD_system.array2string import array2string
+from MBD_system.body.body import Body
 from MBD_system.string2array import string2array
-from MBD_system.item_widget import ItemWidget
-
+from body_ui import Ui_Form
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -117,6 +114,13 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
         _R = np.array(string2array(self.ui.R_lineEdit.text()), dtype="float32")
         _theta = np.array(string2array(self.ui.theta_lineEdit.text()), dtype="float32")
         
+        
+        
+        if self.ui.transformCS_comboBox.currentText() == "CAD":
+            __dR = self.item.CM_CAD_LCS - Ai_ui_P_vector(self.item.CM_CAD_LCS, np.deg2rad(_theta[2]))
+        else:
+            __dR = np.zeros(3)
+
         _dR = string2array(self.ui.dR_lineEdit.text())
         _dtheta = string2array(self.ui.dtheta_lineEdit.text())
         
@@ -129,7 +133,7 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
             self.item._name = _name
             self.item.mass = _mass
             self.item.J_zz = _J_zz
-            self.item.R = _R
+            self.item.R = _R - __dR
             self.item.theta = np.deg2rad(_theta)
             self.item.dR = _dR
             self.item.dtheta = np.deg2rad(_dtheta)

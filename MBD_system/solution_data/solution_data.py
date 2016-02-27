@@ -3,15 +3,11 @@ Created on 9. jul. 2014
 
 @author: lskrinjar
 """
-import sys
-import os
-import itertools
-import numpy as np
-from matplotlib import pyplot as plt
-from pprint import pprint
-import subprocess
-import xlsxwriter
 import xlrd
+import xlsxwriter
+from PyQt4 import QtCore
+from matplotlib import pyplot as plt
+
 try:
     from moviepy.editor import *
 except:
@@ -59,13 +55,26 @@ class SolutionData(SolutionDataItem):
         #    set file type: .dat, .xlsx, .csv, .sol(default)
         self._filetype = ".sol"
 
+        #   saving options
+        #   options:
+        #   discard
+        #   overwrite
+        #   save to new
+        self._solution_save_options = "discard"
+
         #   load data from file if already exists
         self.solution_data = None
         if os.path.isfile(str(self._file_abs_path)):
             _path, _file = os.path.split(self._file_abs_path)
             self.filename, self._filetype = os.path.splitext(_file)
-            self.solution_data = self.read_file(self._file_abs_path)
 
+            #   read file
+            self.read_file(self._file_abs_path)
+        else:
+            self.filename, self._filetype = os.path.splitext(str(_file))
+        
+        print "self._filetype =", self._filetype
+            
         #    simulation status
         #    options: finished, running, waiting
         self.waiting = True
@@ -93,6 +102,9 @@ class SolutionData(SolutionDataItem):
         self._header_ids = []
 
         self.__excel_worksheet = "solution"
+        
+        #    initialize containers attributes
+        self._containers()
 
     def load_solution_data(self):
         self.loaded = True
@@ -246,6 +258,7 @@ class SolutionData(SolutionDataItem):
 
         :param _file_abs_path:
         """
+        print "write_to_file()"
         if _file_abs_path != None:
             self._file_abs_path = _file_abs_path
 
@@ -268,7 +281,12 @@ class SolutionData(SolutionDataItem):
 
         if self._filetype not in self._filename:
             self._filename = self._filename + self._filetype
-        self._filename = check_filename(self._filename)
+        
+
+        if type(self._filename) == QtCore.QString: 
+            self._filename = str(self._filename)
+        else:
+            self._filename = check_filename(self._filename)
 
         #   save to file of selected type
         if self._filetype == ".dat" or self._filetype == ".sol":
@@ -328,6 +346,7 @@ class SolutionData(SolutionDataItem):
         """
         Function saves data to .xlsx filetype
         """
+        print "_write_to_excel_file()"
         #   set up excel file
         self.__excel_settings()
 
@@ -371,6 +390,7 @@ class SolutionData(SolutionDataItem):
 
         #   freeze first two rows
         worksheet.freeze_panes(2, 0)
+
         #   close file
         workbook.close()
 

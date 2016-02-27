@@ -1,18 +1,15 @@
-'''
+"""
 Created on 6. jan. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
+"""
 
-from OpenGL import *
 from OpenGL.GL import *
-from OpenGL.GLU import *
-from PyQt4 import QtCore, QtGui, QtOpenGL
-from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.QtOpenGL import *
 
 from simulation_control_widget.opengl_widget.paint_text.paint_text import update_text_color
+
+
 # from ...paint_text_color_update import update_text_color
 
 

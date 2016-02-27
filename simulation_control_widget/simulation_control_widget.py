@@ -3,21 +3,12 @@ Created on 3. mar. 2014
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
 """
-import os
-import datetime
-from pprint import pprint
-import sys
-import time
-import gc
-import shutil
 import cProfile
+import time
 
-import numpy as np
-import scipy as sp
-from matplotlib import pyplot as plt
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+
 try:
     from moviepy.editor import ImageSequenceClip
 except:
@@ -28,7 +19,7 @@ from opengl_widget.opengl_widget import OpenGLWidget
 from simulation_control_widget_ui import Ui_Form
 from solver.solver import Solver
 from signals import StatusSignal
-from MBD_system.check_filename import check_filename
+from video_maker.video_maker import VideoMaker
 
 
 try:
@@ -67,15 +58,16 @@ class SimulationControlWidget(QtGui.QWidget):
         
         self.MBD_system = MBD_system
 
-        if self.MBD_system.loadSolutionFileWhenFinished:
-            self.ui.loadSolutionFileStatus.setChecked(True)
-        else:
-            self.ui.loadSolutionFileStatus.setChecked(False)
+        #   when simulation is finishes
+        #   automatically load solution file
+        self.ui.loadSolutionFileStatus.setChecked(self.MBD_system.loadSolutionFileWhenFinished)
+        #   restore initial conditions
+        self.ui.restoreInitialConditionsStatus.setChecked(self.MBD_system.restoreInitialConditionsWhenFinished)
 
         #    sets opengl widget in central widget position
         self.OpenGLWidget = OpenGLWidget(MBD_system=MBD_system, parent=self._parent)
         
-        self.__status = "simulation"  # simulation or animation
+        self._status = "simulation"  # simulation or animation
 
         #   set integration method to display
         try:
@@ -206,13 +198,21 @@ class SimulationControlWidget(QtGui.QWidget):
             _index = self.ui.analysisTypeComboBox.findText(QtCore.QString(self.MBD_system.analysis_type.title()))
             self.ui.analysisTypeComboBox.setCurrentIndex(_index)
 
-    @pyqtSlot()
+
+        #   video maker thread to create video
+        self.video_maker = VideoMaker(parent=self)
+
     def _analysis_type_changed(self):
         """
         Function assignes new value to object attribute if it is changed by user in combo box
         :return:
         """
         self.MBD_system.analysis_type = self.ui.analysisTypeComboBox.currentText().toLower()
+        
+        if str(self.ui.analysisTypeComboBox.currentText()).lower() == "kinematic":
+            self.ui.integrationMethodComboBox.setEnabled(False)
+        else:
+            self.ui.integrationMethodComboBox.setEnabled(True)
 
     @pyqtSlot()
     def profile_functions(self):
@@ -248,11 +248,11 @@ class SimulationControlWidget(QtGui.QWidget):
         
         """
         try:
-            self.__step = int(self.ui.currentStep.text())
-            self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[self.__step, :])
-            self.MBD_system.update_simulation_properties(time=self.t[self.__step], step_num=self.__step)
-            self.step_num_signal.signal_step.emit(self.__step)
-            self.__update_GL()
+            self._step = int(self.ui.currentStep.text())
+            self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[self._step, :])
+            self.MBD_system.update_simulation_properties(time=self.t[self._step], step_num=self._step)
+            self.step_num_signal.signal_step.emit(self._step)
+            self._update_GL()
         except:
             pass
 
@@ -272,7 +272,9 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         Function loads solution data from object (first) or from file (second)
         """
-        if solution_object_id is not None:
+        print "solution_object_id =", solution_object_id, type(solution_object_id)
+        print "test =", solution_object_id is not None
+        if solution_object_id is None:
             #   assign solution data from solution data object to ne variable
             solution_data = self.solver.analysis._solution_data.load_solution_data()
         elif filename is not None:
@@ -296,45 +298,46 @@ class SimulationControlWidget(QtGui.QWidget):
         self.t = solution_data[:, 4]
         self.q = solution_data[:, 5:]
 
-        self.__step = 0
+        self._step = 0
         
-        self.__status = "animation"
+        self._status = "animation"
         
         self.ui.forwardButton.setEnabled(True)
         self.ui.backwardButton.setEnabled(False)
         self.ui.playButton.setEnabled(True)
         self.ui.currentStep.setEnabled(True)
         
-        self.ui.currentStep.setText(str(int(self.__step)))
+        self.ui.currentStep.setText(str(int(self._step)))
         
         self.ui.solutionFileLoaded_display.setText(filename)
         self.ui.numberOfSteps.setText(str(int(len(self.step)-1)))
-        self.__update_GL()
+        self._update_GL()
         
         # self.status_signal.signal_status.emit("Animation")
 
-        self.simulationReset()
+        if self.MBD_system.restoreInitialConditionsWhenFinished:
+            self.simulationReset()
 
-    def __update_GL(self):
+    def _update_GL(self):
         """
         
         """
-        self.ui.currentStep.setText(str(int(self.__step)))
-        self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[int(self.__step), :])
-        self.OpenGLWidget.repaintGL(int(self.__step))
+        self.ui.currentStep.setText(str(int(self._step)))
+        self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[int(self._step), :])
+        self.OpenGLWidget.repaintGL(int(self._step))
         
         #    energy data signal
-        _energy = self.energy[self.__step]
-        _energy_delta = _energy - self.energy[int(self.__step)-1]
+        _energy = self.energy[self._step]
+        _energy_delta = _energy - self.energy[int(self._step)-1]
         self.energy_signal.signal_energy.emit(_energy, _energy_delta)
 
     def animation_forward(self):
         """
         Go to next solution time step
         """
-        if (self.__step + self._delta_step) <= self.step[-1]:
-            self.__step += int(self._delta_step)
-            self.__update_GL()
+        if (self._step + self._delta_step) <= self.step[-1]:
+            self._step += int(self._delta_step)
+            self._update_GL()
             self.ui.backwardButton.setEnabled(True)
         else:
             self.ui.forwardButton.setEnabled(False)
@@ -343,9 +346,9 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         Return to prevouos solution time step
         """
-        if (self.__step - self._delta_step) >= self.step[0]:
-            self.__step -= int(self._delta_step)
-            self.__update_GL()
+        if (self._step - self._delta_step) >= self.step[0]:
+            self._step -= int(self._delta_step)
+            self._update_GL()
             self.ui.forwardButton.setEnabled(True)
         else:
             self.ui.backwardButton.setEnabled(False)
@@ -438,8 +441,8 @@ class SimulationControlWidget(QtGui.QWidget):
         :return:
         """
         for _step in xrange(0, len(self.step), int(self._delta_step)):
-            self.__step = int(_step)
-            self.__update_GL()
+            self._step = int(_step)
+            self._update_GL()
 
             time.sleep(self.ui.playBackSpeed_doubleSpinBox.value()*1E-2)
 
@@ -448,40 +451,5 @@ class SimulationControlWidget(QtGui.QWidget):
         Function creates video file of animation
         :return:
         """
-        #   check if folder exists and if not create it
-        folder = "_animation"
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-        #   absolute path to store animation images to use them to create video file
-        animation_folder_abs_path = os.path.join(os.getcwd(), folder)
-
-        #   predefine empty list to store image objects
-        # images = []
-        for _step in xrange(0, len(self.step), int(self._delta_step)):
-            filename = "step_%06d"%_step+".png"
-
-            #   assign step and repaint GL widget
-            self.__step = int(_step)
-            self.__update_GL()
-
-            #   get image of current opengl widget scene
-            image = self.OpenGLWidget.grabFrameBuffer()
-
-            #   abs path to image object of current simulation time step
-            file_abs_path = os.path.join(animation_folder_abs_path, filename)
-            #   save image to file
-            image.save(file_abs_path)
-
-        #   create video object
-        video = ImageSequenceClip(animation_folder_abs_path, fps=24)#24
-        #   write data to video object
-        __animation_filename = "animation.avi"
-
-        #   check filename
-        __animation_filename = check_filename(__animation_filename)
-
-        video.write_videofile(__animation_filename,codec='mpeg4')
-
-        #   delete animation folder with animation figures
-        shutil.rmtree(animation_folder_abs_path)
+        #   starts video maker in new thread
+        self.video_maker.start()

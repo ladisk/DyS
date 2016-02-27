@@ -3,39 +3,51 @@ Created on 21. feb. 2014
 
 @author: lskrinjar
 """
+import copy
+import logging
 import os
 import time
-import logging
 from operator import attrgetter
-import xlsxwriter
-import xlrd
-from matplotlib import pyplot as plt
-from OpenGL.GL import *
-import copy
 
+import xlrd
+import xlsxwriter
+from OpenGL.GL import *
+from matplotlib import pyplot as plt
 
 from MBD_system.MBD_system_items import ContactItem
-from MBD_system.force.force import Force
+from MBD_system.check_filename import check_filename
 from MBD_system.contact.bounding_box.bounding_box import AABB
+from MBD_system.contact.contact_geometry.contact_geometry import ContactGeometry
 from MBD_system.contact.overlap_pair.overlap_pair import OverlapPair
-from evaluate_distance import evaluate_distance_2D
-from contact_C_matrix import *
+from MBD_system.contact_model.contact_model import ContactModel
+from MBD_system.dr_contact_point_uP import dr_contact_point_uP
+from MBD_system.extract_from_dictionary_by_string_in_key import extract_from_dictionary_by_string_in_key
+from MBD_system.force.force import Force
+from MBD_system.friction_model.friction_model import FrictionModel
 from MBD_system.q2dR_i import q2dR_i
-from MBD_system.q2theta_i import q2theta_i
 from MBD_system.q2dtheta_i import q2dtheta_i
 from MBD_system.q2q_body import q2q_body
-from MBD_system.transform_cs import cm_lcs2gcs, gcs2cm_lcs, gcs2lcs_z_axis
-from MBD_system.dr_contact_point_uP import dr_contact_point_uP
-from MBD_system.contact_model.contact_model import ContactModel
-from MBD_system.friction_model.friction_model import FrictionModel
-from MBD_system.contact.contact_geometry.contact_geometry import ContactGeometry
-from MBD_system.check_filename import check_filename
-from MBD_system.extract_from_dictionary_by_string_in_key import extract_from_dictionary_by_string_in_key
+from MBD_system.q2theta_i import q2theta_i
+from MBD_system.transform_cs import cm_lcs2gcs, gcs2cm_lcs
+from contact_C_matrix import *
+from evaluate_distance import evaluate_distance_2D
 
 
 class Contact(ContactItem):
     """
-    classdocs
+    Contact object to solve contacts between a pair of bodies, ie. body i and body j
+    Main logic of contact class:
+
+    class method _contact_geometry_GCS() is evaluated at every time step (contact detection) this
+    method is run in class method check_for_contact()
+
+    class method _contact_geometry_LCS() is evaluated only when contact is detected
+
+    class method _get_contact_geometry_data() is evaluated only when contact is detected and before class method _contact_geometry_LCS()
+
+    class attribute _delta is depth of deformation at contact point and is:
+    negative (delta) - impact
+    positive (delta) - no impact
     """
     __id = itertools.count(0)
 
@@ -57,6 +69,7 @@ class Contact(ContactItem):
         :param  properties_dict     dictionary of additional object properties
         :param  parent              pointer to the parent object
         """
+
         #    number
         self.contact_id = self.__id.next()
         #    name as string
@@ -71,17 +84,20 @@ class Contact(ContactItem):
         #   parent
         self._parent = parent
 
+        #   bodies
+        self._bodies = self._parent._parent.bodies
+
         #    contact type
         self._type = _type
 
         #   supported types
         self._types = ["general",
-                        "revolute clearance joint",
-                        "prismatic clearance joint",
-                        "contact sphere-sphere",
-                        "contact plane-sphere",
-                        "pin-slot clearance joint linear",
-                        "pin-slot clearance joint radial"]
+                       "revolute clearance joint",
+                       "prismatic clearance joint",
+                       "contact sphere-sphere",
+                       "contact plane-sphere",
+                       "pin-slot clearance joint linear",
+                       "pin-slot clearance joint radial"]
 
         #   contact geometry (profile) - list of object pairs
         self.contact_geometry_list = []
@@ -108,7 +124,7 @@ class Contact(ContactItem):
         self.body_id_i = body_id_i
         self.body_id_j = body_id_j
         self.body_id_list = [self.body_id_i, self.body_id_j]
-        self.body_list = []
+        self.body_list = [self._bodies[self.body_id_i], self._bodies[self.body_id_j]]
         self.contact_geometry_list = []
 
         #   contact model
@@ -119,7 +135,7 @@ class Contact(ContactItem):
             self.contact_model_type = "hertz"
         #   extract only properties that relate to contact model object properties
         self.properties_contact_model = extract_from_dictionary_by_string_in_key(properties_dict, "contact_model.")
-        self.contact_model = ContactModel(self.contact_model_type, c_r=self.coef_of_restitution, properties_dict=properties_dict, parent=self)
+        self.contact_model = ContactModel(self.contact_model_type, c_r=self.coef_of_restitution, properties_dict=self.properties_contact_model, parent=self)
 
         #    friction model
         self.friction_model_type = friction_model_type
@@ -157,29 +173,30 @@ class Contact(ContactItem):
         self.edge_GCS = [None, None]
 
         #   contact point(s) in GCS
-        self.u_P_GCS = None
-        self.u_iP_GCS = None
-        self.u_jP_GCS = None
-        self.u_P_list_GCS = [self.u_iP_GCS, self.u_jP_GCS]
+        self.u_P_GCS = np.array(np.zeros(2))
+        self.u_iP_GCS = np.zeros(2, dtype="float32")
+        self.u_jP_GCS = np.zeros(2, dtype="float32")
+        self.u_P_GCS_list = [self.u_iP_GCS, self.u_jP_GCS]
 
         #   contact point in body LCS
         self.u_P_LCS = None
-        self.u_iP_LCS = None
-        self.u_jP_LCS = None
+        self.u_iP_LCS = np.zeros(2)
+        self.u_jP_LCS = np.zeros(2)
         self.u_P_LCS_list = [self.u_iP_LCS, self.u_jP_LCS]
+        self.u_P_LCS_0_list = copy.copy(self.u_P_LCS_list)
 
         #   list of normals and tangents in LCS of each body in contact
-        #   tangents
-        self._t_GCS = None
-        self._t_i_LCS = None
-        self._t_j_LCS = None
-        self._t_LCS_list = [self._t_i_LCS, self._t_j_LCS]
         #   normals
-        self._n_GCS = None
-        self._n_i_LCS = None
-        self._n_j_LCS = None
+        self._n_GCS = np.zeros(2)
+        self._n_i_LCS = np.zeros(2)
+        self._n_j_LCS = np.zeros(2)
         self._n_LCS_list = [self._n_i_LCS, self._n_j_LCS]
         self._n_list = []
+        #   tangents
+        self._t_GCS = np.zeros(2)
+        self._t_i_LCS = np.zeros(2)
+        self._t_j_LCS = np.zeros(2)
+        self._t_LCS_list = [self._t_i_LCS, self._t_j_LCS]
 
         #   contact forces
         self.contact_bodies_added_to_list = False
@@ -318,7 +335,7 @@ class Contact(ContactItem):
                                           "dqn":self._dqn_solution_container,
                                           "dqt":self._dqt_solution_container}
 
-    def _reset_to_initial_state(self):
+    def reset(self):
         """
         Reset main object attributes to initial value
         """
@@ -328,21 +345,8 @@ class Contact(ContactItem):
 
         #    reset force object solution data containers
         for force in self._Fn_list:
-            force._reset_to_initial_state()
-    
-    def __set_ACCF_parameters(self):
-        """
-        Set additional object attributes based if contact type is ACCF
-        """
-        self._phase = "C"  #    C - compression, E-expansion
-    
-    def __set_ECF_N_parameters(self):
-        """
-        Set additional object attributes based if contact type is ECF-N
-        """
-        self.K = 10
-        self.c_r = 0.1
-        
+            force.reset()
+
     def create_bounding_box_for_each_body_in_contact(self, bodies=[]):
         """
         Create bounding box object for each body
@@ -455,6 +459,7 @@ class Contact(ContactItem):
         Function saves current calculated data at
         :return:
         """
+        print "step =", step, "h =", h
         #   step number
         self._step_num_solution_container = np.append(self._step_num_solution_container, step)
 
@@ -479,7 +484,8 @@ class Contact(ContactItem):
         self._Ft_solution_container = np.append(self._Ft_solution_container, self.Ft)
 
         #   uPi, uPj
-        self._u_P_solution_container.append(self.u_P_list_LCS.flatten())
+        _u_P_solution_container = np.append(np.array(self.u_P_LCS_list).flatten(), np.array(self.u_P_GCS))
+        self._u_P_solution_container.append(_u_P_solution_container)
 
     def __AABB_AABB_overlap(self, AABB_i, AABB_j):
         """
@@ -713,16 +719,16 @@ class Contact(ContactItem):
 
         # logging.getLogger("DyS_logger").info("Contact point in GCS: %s", self.r_P)
         #    calculate a vector of contact point for each body in body LCS
-        for body_id, u_P, theta_str in zip(self.body_id_list, self.u_P_attribute_name_list, self.theta_ij_attribute_name_list):
+        for body, body_id, u_P, theta_str in zip(self.body_list, self.body_id_list, self.u_P_attribute_name_list, self.theta_ij_attribute_name_list):
             #    assign pointer to a body
-            _body = bodies[body_id]
-            self.body_list.append(_body)
+            # _body = bodies[body_id]
+            # self.body_list.append(_body)
 
             #    get R, theta of body from q
             q_body = q2q_body(q, body_id)
 
             #    update coordinates and angle in 2D, R, theta
-            _body.update_coordinates_and_angles_2D(q_body)
+            body.update_coordinates_and_angles_2D(q_body)
 
             #    distance in local coordinate system of a body
             u_P_val = gcs2cm_lcs(self.r_P, q_body[0:2], q_body[2])
@@ -775,7 +781,7 @@ class Contact(ContactItem):
         during contact
         :return:
         """
-        self.u_P_list_LCS = []
+        self.u_P_LCS_list = []
         #    distance in local coordinate system of a body
         _node_GCS = self.min_distance_obj.get_node_2D()
         # u_P_GCS
@@ -793,7 +799,7 @@ class Contact(ContactItem):
             #   if body is node body - calculate node in GCS
             if body == self.__node_body:
                 self.node_LCS = gcs2cm_lcs(_node_GCS, q_body[0:2], q_body[2])
-                self.u_P_list_LCS.append(self.node_LCS)
+                self.u_P_LCS_list.append(self.node_LCS)
 
             #   if body is edge body - calculate edge nodes in GCS
             elif body == self.__edge_body:
@@ -804,7 +810,7 @@ class Contact(ContactItem):
                 #   calculate contact point on edge - normal projection of node to edge
                 #   of opposite body
                 _node_LCS = gcs2cm_lcs(_node_GCS, q_body[0:2], q_body[2])
-                self.u_P_list_LCS.append(_node_LCS)
+                self.u_P_LCS_list.append(_node_LCS)
 
     def _contact_geometry_GCS(self, q):
         """
@@ -839,7 +845,7 @@ class Contact(ContactItem):
         self._dq_n, self._dq_t = self._contact_velocity(q)
 
         #   calculate contact geometry in GCS to calculate contact distance
-        self._contact_geometry_GCS(q)
+        # self._contact_geometry_GCS(q)
 
         #   calculate distance: node-edge
         _distance, _inside = evaluate_distance_2D(self.node_GCS, self.edge_GCS[0], self._n, self._t)
@@ -869,7 +875,7 @@ class Contact(ContactItem):
         Calculate contact parameters
         returns:
         """
-        # print "self._contact_point_found =", self._contact_point_found
+        # print "solve()@Contact"
         #    calculate coordinates of contact point from global coordinates in local coordinates of each body in contact
         if not self._contact_point_found:
             self._get_contact_geometry_data(q)
@@ -888,94 +894,71 @@ class Contact(ContactItem):
             self.contact_model.set_dq0(self._dq0_n, self._dq0_t)
             self.initial_contact_velocity_calculated = True
 
-        # if self.contact_detected:
-        self._distance, self._delta = self._contact_geometry_GCS(q)
-        # print "self._dq0_n, self._dq0_t =", self._dq0_n, self._dq0_t
+        if self._contact_point_found:
+            self._contact_geometry_LCS(q)
 
         #   current contact velocity at time t
         self._dq_n, self._dq_t = self._contact_velocity(q)
-        # print "self._dq_n, self._dq_t =", self._dq_n, self._dq_t
-        # time.sleep(100)
-        #   current contact velocity at time t
-        # self._dq_n, self._dq_t = self._contact_velocity(q)
 
-        if self._type.lower() in self.__types:#== "general" or self._type.lower() == "revolute clearance joint" or self._type.lower() == "contact sphere-sphere":#ECF-N
+        # time.sleep(100)
+
+        if self._type.lower() in self._types:#== "general" or self._type.lower() == "revolute clearance joint" or self._type.lower() == "contact sphere-sphere":#ECF-N
             self._solve_ECF_N(t, q, self._delta, self._dq_n, self._dq_t)#self._delta
         else:
             raise ValueError, "Contact type not correct!"
 
     def _solve_ECF_N(self, t, q, _delta, _dq_n, _dq_t):
         """
-        Args:
-            _delta - (scalar value) contact depth in normal direction
-            _dq_n - contact velocity in normal direction
-            _dq_t - contact velocity in tangent direction
-        returns:
-            F - force vector (Fx, Fy)
+        Function evaluates contact forces with contact and friction model
+        :param t:       time (np.float)
+        :param q:       vector of displacements and velocities (np.array)
+        :param _delta:  penetration depth (np.float)
+        :param _dq_n:   relative normal contact velocity (np.float)
+        :param _dq_t:   relative tangent contact velocity (np.float)
+        :returns None:
         """
-        # print "_solve_ECF_N()"
-
+        # print "n(contact) =", self._n_GCS
+        # print "_solve_ECF_N() ="
         # print "delta =", _delta
         # print "dqn =", _dq_n
         # print "q =", q
         #    normal and tangent force are calculated with selected contact and friction model
         self.Fn = self.contact_model.contact_force(_delta, _dq_n)# _dq_t, self._n, self._t
+        # print "self.Fn =", self.Fn
         # print "--------------------------------"
         # print "q =", q
         # print "t =%20.15f"%t, "Fn =", self.Fn, "delta =", _delta, "dqn =", _dq_n
         self.Ft = self.friction_model.friction_force(self.Fn, _dq_t)
-        # print "Ft =", Ft
-
-        #    contact force in GCS
-        #    normal component
-        # F_n = Fn * self._n  # add normal to get orientation of force in GCS
-        # #    tangent component
-        # F_t = Ft * self._t
-
-
-        #   contact force (normal and tangent values) in GCS of body i and body j
-        # F_i = F_n + F_t
-        # F_j = F_n - F_t
-        #   create list of forces for each body in contact
-        # F_list = [F_i, F_j]
 
         #    check if contact is finished
-        # print "TOL =", self.distance_TOL
-        # print "_delta =", _delta
-        # print "_delta0 =", self._delta0
-        # print "abs(_delta) < self.distance_TOL =", abs(_delta) < self.distance_TOL
         #   contact
         if _delta <= self._delta0:#<self._delta0 and self._dq_n <= abs(self._dq0_n):#-self.distance_TOL:# and self._dq_n >=  self._dq0_n:#self.distance_TOL:# and (self._dq_n < 0):, _delta<-1*self.distance_TOL
             # print "exe???"
             # print "self._Fn_list =", self._Fn_list
             # print "self._Ft_list =", self._Ft_list
-            # print "self.u_P_list_LCS =", self.u_P_list_LCS
+            # print "self.u_P_LCS_list =", self.u_P_LCS_list
             # print "self._n_list =", self._n_list
             # print "self._t_list =", self._t_list
-
-            for _force_n, _force_t, _u_P, _n, _t in zip(self._Fn_list, self._Ft_list, self.u_P_list_LCS, self._n_list, self._t_list):
-                # print "-------------------------"
-                # print "body id =", _force_n.body_id
-                # print "n =", _n
-                # print "self.status =", self.status
-                #   contact force values during contact
+            # print "self._n_LCS_list =", self._n_LCS_list
+            for body_id, _force_n, _force_t, _u_P, _n, _t in zip(self.body_id_list, self._Fn_list, self._Ft_list, self.u_P_LCS_list, self._n_LCS_list, self._t_LCS_list):
+                # print "body id =", body_id
+                # print "_n =", _n
+                # print "_u_P =", _u_P
+                #   contact
                 if self.status == 1:
-                    # print "self.status =", self.status
                     _Fn = self.Fn * _n
                     _Ft = self.Ft * _t
-                    # print "_Fn =", _Fn
-                    # print "_Ft =", _Ft
-                    # print "self.status =", self.status
+
+                #   no contact
                 else:
                     _Fn = self.Fn = np.zeros(2)
                     _Ft = self.Ft = np.zeros(2)
                     self._contact_point_found = False
-                # print "_u_P =", _u_P
-                # print "_Fn =", _Fn
+
+                #   update contact force object attributes
                 _force_n.update(self._step, F=_Fn, u_P=_u_P)
                 _force_t.update(self._step, F=_Ft, u_P=_u_P)
-                # pprint(vars(_force_n))
-            # time.sleep(100)
+
             #   store data to solution containers
             # self._distance_solution_container = np.append(self._distance_solution_container, _delta)
 
@@ -990,9 +973,9 @@ class Contact(ContactItem):
             self.contact_detected = False
             self.status == 0
             self.no_contact()
-            # time.sleep(10)
 
-        # self._status_container = np.append(self._status_container, self.status)
+        # time.sleep(100)
+
 
     def _contact_velocity(self, q):
         """
@@ -1017,9 +1000,9 @@ class Contact(ContactItem):
         _dq = dr_P[1] - dr_P[0]
         #   relative contact velocity
         #   normal direction
-        _dq_n = np.dot(_dq, self._n)
+        _dq_n = np.dot(_dq, self._n_GCS)
         #   tangent direction
-        _dq_t = np.dot(_dq, self._t)
+        _dq_t = np.dot(_dq, self._t_GCS)
 
         return _dq_n, _dq_t
 
@@ -1029,8 +1012,10 @@ class Contact(ContactItem):
         """
         self.Fn = 0
         self.Ft = 0
-        # self._Fn_solution_container = np.append(self._Fn_solution_container, 0)
-        # self._Ft_solution_container = np.append(self._Ft_solution_container, 0)
+
+        #   uPi and uPj - position vector of contact force in body LCS
+        self.u_P_LCS_list = [np.zeros(2), np.zeros(2)]
+        self.u_P_GCS = np.zeros(2)
 
         self._dq_n = 0
         self._dq_t = 0
@@ -1069,7 +1054,6 @@ class Contact(ContactItem):
         """
         Save contact solution data to file.
         """
-
         self._solution_filename = "solution_data_" + self._name + "_sol"+self._solution_filetype
         self._solution_filename = check_filename(self._solution_filename)
 
@@ -1106,7 +1090,7 @@ class Contact(ContactItem):
         self.__excel_columns()
 
         #   column headers
-        _header = ["i-th step", "status", "dt", "time", "delta", "dq_n", "dq_t", "Fn", "Ft", "uPi_x", "uPi_y", "uPj_x", "uPj_y"]
+        _header = ["i-th step", "status", "dt", "time", "delta", "dq_n", "dq_t", "Fn", "Ft", "uPi_x", "uPi_y", "uPj_x", "uPj_y", "uPx_GCS", "uPy_GCS"]
 
         #   create an new Excel file and add a worksheet
         workbook = xlsxwriter.Workbook(self._solution_filename, {'nan_inf_to_errors': True})
@@ -1149,12 +1133,10 @@ class Contact(ContactItem):
         worksheet.write_column(self.__column_start_write, self.__col_Ft_solution_container, self._Ft_solution_container, format_2)
         worksheet.set_column('I:I', 16)
 
-        try:
-            for i in range(0, np.shape(np.array(self._u_P_solution_container))[1]):
-                worksheet.write_column(2, 9+i, np.array(self._u_P_solution_container)[:, i], format_1)
-        except:
-            pass
-        worksheet.set_column("J:M", 22)
+        #   uPi and uPj of contact force at every time step
+        for i in range(0, np.shape(np.array(self._u_P_solution_container))[1]):
+            worksheet.write_column(2, 9+i, np.array(self._u_P_solution_container)[:, i], format_1)
+        worksheet.set_column("J:O", 22)
 
         #   freeze first two rows
         worksheet.freeze_panes(2, 0)
@@ -1254,9 +1236,10 @@ class Contact(ContactItem):
         Display opengl data of contact. Contact point in LCS of a body and
         :return:
         """
+
         if step is None:
             if self.contact_detected:
-                for u_CP in self.u_P_list_LCS:
+                for u_CP in self.u_P_LCS_list:
                     glVertex3f(u_CP[0], u_CP[1], 0)
         else:
             try:
@@ -1273,10 +1256,20 @@ class Contact(ContactItem):
         :return:
         """
         if step is None:
-            if self.u_P_GCS is not None and self.contact_detected:
-                glVertex3f(self.u_P_GCS[0], self.u_P_GCS[1], 0)
+            if self.contact_detected:
+                for u_P_GCS in self.u_P_GCS_list:
+                    glVertex3f(u_P_GCS[0], u_P_GCS[1], self.z_dim)
         else:
             None
+
+    def get_contact_point(self, step=None):
+        """
+        Method prints contact point in GCS
+        :return:
+        """
+        if step is not None:
+            _u_P_solution_container = np.array(self._u_P_solution_container)
+            print "uP_GCS =", _u_P_solution_container[int(step), 4:6]
 
     def plot_Fn_delta(self, color=None, plot_label=None):
         """

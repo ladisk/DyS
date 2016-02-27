@@ -3,14 +3,11 @@ Created on 1. jan. 2016
 
 @author: lskrinjar
 """
-import time
-import numpy as np
 import matplotlib as mpl
-from matplotlib import pyplot as plt
-from pprint import pprint
+import numpy as np
 import scipy
 import scipy.optimize
-
+from matplotlib import pyplot as plt
 
 from MBD_system.contact_model.contact_model import ContactModel
 
@@ -147,8 +144,8 @@ class ContactModelCylinder(ContactModel):
 
         if self.R_i is not None and self.R_j is not None:
             if self.contact_location == "internal":
-                print "self.R_i =", self.R_i
-                print "self.R_j =", self.R_j
+                # print "self.R_i =", self.R_i
+                # print "self.R_j =", self.R_j
                 self.dR = self.R_i - self.R_j
             if self.contact_location == "external":
                 self.dR = self.R_i + self.R_j
@@ -202,9 +199,9 @@ class ContactModelCylinder(ContactModel):
                 self.b = 0.85
                 self.n = 1.094
 
-        print "a =", self.a
-        print "b =", self.b
-        print "n =", self.n
+        # print "a =", self.a
+        # print "b =", self.b
+        # print "n =", self.n
 
     def _evaluate_Y(self):
         """
@@ -212,10 +209,10 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         if 0.005 <= self.dR*1E+3 <= 0.34954:    #   dR from m to mm
-            print "self.dR =", self.dR, self.dR * 1E+3
-            print "np.log(self.dR) =", np.log(self.dR), np.log(self.dR * 1E+6)
+            # print "self.dR =", self.dR, self.dR * 1E+3
+            # print "np.log(self.dR) =", np.log(self.dR), np.log(self.dR * 1E+6)
             Y = 1.51*(np.log((self.dR * 1E+3 * 1E+3)))**(-0.151)
-            print "Y =", Y
+            # print "Y =", Y
         elif 0.34954 <= self.dR*1E+3 <= 10:
             Y = 0.0151*self.dR + 1.151
         else:
@@ -479,7 +476,7 @@ class ContactModelCylinder(ContactModel):
         # print "F0 =", self._Fn0
         # print "initial approximation =", self._Fn0
         _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_DubowskyFreudenstein, self._Fn0, fprime=self.__evaluate_dFn_DubowskyFreudenstein, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        print "F =", _Fn
+        # print "F =", _Fn
         return _Fn
 
     def _evaluate_delta_DubowskyFreudenstein(self, Fn):
@@ -616,7 +613,7 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         _Fn = (((self.a * (self.dR) + self.b) * (self.L) * (self.E)) / (self.dR)) * (abs(delta)**self.n) * (1 + ((3. / 4.) * (1 - self.c_r**2) * (dq_n / self._dq0_n))) #
-        print "delta =", delta, "Fn =", _Fn
+        # print "delta =", delta, "Fn =", _Fn
         return _Fn * self.L
 
 if __name__ == "__main__":

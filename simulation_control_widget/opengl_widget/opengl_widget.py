@@ -5,26 +5,19 @@ Created on 5. feb. 2014
 """
 import os
 from pprint import pprint
-import time
+
 import numpy as np
-
-
-from OpenGL import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.vertex_buffer_object import *
-from OpenGL.GL.shaders import *
-from OpenGL.GLU import *
 from PyQt4 import QtCore, QtGui, QtOpenGL
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
-
 import coordinate_system.display_CS.display_CS as display_CS
 import paint_text.paint_text as paint_text
-from simulation_control_widget.opengl_widget.view.view import View
 from coordinate_system.coordinate_system import CoordinateSystem
 from simulation_control_widget.opengl_widget.matrix.matrix import Matrix
+from simulation_control_widget.opengl_widget.view.view import View
 from simulation_control_widget.opengl_widget.window.window import Window
 
 
@@ -58,7 +51,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.far_GL = +1000
         self.zoom = 1
         self.delta_zoom = 0
-        self.CS_window = 80
+        self.CS_window = 100
         
         self.__scale_factor_Translation = self.scale_factor_Translation = 0.001
         self.__scale_factor_Rotation = self.scale_factor_Rotation = 1
@@ -70,7 +63,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.resize_factor_height = 1
 
         #    coordinate system
-        self.GCS = CoordinateSystem()#parent=self
+        self.GCS = CoordinateSystem(parent=self.MBD_system.ground)#parent=self
 
         # core profile
         glformat = QtOpenGL.QGLFormat()
@@ -159,7 +152,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         Display geometry
         """
         # Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)# | GL_STENCIL_BUFFER_BIT)
                 
         #    setup camera
         #    projection matrix
@@ -227,10 +220,12 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
             #   paint body geometry
             body.paintGL_VBO(self.step, self.shader_program)
-
+            
             #   paint body name
             if body._idVisible:#self.nameVisible:
                 self.renderText(0, 0, 0, QString("ID ") + QString(str(body.body_id)), font=QFont("Consolas", 8))
+
+
             #   paint body AABB tree
             # body._paintGL_VBO_AABBtree(self.shader_program)
             # glUseProgram(0)
@@ -311,6 +306,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         :return:
         """
+        print "refit()"
         _uP_i_max = []
         for body in self.MBD_system.bodies:
             _uP_i_max_i = body.get_uP_i_max() + abs(body.R)
@@ -324,11 +320,12 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         [x, y, z] = np.amax(_uP_i_max, axis=0)
         #   max dim is 50% larger than max coordinate
         self._max_dim = 1.5 * np.amax(np.array([x, y]))
-
+        print "self._max_dim =", self._max_dim
         delta = self.view._right_GL / self._max_dim
 
-
+        print "self.left_GL =", self.left_GL
         self.left_GL = - self._max_dim
+        print "self.left_GL =", self.left_GL
         self.right_GL = self._max_dim
 
         self.bottom_GL = -self._max_dim
@@ -423,7 +420,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         popMenu = QtGui.QMenu(parent=self)
 
         _updateGLAction = popMenu.addAction("Refresh")
-        
         _updateGLAction.triggered.connect(self._repaintGL)
         popMenu.addSeparator()
 
@@ -433,6 +429,10 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         _show_GCSAction = QtGui.QAction("Show GCS", self, checkable=True, checked=self.GCS._visible)
         _show_GCSAction.triggered.connect(self.GCS._show)
         popMenu.addAction(_show_GCSAction)
+        
+        popMenu.addSeparator()
+        _resetAction = popMenu.addAction("Reset")
+        _resetAction.triggered.connect(self._parent.SimulationControlWidget.simulationReset)
 
         popMenu.exec_(event.globalPos())
 
@@ -504,8 +504,13 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         _viewRightAction = viewDirectionSubmenu.addAction("Right")
         _viewRightAction.triggered.connect(self.viewRight)
 
+        viewDirectionSubmenu.addSeparator()
         _viewIsometricAction = viewDirectionSubmenu.addAction("Isometric")
         _viewIsometricAction.triggered.connect(self.viewIsometric)
+
+        viewDirectionSubmenu.addSeparator()
+        _refitAction = viewDirectionSubmenu.addAction("Refit")
+        _refitAction.triggered.connect(self.refit)
 
         return viewDirectionSubmenu
 

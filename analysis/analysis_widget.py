@@ -1,30 +1,26 @@
-'''
+"""
 Created on 27. jan. 2014
 
 @author: lskrinjar
-'''
+"""
+import inspect
 import os
-import sys
 import subprocess
 from pprint import pprint
-import numpy as np
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from analysis_ui import Ui_Form
-from MBD_system.solution_data.solution_data import SolutionData
 from MBD_system.body.body_widget import BodyWidget
+from MBD_system.contact.contact_widget import ContactWidget
 from MBD_system.force.force_widget import ForceWidget
 from MBD_system.joint.joint_widget import JointWidget
-from MBD_system.contact.contact_widget import ContactWidget
+from MBD_system.solution_data.solution_data import SolutionData
 from MBD_system.spring.spring_widget import SpringWidget
-from MBD_system.item_widget import ItemWidget
-from MBD_system.MBD_system_items import SolutionDataItem
-from analysis.analysis_tree_model import AnalysisTreeModel
 from analysis.analysis_table_model import AnalysisTableModel
-from analysis.analysis_list_model import AnalysisListModel
+from analysis.analysis_tree_model import AnalysisTreeModel
+from analysis_ui import Ui_Form
 
 
 class solutionFilenameSignal(QtCore.QObject):
@@ -232,12 +228,13 @@ class AnalysisWidget(QtGui.QWidget):  # QMainWindow#, QAbstractItemView, QWidget
         
         """
         subprocess.call(['notepad.exe', str(self.__filename)])
-    
-    
+
     def add_solution_data(self, filename):
         """
         
         """
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
         #   root index
         root_index = self.ui.treeView.rootIndex()
 

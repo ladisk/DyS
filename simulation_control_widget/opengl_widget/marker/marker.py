@@ -1,18 +1,13 @@
 __author__ = 'lskrinjar'
 
-import sys
-import os
-from pprint import pprint
 import itertools
-import logging
+
 import numpy as np
-import ctypes
-from OpenGL import *
 from OpenGL.GL import *
 from OpenGL.GL.ARB.vertex_buffer_object import *
-from OpenGL.GL.shaders import *
 from OpenGL.GLU import *
 
+from MBD_system.Ai_ui_P import Ai_ui_P_vector
 
 
 class Marker(object):
@@ -29,7 +24,10 @@ class Marker(object):
         :param scale:
         :param parent:
         """
+        #   parent
         self._parent = parent
+
+        #   visualization properties
         self._visible = visible
         self._VBO_created = False
         self.scale = scale
@@ -37,7 +35,7 @@ class Marker(object):
         #   marker id
         self.marker_id = self.__id.next()
 
-        #   node vector (x, y, z)
+        #   node vector (x, y, z) in body LCS
         self.node = node
 
         #   create colors array - color vector for every vertex
@@ -85,6 +83,10 @@ class Marker(object):
         else:
             self._visible = True
 
+        print "marker"
+        print "coordinates (in body LCS)=", self.node
+        print "coordinates (in GCS) =", self._parent.R + Ai_ui_P_vector(self.node, self._parent.theta[2])
+
     def _colors(self):
         """
 
@@ -113,8 +115,7 @@ class Marker(object):
             # print "-----------------------------------------"
             # print "marker.py create VBO()"
             # print "self.node =", self.node
-            self.__v_pointer = ctypes.c_void_p(0)
-            self.__c_pointer = ctypes.c_void_p(12)
+
 
             #    generate a new VBO and get the associated vbo_id
             num_of_VBOs = 1
@@ -147,6 +148,7 @@ class Marker(object):
         Paint local coordinate system VBO
         """
 
+
         if self._visible and self._VBO_created:
             
             #   bind buffer to id
@@ -154,11 +156,13 @@ class Marker(object):
             
             #    stride in bits (1 float = 4 bits)
             stride_in_bits = 24
-            
+
+            v_pointer = ctypes.c_void_p(0)
+            c_pointer = ctypes.c_void_p(12)
             #   pointers
             glDisableClientState(GL_NORMAL_ARRAY)
-            glVertexPointer(3, GL_FLOAT, stride_in_bits, self.__v_pointer)
-            glColorPointer(3, GL_FLOAT, stride_in_bits, self.__c_pointer)
+            glVertexPointer(3, GL_FLOAT, stride_in_bits, v_pointer)
+            glColorPointer(3, GL_FLOAT, stride_in_bits, c_pointer)
             glDisable(GL_LIGHTING)
 
             #   draw lines - opengl

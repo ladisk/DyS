@@ -4,33 +4,24 @@ Created on 13. mar. 2014
 @author: luka.skrinjar
 """
 
-
-import os
-import sys
-import operator
-import time
 import copy
-import logging
 import datetime
 import inspect
-from pprint import pprint
-import numpy as np
 import itertools
-import matplotlib.pyplot as plt
+import logging
+import os
+import time
+
+import numpy as np
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
-from xlwt import Workbook
-from dxfwrite import DXFEngine as dxf
-
 
 from DAE_fun import DAEfun
+from MBD_system.check_filename import check_filename
+from MBD_system.q2R_i import q2R_i
 from MBD_system.q2dR_i import q2dR_i
 from MBD_system.q2dtheta_i import q2dtheta_i
-from MBD_system.q2R_i import q2R_i
-from MBD_system import convert_bytes_to_
-from MBD_system.check_filename import check_filename
 from MBD_system.solution_data.solution_data import SolutionData
-
 from signals import ErrorTimeIntegrationSignal
 from signals import SolutionSignal
 
@@ -154,14 +145,15 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
 
         #   get initial conditions
         q0 = self._MBD_system.evaluate_q0()
+        self.FLAG = 1
 
         #   solution containers
         self._solution_containers()
 
         self.simulation_id = 0
-  #    0 - no contact
-                               #    1 - contact detected
-                               #    -1 - contact already happened - reduce integration step
+        #    0 - no contact
+        #    1 - contact detected
+        #    -1 - contact already happened - reduce integration step
         self.step = 0
         self.h_contact = self._MBD_system.Hmin
 
@@ -207,8 +199,8 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 self.update_GL_(t=t, q=w)
 
             self.t = t = t + h
-            print "-------------------------------------"
-            print "t =", t, "step =", self.step
+            # print "-------------------------------------"
+            # print "t =", t, "step =", self.step
             w = w + h * self.DAE_fun.evaluate_dq(h, t, w)
             # print "q =", w
             #    solve contacts here
@@ -274,7 +266,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         while self.FLAG == 1:
             # print "-------------------------------------"
             # print "step =", self.step, "contact =", self.FLAG_contact
-            # print "t =", t
+            # print "t =", t,
             if self.stopped:
                 self.update_GL_(t=t, q=w)
                 self.stop_solve()
@@ -284,11 +276,11 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 h = h_contact
             elif self.FLAG_contact == 0:
                 h = Hmax
-
+            # print "h =", h,
             # print "self.FLAG_contact =", self.FLAG_contact
-            print "--------------------------------"
+            # print "--------------------------------"
             # print "h =", h
-            print "t =", t
+            # print "t =", t
             # print "w =", w
             # print "self.DAE_fun.evaluate_dq(h, t, w) =", self.DAE_fun.evaluate_dq(h, t, w)
             K1 = h * self.DAE_fun.evaluate_dq(h, t, w)
@@ -392,9 +384,9 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 # else:
                 #     h = Hmax
 
-        #    integration finished - end time reached successfully
-        if self.finished or self.failed:
-            self.finished_solve()
+            #    integration finished - end time reached successfully
+            if self.finished or self.failed or self.stopped:
+                self.finished_solve()
 
         #    save data to file
         self.write_simulation_solution_to_file()
@@ -481,6 +473,8 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         Raises:
             None
         """
+        # print "---------------------------------"
+        # print "t =", t, "step =", self.step,
         self.__update_coordinates_and_angles_of_all_bodies(q)
 
         self.contact_status_list = []
@@ -492,7 +486,6 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 #    function recursively loops through all potential AABB objects in AABB tree of each body
                 #    and if two AABB objects overlap, a new overlap object is created
                 #    that has both overlapping AABB objects
-
                 #   general contact
                 if contact._type == "General":
                     #   adds simulation data to contact object
@@ -512,7 +505,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
                 #   revolute clearance joint contact
                 elif contact._type.lower() == "revolute clearance joint" or contact._type.lower() == "contact sphere-sphere" or contact._type.lower() == "contact plane-sphere" or contact._type.lower() == "pin-slot clearance joint linear":
                     status = contact.check_for_contact(q)
-                    print "t =", t, "status(check_for_contact) =", status
+                    # print "t =", t, "status(check_for_contact) =", status
                     self.contact_status_list.append(status)
 
                 else:
@@ -631,6 +624,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         """
         Function writes solution data to solution data object
         """
+        print "write_simulation_solution_to_file()"
         solution_data = self.collect_solution_data()
 
         #   write solution data and info to solution data object
@@ -649,16 +643,20 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self._solution_data.add_data(solution_data)
         self._solution_data.finished = True
 
-        #   write data to file
-        self._solution_data.write_to_file()
+        # print "exe1"
+        # print "self.MBD_system._solution_save_options =", self.MBD_system._solution_save_options
+        if self.MBD_system._solution_save_options != "discard":
+            print "exe2"
+            #   write data to file
+            self._solution_data.write_to_file()
 
-        #   emit signal
-        self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._filename)
+            #   emit signal
+            # self.solution_signal.solution_data.emit(id(self._solution_data), self._solution_data._filename)
 
-        #   write contact values of every simulation time step to file
-        for contact in self.MBD_system.contacts:
-            if contact.save_to_file:
-                contact.write_to_file()
+            #   write contact values of every simulation time step to file
+            for contact in self.MBD_system.contacts:
+                if contact._solution_save_options != "discard":
+                    contact.write_to_file()
 
     def collect_solution_data(self):
         """
@@ -671,7 +669,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         #   energy
         _energy_data = np.array([self.energy_data]).T
         #   add all solution data to one variable
-        solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol))
+        solution_data = np.hstack((_step, _energy_data, self.R_vector, self.step_size, self.t_vector, self.q_sol_matrix))
 
         return solution_data
 
@@ -682,7 +680,6 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         """
         data = self.collect_solution_data()
         self._solution_data.add_data(data)
-
 
     def start_solve(self):
         """
@@ -781,6 +778,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         """
         Function restores initial conditions and displays it with opengl widget.
         """
+        print "restore_initial_condition()"
         self.step = 0
         self.MBD_system._restore_initial_conditions()
 

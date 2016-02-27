@@ -3,18 +3,11 @@ Created on 19. feb. 2014
 
 @author: luka.skrinjar
 """
-import os
-import sys
 import logging
 import logging.handlers
-from pprint import pprint
-
 
 import numpy as np
-from PyQt4 import QtCore, QtGui
 
-
-from body.body import Body
 import body.list_of_bodies as list_of_bodies
 import contact.list_of_contacts as list_of_contacts
 import dprj_file_
@@ -22,7 +15,9 @@ import force.list_of_forces as list_of_forces
 import joint.list_of_joints as list_of_joints
 import spring.list_of_springs as list_of_springs
 from MBD_system_items import *
+from body.body import Body
 from motion import list_of_motions
+
 
 class MBDsystem(MBDsystemItem):
     """
@@ -47,7 +42,7 @@ class MBDsystem(MBDsystemItem):
         #   use baumgarte stabilization method - BSM
         self.use_BSM = True
         self.t_n = 1
-        self.integrationMethod = None
+        self.integrationMethod = "Euler"
 
         #   type of analysis, options:
         #   kinematic
@@ -66,11 +61,15 @@ class MBDsystem(MBDsystemItem):
         #   filetype, options:
         #   .dat, (.xlsx, .csv - not implemented yet)
         self._solution_filetype = ".sol" #.sol,.xlsx
+        self._solution_filetypes = [".sol",
+                                    ".xlsx",
+                                    ".dat"]
+        self._soltuion_filetype_software = ["Solution file", "Excel file", "Text file"]
         #   options:
         #   discard
         #   overwrite
         #   save to new
-        self._save_options = "discard"
+        self._solution_save_options = "discard"
 
         #   extension of data files
         self._data_filetype = ".dat"
@@ -88,18 +87,20 @@ class MBDsystem(MBDsystemItem):
         self._log_file = LOG_FILENAME
         self.loadSolutionFileWhenFinished = False
         self.updateEveryIthStep = 10
+        self.restoreInitialConditionsWhenFinished = False
 
         self._logger = logging.getLogger('DyS_logger')
-
-        _log_file_abs_path = os.path.join(MBD_folder_abs_path, self._log_file)
-#         print "_log_file_abs_path =", _log_file_abs_path
-#         
-#         if not os.path.exists(_log_file_abs_path):
-#             pass
-#         else:
-#             _log_file_abs_path = os.path.join(os.getcwd(), self._log_file)
-            
-#         print "_log_file_abs_path =", _log_file_abs_path
+        print "MBD_folder_abs_path =", MBD_folder_abs_path
+        _log_file_abs_path = os.path.normpath(os.path.join(MBD_folder_abs_path, self._log_file))
+        print "_log_file_abs_path =", _log_file_abs_path
+        #    check if log file exists and if not create it
+        # if not os.path.exists(_log_file_abs_path):
+        #     pass#open(_log_file_abs_path, 'w+')
+        # else:
+        #     _log_file_abs_path = os.path.join(MBD_folder_abs_path, self._log_file)
+        print os.path.exists(_log_file_abs_path)
+        print os.path.isfile(_log_file_abs_path)
+        #   set up logging
         hdlr = logging.FileHandler(_log_file_abs_path, mode='w')
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         hdlr.setFormatter(formatter)
@@ -124,7 +125,7 @@ class MBDsystem(MBDsystemItem):
 
         self.MBD_system_constructed = False
         self._name = MBD_filename
-        
+        self.saved = False
         
         if MBD_folder_abs_path != []:
             if os.path.isabs(MBD_folder_abs_path):
@@ -210,11 +211,14 @@ class MBDsystem(MBDsystemItem):
         """
 
 
-    def write(self):
+    def write(self, filename=None):
         """
-
+        Save to file
         :return:
         """
+        if filename is not None:
+            self._name = filename
+
 
     def __parameters_by_type(self):
         """
@@ -538,7 +542,7 @@ class MBDsystem(MBDsystemItem):
 
     def get_q(self):
         """
-        Function returns q vector of MBD system from body object data
+        Function returns q vector (positions and velocities) of MBD system from body object data
         """
         _q = []
         #   q
@@ -579,7 +583,7 @@ class MBDsystem(MBDsystemItem):
 
         self.update_coordinates_and_angles_of_all_bodies(self.q0)
         for contact in self.contacts:
-            contact._reset_to_initial_state()
+            contact.reset()
 
     def update_coordinates_and_angles_of_all_bodies(self, q, step=None):
         """
@@ -692,12 +696,9 @@ class MBDsystem(MBDsystemItem):
                     self.Hmin = 1E-4
                     t_min = self.Hmin
                 Hmin = (10**np.floor(np.log10(t_min)))*1E-1
-                if t_min > self.Hmin:
-                    print "Suggested value of Hmin is %4.3e"%Hmin
-                    # QtGui.QMessageBox.information(self._3, "Information!", "Suggested value of Hmin is %s"%t_min,QtGui.QMessageBox.Ok, QtGui.QMessageBox.NoButton,QtGui.QMessageBox.NoButton)
-
-                else:
-                    self.Hmin = Hmin
+                print "Suggested value of Hmin is %4.3e"%Hmin
+                logging.getLogger("DyS_logger").info("Suggested value of Hmin is %4.3e" %Hmin)
+                # QtGui.QMessageBox.information(self._3, "Information!", "Suggested value of Hmin is %s"%t_min,QtGui.QMessageBox.Ok, QtGui.QMessageBox.NoButton,QtGui.QMessageBox.NoButton)
 
     def evaluate_Hmax(self):
         """

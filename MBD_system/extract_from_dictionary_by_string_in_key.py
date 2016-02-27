@@ -12,10 +12,9 @@ def extract_from_dictionary_by_string_in_key(dictionary, string):
     extracted_dictonary = {}
 
     for key in dictionary:
-
         #   find key that has string inside
         if string in key:
-            _indx = key.find(string, 0, len(string))
+            _indx = key.find(string)
             #   new key - with removed string
             _key = key[_indx+len(string)::]
             extracted_dictonary[_key] = dictionary[key]
@@ -25,9 +24,9 @@ def extract_from_dictionary_by_string_in_key(dictionary, string):
 
 if __name__ == "__main__":
     d = {'contact_model.L_2':(3,4),
-     'b':(1,2),
-     'contact_model.ckjsfb':(5,5),
-     'd':(3,3)}
+         'b':(1,2),
+         'contact_model.K':(5,5),
+         'd':(3,3)}
 
     print d
 

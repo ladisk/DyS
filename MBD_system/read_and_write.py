@@ -1,13 +1,13 @@
-'''
+"""
 Created on 20. feb. 2015
 
 @author: lskrinjar
 
-'''
-import os
+"""
+from pprint import pprint
+
 import dill
-import pickle
-import cPickle
+
 
 def write(obj, filename):
     
@@ -21,4 +21,5 @@ def read(filename):
     
     
 if __name__ == "__main__":
-    read("ground_.pkl")
+    a = read("ground_.pkl")
+    pprint(vars(a))
