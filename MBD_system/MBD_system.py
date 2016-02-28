@@ -90,9 +90,8 @@ class MBDsystem(MBDsystemItem):
         self.restoreInitialConditionsWhenFinished = False
 
         self._logger = logging.getLogger('DyS_logger')
-        print "MBD_folder_abs_path =", MBD_folder_abs_path
         _log_file_abs_path = os.path.normpath(os.path.join(MBD_folder_abs_path, self._log_file))
-        print "_log_file_abs_path =", _log_file_abs_path
+
         #    check if log file exists and if not create it
         # if not os.path.exists(_log_file_abs_path):
         #     pass#open(_log_file_abs_path, 'w+')
@@ -129,19 +128,19 @@ class MBDsystem(MBDsystemItem):
         
         if MBD_folder_abs_path != []:
             if os.path.isabs(MBD_folder_abs_path):
-                self.MBD_folder_abs_path_ = os.path.abspath(MBD_folder_abs_path)
+                self.MBD_folder_abs_path = os.path.abspath(MBD_folder_abs_path)
             else:
-                self.MBD_folder_abs_path_ = os.path.abspath(MBD_folder_abs_path)
+                self.MBD_folder_abs_path = os.path.abspath(MBD_folder_abs_path)
         
         #    create groups as items (only for tree view hierarchy)
         self.__create_groups()
         
         
         if MBD_file_abs_path == []:
-            for file in os.listdir(self.MBD_folder_abs_path_):
+            for file in os.listdir(self.MBD_folder_abs_path):
                 if file.endswith(".dprj"):
                     self._name = file
-                    self.MBD_file_abs_path = os.path.join(os.path.abspath(self.MBD_folder_abs_path_), file)
+                    self.MBD_file_abs_path = os.path.join(os.path.abspath(self.MBD_folder_abs_path), file)
         else:
             self.MBD_file_abs_path = MBD_file_abs_path
 
@@ -201,7 +200,7 @@ class MBDsystem(MBDsystemItem):
 
             self.C_q_number_of_rows = 0
         else:
-            self.construct_MBD_system(MBD_file_abs_path=self.MBD_file_abs_path, MBD_folder_abs_path=self.MBD_folder_abs_path_, _name=self._name)
+            self.construct_MBD_system(MBD_file_abs_path=self.MBD_file_abs_path, MBD_folder_abs_path=self.MBD_folder_abs_path, _name=self._name)
 
     def read_ascii(self, filename):
         """
@@ -357,7 +356,7 @@ class MBDsystem(MBDsystemItem):
         setattr(self, group_obj._name, group_obj)
 
     def _create_abs_path_to_group_file(self, group_name):
-        setattr(self, "abs_path_to_" + group_name.lower(), os.path.join(self.MBD_folder_abs_path_, group_name.lower() + self._data_filetype))
+        setattr(self, "abs_path_to_" + group_name.lower(), os.path.join(self.MBD_folder_abs_path, group_name.lower() + self._data_filetype))
 
     def get_properties(self):
         """
@@ -370,9 +369,9 @@ class MBDsystem(MBDsystemItem):
         """
         self.MBD_file_abs_path = MBD_file_abs_path
         if MBD_file_abs_path != []:
-            self.MBD_folder_abs_path_, self.filename_ = os.path.split(MBD_file_abs_path)
+            self.MBD_folder_abs_path, self.filename_ = os.path.split(MBD_file_abs_path)
         else:
-            self.MBD_folder_abs_path_ = "c:\Temp"
+            self.MBD_folder_abs_path = "c:\Temp"
             self.filename_ = "Model_1"
             
     def construct_MBD_system(self, MBD_file_abs_path=[], MBD_folder_name=[], MBD_folder_abs_path=[], _name=[]):
@@ -383,7 +382,7 @@ class MBDsystem(MBDsystemItem):
             
         self._name = _name
         self.MBD_folder_name = MBD_folder_name
-        self.MBD_folder_abs_path_ = MBD_folder_abs_path
+        self.MBD_folder_abs_path = MBD_folder_abs_path
         self.MBD_file_abs_path = MBD_file_abs_path
 
         #    create ground body
@@ -410,9 +409,9 @@ class MBDsystem(MBDsystemItem):
     
     
 
-        if self.save_screenshots and self.MBD_folder_abs_path_ != []:
+        if self.save_screenshots and self.MBD_folder_abs_path != []:
             self.saved_screenshots_folder_name = "screenshots"
-            self.saved_screenshots_folder_abs_path = os.path.join(self.MBD_folder_abs_path_, self.saved_screenshots_folder_name)
+            self.saved_screenshots_folder_abs_path = os.path.join(self.MBD_folder_abs_path, self.saved_screenshots_folder_name)
             #    create folder
             try:
                 os.stat(self.saved_screenshots_folder_abs_path)
@@ -436,7 +435,7 @@ class MBDsystem(MBDsystemItem):
         Delete MBD_system object additional properties.
         """
         self._name = "Model_1"
-        self.MBD_folder_abs_path_ = []
+        self.MBD_folder_abs_path = []
         
         self.ground = None
         for body in self.bodies:
@@ -462,14 +461,14 @@ class MBDsystem(MBDsystemItem):
         """
         Create ground object in object MBD_system.
         """
-        self.ground = Body(parent=self, name="Ground", MBD_folder_abs_path=self.MBD_folder_abs_path_)
+        self.ground = Body(parent=self, name="Ground", MBD_folder_abs_path=self.MBD_folder_abs_path)
 
     def create_bodies(self, bodies_function=[]):
         if bodies_function == []:
             #    reads bodies list - file bodies.txt
-            self.list_of_body_names = list_of_bodies.create_list(filename="bodies" + self._data_filetype, MBD_folder_abs_path=self.MBD_folder_abs_path_)
+            self.list_of_body_names = list_of_bodies.create_list(filename="bodies" + self._data_filetype, MBD_folder_abs_path=self.MBD_folder_abs_path)
             #    reads the content of the folder and returns the list of files that have .stl file of geometry
-#             list_of_body_names = self.__list_of_body_names + list_of_bodies.create_list(MBD_folder_abs_path=self.MBD_folder_abs_path_)
+#             list_of_body_names = self.__list_of_body_names + list_of_bodies.create_list(MBD_folder_abs_path=self.MBD_folder_abs_path)
  
             #    create list of bodies
             for body_name_ in self.list_of_body_names:
@@ -495,7 +494,7 @@ class MBDsystem(MBDsystemItem):
         """
         Create a body object and add it to the list of bodies
         """
-        body_ = Body(name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path_, parent=self.Bodies)
+        body_ = Body(name=body_name_, MBD_folder_abs_path=self.MBD_folder_abs_path, parent=self.Bodies)
         self.bodies.append(body_)
 
     def create_joints(self):
@@ -579,7 +578,7 @@ class MBDsystem(MBDsystemItem):
         Restore initial conditions
         """
         if not hasattr(self, "q0"):
-            self.q0 = self.create_q0()
+            self.q0 = self.evaluate_q0()
 
         self.update_coordinates_and_angles_of_all_bodies(self.q0)
         for contact in self.contacts:

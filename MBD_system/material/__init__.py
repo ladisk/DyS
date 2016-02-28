@@ -1,6 +1,5 @@
-'''
-Created on 6. jan. 2014
+"""
+Created on 12. feb. 2016
 
 @author: lskrinjar (email: skrinjar.luka@gmail.com)
-'''
-
+"""

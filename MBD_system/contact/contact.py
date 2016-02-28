@@ -941,9 +941,6 @@ class Contact(ContactItem):
             # print "self._t_list =", self._t_list
             # print "self._n_LCS_list =", self._n_LCS_list
             for body_id, _force_n, _force_t, _u_P, _n, _t in zip(self.body_id_list, self._Fn_list, self._Ft_list, self.u_P_LCS_list, self._n_LCS_list, self._t_LCS_list):
-                # print "body id =", body_id
-                # print "_n =", _n
-                # print "_u_P =", _u_P
                 #   contact
                 if self.status == 1:
                     _Fn = self.Fn * _n
@@ -1239,26 +1236,28 @@ class Contact(ContactItem):
 
         if step is None:
             if self.contact_detected:
-                for u_CP in self.u_P_LCS_list:
-                    glVertex3f(u_CP[0], u_CP[1], 0)
-        else:
-            try:
-                _u_P_solution_container = np.array(self._u_P_solution_container)[step, :]
-                for i, u_CP in enumerate(self.u_P_list):
-                    _u_CP = _u_P_solution_container[2*i:2*i+2]
-                    glVertex3f(_u_CP[0], _u_CP[1], 0)
-            except:
-                pass
+                for u_CP, Fn, Ft in zip(self.u_P_LCS_list, self._Fn_list, self._Ft_list):
+                    if Fn._visible or Ft._visible:
+                        glVertex3f(u_CP[0], u_CP[1], 0)
+        # else:
+        #     try:
+        #         _u_P_solution_container = np.array(self._u_P_solution_container)[step, :]
+        #         for i, u_CP in enumerate(self.u_P_list):
+        #             _u_CP = _u_P_solution_container[2*i:2*i+2]
+        #             glVertex3f(_u_CP[0], _u_CP[1], 0)
+        #     except:
+        #         pass
 
-    def _paing_GL_GCS(self, step=None):
+    def _paint_GL_GCS(self, step=None):
         """
         Paint contact point in GCS
         :return:
         """
         if step is None:
             if self.contact_detected:
-                for u_P_GCS in self.u_P_GCS_list:
-                    glVertex3f(u_P_GCS[0], u_P_GCS[1], self.z_dim)
+                for u_P_GCS, Fn, Ft in zip(self.u_P_GCS_list, self._Fn_list, self._Ft_list):
+                    if Fn._visible or Ft._visible:
+                        glVertex3f(u_P_GCS[0], u_P_GCS[1], self.z_dim)
         else:
             None
 

@@ -14,7 +14,7 @@ from MBD_system.n2t import n2t
 from MBD_system.q2R_i import q2R_i
 from MBD_system.q2theta_i import q2theta_i
 from MBD_system.t2n import t2n
-from MBD_system.transform_cs import gcs2cm_lcs
+from MBD_system.transform_cs import gcs2cm_lcs, uP_gcs2lcs
 from MBD_system.u_P_gcs2lcs import u_P_gcs2lcs
 from MBD_system.u_P_lcs2gcs import u_P_lcs2gcs
 from simulation_control_widget.opengl_widget.marker.marker import Marker
@@ -438,29 +438,33 @@ class PinSlotClearanceJointLinear(Contact):
             for i, (body_id, _normal) in enumerate(zip(self.body_id_list, self._n_GCS_list)):
                 #   normal in LCS
                 _theta = q2theta_i(q, body_id)
-                _normal_LCS = Ai_ui_P_vector(_normal, _theta)
+                # _normal_LCS = Ai_ui_P_vector(_normal, _theta)
+                _normal_LCS = uP_gcs2lcs(_normal, _theta)
                 #   append normal to list
                 self._n_LCS_list[i] = _normal_LCS
 
             if self.pin_in_section_jP:
                 _u_CP_LCS_list = [self.u_CP_LCS_list[0], self.u_CP_LCS_list[1]]
                 _u_CP_GCS_list = [self.u_CP_GCS_list[0], self.u_CP_GCS_list[1]]
+
             if self.pin_in_section_jR:
                 _u_CP_LCS_list = [self.u_CP_LCS_list[0], self.u_CP_LCS_list[2]]
-                _u_CP_GCS_list = [self.u_CP_GCS_list[0], self.u_CP_LCS_list[2]]
+                _u_CP_GCS_list = [self.u_CP_GCS_list[0], self.u_CP_GCS_list[2]]
 
             #   evaluate actual contact point in LCS of each body and in GCS
-            for i, (body_id, _u_CP_GCS, _u_CP_LCS, _R0) in enumerate(zip(self.body_id_list, _u_CP_GCS_list, _u_CP_LCS_list, self.R0_list)):
+            for i, (body_id, _u_CP_LCS, _R0) in enumerate(zip(self.body_id_list, _u_CP_LCS_list, self.R0_list)):
                 #   R of body
                 R = q2R_i(q, body_id)
                 #   theta of body
                 theta = q2theta_i(q, body_id)
 
                 #   contact point in body LCS
-                _u_P_LCS = Ai_ui_P_vector(_u_CP_LCS, theta) + _R0 * self._n_GCS
-                self.u_P_LCS_list[i] = _u_P_LCS
+                _u_P_LCS = _u_CP_LCS
+                self.u_P_LCS_list[i] = _u_P_LCS# + _R0 * self._n_GCS
                 #   contact point in GCS
-                self.u_P_GCS_list[i] = R + _u_P_LCS
+                self.u_P_GCS_list[i] = R + Ai_ui_P_vector(_u_CP_LCS, theta) + _R0 * self._n_GCS
+
+            print "self.u_P_GCS_list =", self.u_P_GCS_list
 
 
     def _evaluate_delta_flat_section(self, distance):

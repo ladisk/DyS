@@ -3,7 +3,6 @@ Created on 21. feb. 2014
 
 @author: lskrinjar
 """
-
 from OpenGL.GL import *
 from sympy import Symbol
 from sympy.parsing.sympy_parser import parse_expr
@@ -27,7 +26,7 @@ class Force(ForceItem):
     """
     __id = itertools.count(-1)
 
-    def __init__(self, body_id, force_name=None, Fx=0, Fy=0, Mz=0, u_iP_f=np.array([0, 0, 0]), data=None, parent=None):
+    def __init__(self, body_id, force_name=None, Fx=0, Fy=0, Mz=0, u_iP_f=np.array([0, 0, 0]), data=None, visible = False, parent=None):
         """
         Constructor of force class
         in:
@@ -83,7 +82,7 @@ class Force(ForceItem):
         #   opengl properties
         self._scale_GL = 1E-2
         self._color_GL = np.array([1, 0, 0])
-        self._visible = False
+        self._visible = visible
 
         #   marker parameters
         self.markers = []

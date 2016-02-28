@@ -4,6 +4,7 @@ Created on 5. feb. 2014
 @author: lskrinjar
 """
 import os
+import time
 from pprint import pprint
 
 import numpy as np
@@ -13,10 +14,9 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtOpenGL import *
 
-import coordinate_system.display_CS.display_CS as display_CS
-import paint_text.paint_text as paint_text
 from coordinate_system.coordinate_system import CoordinateSystem
-from simulation_control_widget.opengl_widget.matrix.matrix import Matrix
+from coordinate_system.coordinate_system_view import CoordinateSystemView
+from simulation_control_widget.opengl_widget.gl_matrix.gl_matrix import GLMatrix
 from simulation_control_widget.opengl_widget.view.view import View
 from simulation_control_widget.opengl_widget.window.window import Window
 
@@ -34,10 +34,12 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self._parent = parent
         # QtOpenGL.QGLWidget.__init__(self, parent)
         super(OpenGLWidget, self).__init__(parent)
-        # super(SimulationControlWidget, self).__init__(parent)
+
+        self._typeInfo = "opengl widget"
         #    main data file
         self.MBD_system = MBD_system
         self.step = None
+        self.t = 0.
         
         #    opengl properties for glOrtho()
         #    the window corner OpenGL coordinates are (-+1, -+1)
@@ -63,7 +65,10 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.resize_factor_height = 1
 
         #    coordinate system
-        self.GCS = CoordinateSystem(parent=self.MBD_system.ground)#parent=self
+        self.GCS = CoordinateSystem(parent=self.MBD_system.ground)
+
+        #   coordinate system view
+        self.GCS_view = CoordinateSystemView(self.CS_window, self.CS_window, parent=self)
 
         # core profile
         glformat = QtOpenGL.QGLFormat()
@@ -72,10 +77,26 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         glformat.setSampleBuffers(True)
 
         #    context menu properties
-        self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # NoContextMenu, CustomContextMenu
+        # self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)  # NoContextMenu, CustomContextMenu
+
+        #   display info text
+        self._show_filename = True
+        self._show_simulationTime = True
+        self._show_simulationStepNumber = True
+        self._show_timeAndDate = True
+        self._show_info = [self._show_filename,
+                           self._show_simulationTime,
+                           self._show_simulationStepNumber,
+                           self._show_timeAndDate]
+
+        #   background color RGBA
+        self.background_color = np.array([0, 0, 0, 1], dtype="float32")
+
+        #   text color
+        self.text_color = self._check_text_color_contrast_update()
 
         #   font
-        self._font = QFont("Consolas", 10)
+        self.font = QFont("Consolas", 10)
 
     def update_data(self, bodies):
         """
@@ -94,7 +115,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         Initialize OpenGL, VBOs, upload data on the GPU, etc.
         """
         #    background color - default color
-        glClearColor(0, 0, 0, 1)
+        glClearColor(self.background_color[0], self.background_color[1], self.background_color[2], 1)
         
         #    enable functions
         #    z-buffer
@@ -123,7 +144,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0)
         glEnable(GL_LIGHT0)
         #    gl matrix object
-        self.gl_matrix = Matrix()
+        self.gl_matrix = GLMatrix()
         #    camera view
         self.view = View()
         #    coordinate system view
@@ -135,8 +156,23 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         #   create VBO of GCS
         self.GCS._create_VBO()
 
+        #   create CS view
+        self.GCS_view._create_VBO()
+        print "self.GCS_view._VBO_created =", self.GCS_view._VBO_created
+
         #    display window
-        self.window = Window(width=self.initial_window_width, height=self.initial_window_height, left_GL=self.left_GL, right_GL=self.right_GL, bottom_GL=self.bottom_GL, top_GL=self.top_GL, near_GL=self.near_GL, far_GL=self.far_GL, zoom=self.zoom, scale_factor_Translation=self.scale_factor_Translation, scale_factor_Rotation=self.scale_factor_Rotation)
+        self.window = Window(width=self.initial_window_width,
+                             height=self.initial_window_height,
+                             left_GL=self.left_GL,
+                             right_GL=self.right_GL,
+                             bottom_GL=self.bottom_GL,
+                             top_GL=self.top_GL,
+                             near_GL=self.near_GL,
+                             far_GL=self.far_GL,
+                             zoom=self.zoom,
+                             scale_factor_Translation=self.scale_factor_Translation,
+                             scale_factor_Rotation=self.scale_factor_Rotation)
+
         self.scale_factor_Translation = self.scale_factor_Translation * float(self.window.width) / float(self._parent.geometry().width())
         self.scale_factor_Rotation = self.scale_factor_Rotation * float(self.window.width) / float(self._parent.geometry().width())
 
@@ -181,7 +217,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         glPointSize(10)
         glBegin(GL_POINTS)
         for contact in self.MBD_system.contacts:
-            contact._paing_GL_GCS(self.step)
+            contact._paint_GL_GCS(self.step)
         glEnd()
         glLineWidth(1.2)
 
@@ -252,10 +288,9 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.gl_matrix.update_modelview_matrix_CS(self.view_CS.current_MODELVIEW_matrix)
         
         #    display CS symbol in lower left corner
-        try:
-            display_CS.display(self, self.gl_matrix, self.CS_window, self.CS_window)
-        except:
-            pass
+        # display_CS.display(self, self.gl_matrix, self.CS_window, self.CS_window)
+        self.GCS_view.paintGL(self.gl_matrix)
+
 
         #    reload saved matrices from gl_matrix object
         glMatrixMode(GL_PROJECTION)
@@ -264,15 +299,38 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         glMatrixMode(GL_MODELVIEW)
         
-        #    display text
-        paint_text.text(self, self.resize_factor_width, self.resize_factor_height, filename=self.MBD_system._name, simulation_time=self.MBD_system.time, simulation_step_number=self.MBD_system.step_num)
+        #    display info text
+        self.paintGLtext()
+
+    def paintGLtext(self):
+        """
+        Paint info text
+        :return:
+        """
+        #   set text color
+        self.qglColor(self.text_color)
+
+        dx = 10
+        dy = 20
+        #   filename
+        if self._show_filename:
+            self.renderText(dx, dy, QString("Filename: ") + QString(self.MBD_system._name), font=self.font)
+
+        if self._show_simulationTime:
+            self.renderText(dx, dy+20, QString("t: ") + QString(str(self.MBD_system.time)), font=self.font)
+
+        if self._show_simulationStepNumber:
+            self.renderText(dx, dy+40, QString("step: ") + QString(str(self.MBD_system.step_num)), font=self.font)
+
+        if self._show_timeAndDate:
+            self.renderText(self.width - 200, dy, str(time.strftime("%b %d %Y %H:%M:%S")), font=self.font)
 
     def paintOverlayGL(self):
         """
 
         :return:
         """
-        print "paintOverlayGL()"
+        # print "paintOverlayGL()"
 
     def repaintGL(self, step = None):
         """
@@ -306,7 +364,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         :return:
         """
-        print "refit()"
+        # print "refit()"
         _uP_i_max = []
         for body in self.MBD_system.bodies:
             _uP_i_max_i = body.get_uP_i_max() + abs(body.R)
@@ -320,12 +378,12 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         [x, y, z] = np.amax(_uP_i_max, axis=0)
         #   max dim is 50% larger than max coordinate
         self._max_dim = 1.5 * np.amax(np.array([x, y]))
-        print "self._max_dim =", self._max_dim
+        # print "self._max_dim =", self._max_dim
         delta = self.view._right_GL / self._max_dim
 
-        print "self.left_GL =", self.left_GL
+        # print "self.left_GL =", self.left_GL
         self.left_GL = - self._max_dim
-        print "self.left_GL =", self.left_GL
+        # print "self.left_GL =", self.left_GL
         self.right_GL = self._max_dim
 
         self.bottom_GL = -self._max_dim
@@ -380,16 +438,16 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
     def mouseReleaseEvent(self, event):
         """
-        
+        This method changes shape of cursor for different actions (translate, rotate, zoom)
         """
         self.last_pos = QtCore.QPoint(event.pos())
 
         if event.button() == QtCore.Qt.LeftButton:
             self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
-         
+
         elif event.button() == QtCore.Qt.RightButton:
             self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
-            self.contextMenuEvent(event)
+            # self.contextMenuEvent(event)
         else:
             self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
 
@@ -404,6 +462,9 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         # pprint(vars(event))
         if event.button() == QtCore.Qt.LeftButton:
             print event.pos()
+        elif event.button() == QtCore.Qt.RightButton:
+            self.setCursor(Qt.CursorShape(Qt.ArrowCursor))
+            self.contextMenuEvent(event)
 
         # print "-------------------------------------------"
 
@@ -415,7 +476,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
     def contextMenuEvent(self, event):
         """
-
+        Context menu
         """
         popMenu = QtGui.QMenu(parent=self)
 
@@ -432,7 +493,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         
         popMenu.addSeparator()
         _resetAction = popMenu.addAction("Reset")
-        _resetAction.triggered.connect(self._parent.SimulationControlWidget.simulationReset)
+        _resetAction.triggered.connect(self._parent.simulation_control_widget.simulationReset)
 
         popMenu.exec_(event.globalPos())
 
@@ -513,6 +574,18 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         _refitAction.triggered.connect(self.refit)
 
         return viewDirectionSubmenu
+
+    def _check_text_color_contrast_update(self):
+        """
+        Function checks
+        :return:
+        """
+        if np.linalg.norm([np.array(glGetFloat(GL_COLOR_CLEAR_VALUE))], 2) > 1.2:
+            text_color = QtCore.Qt.black
+        else:
+            text_color = QtCore.Qt.white
+
+        return text_color
 
     @QtCore.pyqtSlot()
     def viewFront(self):

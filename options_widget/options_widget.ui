@@ -74,15 +74,13 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QCheckBox" name="showGCS_checkBox">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Show GCS</string>
               </property>
              </widget>
             </item>
            </layout>
-           <zorder>label_2</zorder>
-           <zorder>verticalSpacer_2</zorder>
           </widget>
          </item>
          <item row="1" column="0">
@@ -166,20 +164,97 @@
        </widget>
        <widget class="QWidget" name="pageVisualization">
         <layout class="QGridLayout" name="gridLayout_7">
-         <item row="1" column="0">
+         <item row="3" column="0">
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Visualization</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QGroupBox" name="infoDisplay_groupBox">
+           <property name="title">
+            <string>Info display</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QCheckBox" name="filename_checkBox">
+              <property name="text">
+               <string>Filename</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="simulationTime_checkBox">
+              <property name="text">
+               <string>Simulation time</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="simulationStepNumber_checkBox">
+              <property name="text">
+               <string>Step number</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="timeAndDate_checkBox">
+              <property name="text">
+               <string>Time and date</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="0" colspan="2">
           <widget class="QGroupBox" name="visualization_groupBox">
            <property name="title">
             <string>Open GL</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="1" column="0">
-             <widget class="QLabel" name="updateDisplayStepLabel">
+            <item row="0" column="2">
+             <widget class="QPushButton" name="editBackgroundColor_pushButton">
               <property name="text">
-               <string>Update display on i-th stp</string>
+               <string>Edit</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="backgroundColor_lineEdit">
+              <property name="inputMethodHints">
+               <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
              <widget class="QLineEdit" name="updateDisplayStep">
               <property name="inputMethodHints">
                <set>Qt::ImhDigitsOnly|Qt::ImhPreferNumbers</set>
@@ -193,14 +268,14 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="pushButton">
+            <item row="2" column="0">
+             <widget class="QLabel" name="updateDisplayStepLabel">
               <property name="text">
-               <string>Edit</string>
+               <string>Update display on i-th stp</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
+            <item row="2" column="3">
              <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -215,26 +290,6 @@
             </item>
            </layout>
           </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Visualization</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>

@@ -76,7 +76,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         self.ui.treeView.customContextMenuRequested.connect(self.contextMenuEvent)
         QtCore.QObject.connect(self.ui.treeView, QtCore.SIGNAL("clicked (QModelIndex)"),self.row_clicked)
 
-        # self._create_animation_file.connect(self._parent.SimulationControlWidget._create_animation_file)
+        # self._create_animation_file.connect(self._parent.simulation_control_widget._create_animation_file)
  
         self._widget = ItemWidget(parent=self)
 
@@ -158,8 +158,8 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         if self._item._typeInfo == "MBDsystem" or self._item._typeInfo == "settings":
             self.menu.addSeparator()
-            show_GCS_Action = QtGui.QAction("Show GCS ", self, checkable=True, checked=self._parent.SimulationControlWidget.OpenGLWidget.GCS._visible)
-            show_GCS_Action.triggered.connect(self._parent.SimulationControlWidget.OpenGLWidget.GCS._show)
+            show_GCS_Action = QtGui.QAction("Show GCS ", self, checkable=True, checked=self._parent.simulation_control_widget.opengl_widget.GCS._visible)
+            show_GCS_Action.triggered.connect(self._parent.simulation_control_widget.opengl_widget.GCS._show)
             self.menu.addAction(show_GCS_Action)
 
             propertiesAction = self.menu.addAction("Properties")
@@ -168,7 +168,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             self.menu.addSeparator()
 
             profileAction = self.menu.addAction("Profile")
-            profileAction.triggered.connect(self._parent.SimulationControlWidget.profile_functions)
+            profileAction.triggered.connect(self._parent.simulation_control_widget.profile_functions)
             
             getDOFsAction = self.menu.addAction("DOF")
             getDOFsAction.triggered.connect(self.__getDOF)
@@ -421,13 +421,13 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
             pass
 
         self.menu.exec_(event.globalPos())
-        self._parent.SimulationControlWidget.OpenGLWidget.updateGL()
+        self._parent.simulation_control_widget.opengl_widget.updateGL()
 
     def closeEvent(self, event):
         """
 
         """
-        self._parent.SimulationControlWidget.OpenGLWidget.updateGL()
+        self._parent.simulation_control_widget.opengl_widget.updateGL()
 
     def _list_parameters(self):
         """
@@ -454,7 +454,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         #   this has to be put in a thread
         # data = self._item._load_dat_file()
-        self._parent.SimulationControlWidget.load_solution_file(filename=self._item._name)
+        self._parent.simulation_control_widget.load_solution_file(filename=self._item._name)
 
     def _load_solution_file_to_project(self):
         """
@@ -568,7 +568,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         
         """
-        C_q, C_qT = self._parent.SimulationControlWidget.solver.solveODE.ode_fun.getDOF()
+        C_q, C_qT = self._parent.simulation_control_widget.solver.solveODE.ode_fun.getDOF()
 
     def _get_q(self):
         """
@@ -653,7 +653,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         t = 0
         q = self.MBD_system.get_q()
         print "C(q, t):"
-        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C(q, t)
+        print self._parent.simulation_control_widget.solver.analysis.DAE_fun.evaluate_C(q, t)
 
     def _evaluate_C_q(self):
         """
@@ -662,7 +662,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         """
         q = self.MBD_system.get_q()
         print "C_q(q, t):"
-        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_q(q, 0)
+        print self._parent.simulation_control_widget.solver.analysis.DAE_fun.evaluate_C_q(q, 0)
 
     def _evaluate_C_t(self):
         """
@@ -672,7 +672,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         t = 0
         q = self.MBD_system.get_q()
         print "C_t(t):"
-        print self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_C_t(q, 0)
+        print self._parent.simulation_control_widget.solver.analysis.DAE_fun.evaluate_C_t(q, 0)
 
     def _edit(self, index):
         """
@@ -808,8 +808,8 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         
         :return:
         """
-        self._parent.SimulationControlWidget.solver.analysis.DAE_fun.evaluate_M()
-        M = self._parent.SimulationControlWidget.solver.analysis.DAE_fun.M
+        self._parent.simulation_control_widget.solver.analysis.DAE_fun.evaluate_M()
+        M = self._parent.simulation_control_widget.solver.analysis.DAE_fun.M
         print "M ="
         print M
 
@@ -818,7 +818,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
         Method gets information of point of contact
         :return:
         """
-        if self._parent.SimulationControlWidget._status == "animation":
-            self._item.get_contact_point(step=self._parent.SimulationControlWidget._step)
+        if self._parent.simulation_control_widget._status == "animation":
+            self._item.get_contact_point(step=self._parent.simulation_control_widget._step)
 
 

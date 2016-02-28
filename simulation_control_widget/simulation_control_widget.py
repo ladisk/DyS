@@ -65,7 +65,7 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.restoreInitialConditionsStatus.setChecked(self.MBD_system.restoreInitialConditionsWhenFinished)
 
         #    sets opengl widget in central widget position
-        self.OpenGLWidget = OpenGLWidget(MBD_system=MBD_system, parent=self._parent)
+        self.opengl_widget = OpenGLWidget(MBD_system=MBD_system, parent=self._parent)
         
         self._status = "simulation"  # simulation or animation
 
@@ -173,8 +173,8 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.playButton.clicked.connect(self.animationPlay)
         
 
-        #    signal repaintGL.signal_repaintGL from self.solver triggers self.OpenGLWidget.repaintGL
-        self.solver.analysis.repaintGL_signal.signal_repaintGL.connect(self.OpenGLWidget.repaintGL)
+        #    signal repaintGL.signal_repaintGL from self.solver triggers self.opengl_widget.repaintGL
+        self.solver.analysis.repaintGL_signal.signal_repaintGL.connect(self.opengl_widget.repaintGL)
 
         #   signal for take a snapshot
         self.solver.analysis.save_screenshot_signal.signal_saveScreenshot.connect(self.take_snapshot)
@@ -272,8 +272,6 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         Function loads solution data from object (first) or from file (second)
         """
-        print "solution_object_id =", solution_object_id, type(solution_object_id)
-        print "test =", solution_object_id is not None
         if solution_object_id is None:
             #   assign solution data from solution data object to ne variable
             solution_data = self.solver.analysis._solution_data.load_solution_data()
@@ -324,7 +322,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         self.ui.currentStep.setText(str(int(self._step)))
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[int(self._step), :])
-        self.OpenGLWidget.repaintGL(int(self._step))
+        self.opengl_widget.repaintGL(int(self._step))
         
         #    energy data signal
         _energy = self.energy[self._step]
@@ -357,7 +355,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         Create a snapshot
         """
-        captured_figure = self.OpenGLWidget.takeSnapShot()
+        captured_figure = self.opengl_widget.takeSnapShot()
         captured_figure.save(self.solver.analysis.screenshot_filename_abs_path + '.png', 'png')
 
     def selectedIntegrationMethod(self, int):

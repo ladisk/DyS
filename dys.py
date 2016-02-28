@@ -193,15 +193,15 @@ class MainWindow(QtGui.QMainWindow):
         # self.TreeViewWidget.move(self.window_offset_x - self.TreeViewWidget.frameGeometry().width(), self.window_offset_y)
 
         #    simulation control widget
-        self.SimulationControlWidget = SimulationControlWidget(MBD_system=self.MBD_system, parent=self)
-        self.SimulationControlWidget.setWindowFlags(self.flags)
-        self.setCentralWidget(self.SimulationControlWidget.OpenGLWidget)
-        self.SimulationControlWidget.show()
+        self.simulation_control_widget = SimulationControlWidget(MBD_system=self.MBD_system, parent=self)
+        self.simulation_control_widget.setWindowFlags(self.flags)
+        self.setCentralWidget(self.simulation_control_widget.opengl_widget)
+        self.simulation_control_widget.show()
         #    move
-        self.SimulationControlWidget.move(.25*screen.width() + self.geometry().width(), dy)
+        self.simulation_control_widget.move(.25*screen.width() + self.geometry().width(), dy)
 
         #   options widget
-        self.options_widget = OptionsWidget()
+        self.options_widget = OptionsWidget(self.simulation_control_widget, parent=None)
 
         #    output widget
         #    maybe put in new thread? if output will be large
@@ -214,7 +214,7 @@ class MainWindow(QtGui.QMainWindow):
         self.JobListWidget.setWindowFlags(self.flags)
 
         #    resize
-        self.resize(self.SimulationControlWidget.OpenGLWidget.initial_window_width, self.SimulationControlWidget.OpenGLWidget.initial_window_height)
+        self.resize(self.simulation_control_widget.opengl_widget.initial_window_width, self.simulation_control_widget.opengl_widget.initial_window_height)
         
         #    create actions
         self.create_actions()
@@ -233,26 +233,26 @@ class MainWindow(QtGui.QMainWindow):
 
         :return:
         """
-        self.SimulationControlWidget.solver.analysis.step_signal.signal_step.connect(self.update_statusbar_text2)
+        self.simulation_control_widget.solver.analysis.step_signal.signal_step.connect(self.update_statusbar_text2)
 
-        self.SimulationControlWidget.solver.running_signal.signal_running.connect(self.update_statusbar_text3)
-        self.SimulationControlWidget.solver.stopped_signal.signal_stopped.connect(self.update_statusbar_text3)
-        self.SimulationControlWidget.solver.analysis.finished_signal.signal_finished.connect(self.update_statusbar_text3)
+        self.simulation_control_widget.solver.running_signal.signal_running.connect(self.update_statusbar_text3)
+        self.simulation_control_widget.solver.stopped_signal.signal_stopped.connect(self.update_statusbar_text3)
+        self.simulation_control_widget.solver.analysis.finished_signal.signal_finished.connect(self.update_statusbar_text3)
 
 
-        # self.SimulationControlWidget.solver.solveODE.finished_signal.signal_finished.connect(self.update_statusbar_text3)
+        # self.simulation_control_widget.solver.solveODE.finished_signal.signal_finished.connect(self.update_statusbar_text3)
 
-        # self.SimulationControlWidget.solver.analysis.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
-        self.SimulationControlWidget.step_num_signal.signal_step.connect(self.update_statusbar_text2)
-        self.SimulationControlWidget.status_signal.signal_status.connect(self.update_statusbar_text3)
+        # self.simulation_control_widget.solver.analysis.filename_signal.signal_filename.connect(self.TreeViewWidget.add_solution_data)
+        self.simulation_control_widget.step_num_signal.signal_step.connect(self.update_statusbar_text2)
+        self.simulation_control_widget.status_signal.signal_status.connect(self.update_statusbar_text3)
         
         
-        self.TreeViewWidget.filename_signal.signal_filename.connect(self.SimulationControlWidget.load_solution_file)
-        # self.TreeViewWidget._widget.repaintGL_signal.signal_repaintGL.connect(self.SimulationControlWidget.OpenGLWidget._repaintGL)
+        self.TreeViewWidget.filename_signal.signal_filename.connect(self.simulation_control_widget.load_solution_file)
+        # self.TreeViewWidget._widget.repaintGL_signal.signal_repaintGL.connect(self.simulation_control_widget.opengl_widget._repaintGL)
         
         
-        self.SimulationControlWidget.solver.analysis.energy_signal.signal_energy.connect(self.update_statusbar_text1)
-        self.SimulationControlWidget.energy_signal.signal_energy.connect(self.update_statusbar_text1)
+        self.simulation_control_widget.solver.analysis.energy_signal.signal_energy.connect(self.update_statusbar_text1)
+        self.simulation_control_widget.energy_signal.signal_energy.connect(self.update_statusbar_text1)
 
         #   save file
         # self.connect(QtGui.QShortcut(QtGui.QKeySequence.Save, self), QtCore.SIGNAL('activated()'), self.saveFile)
@@ -285,25 +285,25 @@ class MainWindow(QtGui.QMainWindow):
         #    view - menu
         #    view
         self.viewActionFront = QtGui.QAction('Front', self, shortcut='Ctrl+F', statusTip='Front view')
-        self.viewActionFront.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewFront)
+        self.viewActionFront.triggered.connect(self.simulation_control_widget.opengl_widget.viewFront)
         
         self.viewActionBack = QtGui.QAction('Back', self, shortcut='Ctrl+B', statusTip='Back view')
-        self.viewActionBack.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewBack)
+        self.viewActionBack.triggered.connect(self.simulation_control_widget.opengl_widget.viewBack)
         
         self.viewActionBottom = QtGui.QAction('Bottom', self, statusTip='Bottom view')
-        self.viewActionBottom.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewBottom)
+        self.viewActionBottom.triggered.connect(self.simulation_control_widget.opengl_widget.viewBottom)
         
         self.viewActionTop = QtGui.QAction('Top', self, statusTip='Top view')
-        self.viewActionTop.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewTop)
+        self.viewActionTop.triggered.connect(self.simulation_control_widget.opengl_widget.viewTop)
         
         self.viewActionLeft = QtGui.QAction('Left', self, shortcut='Ctrl+L', statusTip='Left view')
-        self.viewActionLeft.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewLeft)
+        self.viewActionLeft.triggered.connect(self.simulation_control_widget.opengl_widget.viewLeft)
         
         self.viewActionRight = QtGui.QAction('Right', self, shortcut='Ctrl+R', statusTip='Right view')
-        self.viewActionRight.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewRight)
+        self.viewActionRight.triggered.connect(self.simulation_control_widget.opengl_widget.viewRight)
         
         self.viewActionIsometric = QtGui.QAction('Isometric', self, shortcut='Ctrl+I', statusTip='Isometric view')
-        self.viewActionIsometric.triggered.connect(self.SimulationControlWidget.OpenGLWidget.viewIsometric)
+        self.viewActionIsometric.triggered.connect(self.simulation_control_widget.opengl_widget.viewIsometric)
         
         
         self.take_snapshot_action = QtGui.QAction('Take snap shot',
@@ -334,18 +334,11 @@ class MainWindow(QtGui.QMainWindow):
         self.show_job_list_action.triggered.connect(self.show_job_list)   
 
         #    settings - menu
-        self.show_change_background_color_dialog_action = QtGui.QAction('Background color',
-                                                                   self,
-                                                                   shortcut="None",
-                                                                   statusTip='Status tip')
-        self.show_change_background_color_dialog_action.triggered.connect(self.show_change_background_color_dialog)
-
-
         self.show_options_widget_action = QtGui.QAction('Options',
                                                                    self,
                                                                    shortcut="None",
                                                                    statusTip='options')
-        self.show_options_widget_action.triggered.connect(self.options_widget.show)
+        self.show_options_widget_action.triggered.connect(self.options_widget._show)
         
         #    help - menu
         #    about
@@ -358,10 +351,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         if type(event) == QtGui.QKeyEvent:
             if event.key() == QtCore.Qt.Key_Right:
-                self.SimulationControlWidget.animation_forward()
+                self.simulation_control_widget.animation_forward()
             
             if event.key() == QtCore.Qt.Key_Left:
-                self.SimulationControlWidget.animation_backward()
+                self.simulation_control_widget.animation_backward()
 
     def create_menus(self):
         """
@@ -433,7 +426,6 @@ class MainWindow(QtGui.QMainWindow):
         
         #    settings
         self.settingsMenu = QtGui.QMenu(self.tr("&Settings"), self)
-        self.settingsMenu.addAction(self.show_change_background_color_dialog_action)
         self.settingsMenu.addAction(self.show_options_widget_action)
         
         #    about
@@ -454,8 +446,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         
         """
-        self.SimulationControlWidget.OpenGLWidget.update_data(self.MBD_system.bodies)
-        self.SimulationControlWidget.OpenGLWidget.repaintGL()
+        self.simulation_control_widget.opengl_widget.update_data(self.MBD_system.bodies)
+        self.simulation_control_widget.opengl_widget.repaintGL()
 
     def showSaveAsFileDialog(self):
         """
@@ -551,20 +543,13 @@ class MainWindow(QtGui.QMainWindow):
 
                 logging.getLogger("DyS_logger").info("Project saved to file: %s. Size is %s", self.MBD_file_abs_path, convert_bytes_to_.convert_size(os.path.getsize(self.MBD_file_abs_path)))
 
-
-    def show_change_background_color_dialog(self):
-        color = QtGui.QColorDialog.getColor()
-        if color.isValid():
-            self.SimulationControlWidget.OpenGLWidget.qglClearColor(color)
-            self.SimulationControlWidget.OpenGLWidget.updateGL()
-
     def show_control_panel(self):
         """
         Function shows control panel when hidden and selecte by user to be displayed
         :return:
         """
-        self.SimulationControlWidget.move(self.window_offset_x + self.SimulationControlWidget.OpenGLWidget.initial_window_width + 10, 6)
-        self.SimulationControlWidget.show()
+        self.simulation_control_widget.move(self.window_offset_x + self.simulation_control_widget.opengl_widget.initial_window_width + 10, 6)
+        self.simulation_control_widget.show()
         
     def show_tree_view(self):
         self.TreeViewWidget.move(self.window_offset_x - 228, 6)
@@ -574,18 +559,18 @@ class MainWindow(QtGui.QMainWindow):
         self.OutputWidget.show()
 
     def show_job_list(self):
-        self.JobListWidget.move(self.window_offset_x + self.SimulationControlWidget.OpenGLWidget.initial_window_width + 10 + 220, 6)
+        self.JobListWidget.move(self.window_offset_x + self.simulation_control_widget.opengl_widget.initial_window_width + 10 + 220, 6)
         self.JobListWidget.show()
 
     def take_snapshot(self, filename=None):
         """
         Function takes snapshot and opens save as dialog to save it as .png picture file.
         """
-        captured_figure = self.SimulationControlWidget.OpenGLWidget.takeSnapShot()
+        captured_figure = self.simulation_control_widget.opengl_widget.takeSnapShot()
 
         _save_file = QtGui.QFileDialog()
-        _save_file.setDirectory(self.MBD_system.self.MBD_folder_abs_path)
-        abs_save_file_path, filetype = _save_file.getSaveFileNameAndFilter(self, "Save file", self.MBD_system.self.MBD_folder_abs_path, ("png (*.png)"))
+        _save_file.setDirectory(self.MBD_system.MBD_folder_abs_path)
+        abs_save_file_path, filetype = _save_file.getSaveFileNameAndFilter(self, "Save file", self.MBD_system.MBD_folder_abs_path, ("png (*.png)"))
         abs_save_file_path = str(abs_save_file_path).replace("/", "\\")
         captured_figure.save(abs_save_file_path)
 
@@ -601,7 +586,7 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().addWidget(self.infoText3, stretch=1)
   
         self.infoText1.setText("Energy (delta): ")
-        self.infoText2.setText("Step No.: " + str(self.SimulationControlWidget.solver.analysis.step))
+        self.infoText2.setText("Step No.: " + str(self.simulation_control_widget.solver.analysis.step))
         self.infoText3.setText("Status: Ready")
         self.repaint()
 
@@ -613,19 +598,19 @@ class MainWindow(QtGui.QMainWindow):
 
     def update_statusbar_text3(self, simulation_status_string):
         # print "simulation_status_string =", simulation_status_string
-        if self.SimulationControlWidget.solver.analysis.running == True:
+        if self.simulation_control_widget.solver.analysis.running == True:
             simulation_status_string = "Running"
 
-        elif self.SimulationControlWidget.solver.analysis.stopped == True:
+        elif self.simulation_control_widget.solver.analysis.stopped == True:
             simulation_status_string = "Stopped"
 
-        elif self.SimulationControlWidget.solver.analysis.finished == True:
+        elif self.simulation_control_widget.solver.analysis.finished == True:
             simulation_status_string = "Finished"
 
         else:
             simulation_status_string = simulation_status_string
         # print "animation"
-        self.SimulationControlWidget.solver.analysis.finished_signal
+        self.simulation_control_widget.solver.analysis.finished_signal
         simulation_status_string = simulation_status_string
 
         self.infoText3.setText("Status: " + QtCore.QString(simulation_status_string))

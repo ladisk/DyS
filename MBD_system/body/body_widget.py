@@ -83,7 +83,7 @@ class BodyWidget(QtGui.QWidget):#QtGui.QDialog
         :param event:
         :return:
         """
-        self._parent._parent.SimulationControlWidget.OpenGLWidget._repaintGL()
+        self._parent._parent.simulation_control_widget.opengl_widget._repaintGL()
 
     def _move(self):
         """
