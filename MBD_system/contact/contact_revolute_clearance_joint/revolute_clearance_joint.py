@@ -16,8 +16,9 @@ from MBD_system.q2dR_i import q2dR_i
 from MBD_system.q2dtheta_i import q2dtheta_i
 from MBD_system.q2q_body import q2q_body
 from MBD_system.q2theta_i import q2theta_i
-from MBD_system.transform_cs import cm_lcs2gcs, gcs2cm_lcs
+from MBD_system.transform_cs import gcs2cm_lcs
 from MBD_system.transform_cs import uP_gcs2lcs
+from MBD_system.u_P_lcs2gcs import u_P_lcs2gcs
 from simulation_control_widget.opengl_widget.marker.marker import Marker
 
 
@@ -57,13 +58,9 @@ class RevoluteClearanceJoint(Contact):
         #   predefined empty list of center point or clearance joint (to center of pin/hole) in body LCS
         self.u_CP_LCS_list = [self.u_iP, self.u_jP]
         #   centers of revolute clearance joint in GCS
-        self.u_CP_GCS_list = []
-        #   predefined empty list of contact point in body LCS
-        self.u_P_LCS_list = []
-
-        #   contact point in GCS
-        self.u_P_GCS = None
-        self.u_P_GCS_list = [None, None]
+        self.u_iCP_GCS = np.zeros(2)
+        self.u_jCP_GCS = np.zeros(2)
+        self.u_CP_GCS_list = [self.u_iCP_GCS, self.u_jCP_GCS]
 
         #   clearance parameters
         self.R0_i = R0_i
@@ -113,7 +110,7 @@ class RevoluteClearanceJoint(Contact):
         # print "check_for_contact()"
         #   evaluated distance, delta
         self._distance, self._delta = self._contact_geometry_GCS(q)
-        # print "self._delta =", self._delta
+        print "self._delta =", self._delta
         #   add distance value to container
 
         # self._distance_solution_container = np.append(self._distance_solution_container, self._delta)
@@ -123,7 +120,8 @@ class RevoluteClearanceJoint(Contact):
 
         #    contact has happened, but time step has to be reduced as initial penetration depth is too large
         # if (np.sign(self._dqn_solution_container[-1]) == +1) or (self._dqn_solution_container[-1] == 0) and (self._sign_check == -1) and (self._distance >= self._radial_clearance):
-        if (self._sign_check == -1) and (self._distance >= self._radial_clearance):
+        # if (self._sign_check == -1) and (self._distance >= self._radial_clearance):
+        if (self._sign_check == -1) and (self._delta <= 0):
 
             #    beginning of contact detected, all parameters are within limits
             if abs(self._delta) <= self.distance_TOL:
@@ -192,8 +190,8 @@ class RevoluteClearanceJoint(Contact):
         Function calculates a vector - point of contact from global coordinates to local coordinates of each body
         """
         #   tangent is calculated from rotation of normal for 90deg in CCW direction
-        self._t = np.dot(A_matrix(np.pi/2), self._n)
-        self._t_LCS_list = [self._t, -self._t]
+        self._t_GCS = np.dot(A_matrix(np.pi/2), self._n_GCS)
+        self._t_LCS_list = [self._t_GCS, -self._t_GCS]
 
     def _contact_geometry_CP_GCS(self, q):
         """
@@ -203,13 +201,12 @@ class RevoluteClearanceJoint(Contact):
         """
         #   calculate position of pin/hole centers of each body in GCS
         u_CP_GCS_list = []
+        print "q =", q
         for body_id, u_P in zip(self.body_id_list, self.u_CP_LCS_list):
-            #   q of a body
-            q_body = q2q_body(q, body_id)
-
+            print "u_P =", u_P
             #   axis center of revolute joint of each body in GCS
-            u_P_GCS = cm_lcs2gcs(u_P, q_body[0:2], q_body[2])
-
+            u_P_GCS = u_P_lcs2gcs(u_P, q, body_id)
+            print "u_P_GCS =", u_P_GCS
             u_CP_GCS_list.append(u_P_GCS)
 
         #   reformat to 32bit float to display in opengl scene
@@ -222,13 +219,13 @@ class RevoluteClearanceJoint(Contact):
         :return distance_obj:   distance object of calculated data in GCS
         """
         self.u_CP_GCS_list = self._contact_geometry_CP_GCS(q)
-
+        print "self.u_CP_GCS_list =", self.u_CP_GCS_list
         #   calculate distance between axis of both bodies in revolute joint
         self._distance_obj = DistanceRevoluteClearanceJoint(self.u_CP_GCS_list[0], self.u_CP_GCS_list[1], parent=self)
 
         #   penetration depth is difference between nominal radial clearance and actual calculated clearance at time t
-        self._distance = self._distance_obj._distance
-        self._delta = self._radial_clearance - self._distance
+        _distance = self._distance_obj._distance
+        _delta = self._radial_clearance - _distance
 
         #   contact is present and actual contact point has to be evaluated
         # if _distance >= self._radial_clearance and abs(_delta) >= self.distance_TOL:
@@ -244,7 +241,7 @@ class RevoluteClearanceJoint(Contact):
         #     print "n =", self._n
 
         #   create normal list in LCS
-        self._n_GCS_list = [-self._n, +self._n]
+        self._n_GCS_list = [-self._n_GCS, +self._n_GCS]
         self._n_LCS_list = []
         for body_id, _normal in zip(self.body_id_list, self._n_GCS_list):
             #   normal in LCS
@@ -271,12 +268,12 @@ class RevoluteClearanceJoint(Contact):
         self.u_P_LCS_list = []
         #   evaluate actual contact point in LCS of each body and in GCS
         for body_id, _u_CP_GCS, _u_CP_LCS, _R0 in zip(self.body_id_list, self.u_CP_GCS_list, self.u_CP_LCS_list, self.R0_list):
-            print "body_id =", body_id
+            # print "body_id =", body_id
             #   q of a body
             q_body = q2q_body(q, body_id)
 
             #   contact point in GCS
-            _u_P_GCS = _u_CP_GCS + _R0 * self._n
+            _u_P_GCS = _u_CP_GCS + _R0 * self._n_GCS
 
             #   contact point in body LCS
             _u_P_LCS = gcs2cm_lcs(_u_P_GCS, q_body[0:2], q_body[2])
@@ -314,7 +311,7 @@ class RevoluteClearanceJoint(Contact):
         #     plt.show()
         #     fig.savefig('testing.png')
 
-        return self._distance, self._delta
+        return _distance, _delta
 
     def _contact_velocity(self, q):
         """
@@ -339,10 +336,10 @@ class RevoluteClearanceJoint(Contact):
 
         #   relative contact velocity
         #   normal direction
-        _dq_n = np.dot(_dq, self._n)
+        _dq_n = np.dot(_dq, self._n_GCS)
 
         #   tangent direction
-        _dq_t = np.dot(_dq, self._t)
+        _dq_t = np.dot(_dq, self._t_GCS)
 
         return _dq_n, _dq_t
 

@@ -178,7 +178,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         :param h:
         :return:
         """
-        self.t_0 = t_0
+        self.t_0 = self._dt = t_0
         self.t_n = t_n
         t = t_0
         w = q0
@@ -189,14 +189,14 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         while self.FLAG == 1:
 
             if self.stopped:
-                self.update_GL_(t=t, q=w)
+                self.updateGL(t=t, q=w)
                 self.stop_solve()
                 self.FLAG = 0
 
             if t >= self.t_n:
                 self.FLAG = 0
                 self.finished = True
-                self.update_GL_(t=t, q=w)
+                self.updateGL(t=t, q=w)
 
             self.t = t = t + h
             # print "-------------------------------------"
@@ -241,7 +241,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         Hmax -
         Hmin -
         """
-        self.t_0 = t_0
+        self.t_0 = self._dt = t_0
         self.t_n = t_n
         t = t_0
         w = q0
@@ -268,7 +268,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
             # print "step =", self.step, "contact =", self.FLAG_contact
             # print "t =", t,
             if self.stopped:
-                self.update_GL_(t=t, q=w)
+                self.updateGL(t=t, q=w)
                 self.stop_solve()
                 self.FLAG = 0
 
@@ -358,7 +358,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
             if t >= self.t_n:
                 self.FLAG = 0
                 self.finished = True
-                self.update_GL_(t=t, q=w)
+                self.updateGL(t=t, q=w)
             #
             # #    reduce step size to get to final time t_n
             # elif t + h > t_n:
@@ -400,7 +400,7 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.__update_coordinates_and_angles_of_all_bodies(w)
 
         #    update opengl display
-        self.update_GL_(t, w)
+        self.updateGL(t, w)
 
         # self.step += 1
         # step_counter = np.append(step_counter, self.step)
@@ -742,26 +742,43 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         """
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(q)
 
-    def update_GL_(self, t, q):
+    def updateGL(self, t, q):
         """
         Update opengl widget at preset time steps
         """
+        #   update display on every i-th step
+        if self._parent._update_display_type == "step":
+            if self.update_opengl_widget_step_count == self.update_opengl_widget_every_Nth_step or self.finished or self.stopped:
+                self._updateGL()
 
-        if self.update_opengl_widget_step_count == self.update_opengl_widget_every_Nth_step or self.finished or self.stopped:
-            #    update opengl widget
-            self.MBD_system.update_simulation_properties(time=t, step_num=self.step)
+                self.time = t
 
-            self.repaintGL_signal.signal_repaintGL.emit()
+                self.save_updated_GL_screenshot_to_file(self.time)
 
-            self.time = t
+                #    reset step counter to update opengl widget
+                self.update_opengl_widget_step_count = 0
 
-            self.save_updated_GL_screenshot_to_file(self.time)
+        #   update display on simulation time interval dt
+        if self._parent._update_display_type == "dt":
+            _t = t - self._dt
+            if _t >= self._parent._dt:
+                self._updateGL(t, self.step)
 
-            #    reset step counter to update opengl widget
+                #   set new value
+                self._dt = t
 
-            self.update_opengl_widget_step_count = 0
 
         return None
+
+    def _updateGL(self, t, step):
+        """
+
+        :return:
+        """
+        #    update opengl widget
+        self.MBD_system.update_simulation_properties(time=t, step_num=step)
+        #   emit signal
+        self.repaintGL_signal.signal_repaintGL.emit()
 
     def save_updated_GL_screenshot_to_file(self, t):
         """
@@ -783,4 +800,4 @@ class SolveDynamicAnalysis(QObject):    # Thread, QObject
         self.MBD_system._restore_initial_conditions()
 
         self.repaintGL_signal.signal_repaintGL.emit()
-        self.update_GL_(t=0, q=self.MBD_system.q0)
+        self.updateGL(t=0, q=self.MBD_system.q0)

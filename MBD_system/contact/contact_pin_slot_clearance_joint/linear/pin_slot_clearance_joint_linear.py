@@ -464,7 +464,7 @@ class PinSlotClearanceJointLinear(Contact):
                 #   contact point in GCS
                 self.u_P_GCS_list[i] = R + Ai_ui_P_vector(_u_CP_LCS, theta) + _R0 * self._n_GCS
 
-            print "self.u_P_GCS_list =", self.u_P_GCS_list
+            # print "self.u_P_GCS_list =", self.u_P_GCS_list
 
 
     def _evaluate_delta_flat_section(self, distance):

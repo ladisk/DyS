@@ -19,7 +19,7 @@ negative the bodies are separating, which corresponds to the restitution phase.
 - [ ] contact point is only updated, it there is translation in contact is not detected???
 - [ ] Update AABB data (AABB frame, nodes in AABB) as function of R, theta (at)
 - [ ] File/Close treeview (modelview) still displays data from closed file
-- [ ] Save/load with dill (or pickle)
+- [ ] load with dill (or pickle)
 
 *ToDo*
 
@@ -29,13 +29,14 @@ negative the bodies are separating, which corresponds to the restitution phase.
 - [ ] prismatic clearance joint
 - [ ] pause simulation
 - [ ] write predictor corrector method (variable order of numerical method)
-- [ ] Graphical representation of springs (translational, torsional)
+- [ ] graphical representation of springs (translational, torsional)
 - [ ] calculate mass moment of inertia (volume) from cloud of triangles – stl file
 - [ ] use package [OOC](http://www.pythonocc.org/) for 3D visualization as it also has support for 3D modeling, neutral formats: step, iges
 - [ ] dynamics 2D to 3D
 
 *Done*
 
+- [x] save with dill (or pickle)
 - [x] before simulation starts evaluates C(q, t) vector and stops the simulation if there are non-zero elements in the array
 - [x] kinematic motors-motions (drives) – df/dt = ?
 - [x] increase time step after contact has happened

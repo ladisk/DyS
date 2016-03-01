@@ -7,9 +7,9 @@ time of creation: 14:00
 from PyQt4 import QtGui
 
 from MBD_system.array2string import array2string
-from options_widget_ui import Ui_Form
+from preferences_widget_ui import Ui_Form
 
-class OptionsWidget(QtGui.QWidget):
+class PreferencesWidget(QtGui.QWidget):
     """
     classdocs
     """
@@ -17,7 +17,7 @@ class OptionsWidget(QtGui.QWidget):
         """
         Constructor
         """
-        super(OptionsWidget, self).__init__(parent=parent)
+        super(PreferencesWidget, self).__init__(parent=parent)
 
         self._parent = parent
 
@@ -29,6 +29,9 @@ class OptionsWidget(QtGui.QWidget):
 
         #   pointer to open gl widget as attribute
         self.opengl_widget = self.simulation_control_woidget.opengl_widget
+
+        #   update display type
+        self.update_display_type = self.ui.updateDisplay_comboBox.currentText()
 
         #   signals
         #   list through different widgets in stacked widget
@@ -50,6 +53,7 @@ class OptionsWidget(QtGui.QWidget):
         color = QtGui.QColorDialog.getColor()
         if color.isValid():
             self.opengl_widget.qglClearColor(color)
+            self.opengl_widget._check_text_color_contrast_update()
             self.opengl_widget.updateGL()
 
     def _cancel(self):

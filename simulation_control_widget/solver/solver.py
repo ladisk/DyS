@@ -36,7 +36,7 @@ class Solver(QtCore.QThread):
          
         self.MBD_system = MBD_system
 
-        #   solvers
+        #   solver (analysis)
         self.analysis = self._analysis_type()
 
     def _analysis_type(self):

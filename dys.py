@@ -20,7 +20,7 @@ from MBD_system import convert_bytes_to_
 from MBD_system import read_and_write
 from MBD_system.MBD_system import MBDsystem
 from job_list_widget.job_list_widget import JobListWidget
-from options_widget.options_widget import OptionsWidget
+from preferences_widget.preferences_widget import PreferencesWidget
 from simulation_control_widget.simulation_control_widget import SimulationControlWidget
 from tree_view_widget.tree_view_widget import TreeViewWidget
 
@@ -200,8 +200,8 @@ class MainWindow(QtGui.QMainWindow):
         #    move
         self.simulation_control_widget.move(.25*screen.width() + self.geometry().width(), dy)
 
-        #   options widget
-        self.options_widget = OptionsWidget(self.simulation_control_widget, parent=None)
+        #   preferences widget
+        self.preferences_widget = PreferencesWidget(self.simulation_control_widget, parent=None)
 
         #    output widget
         #    maybe put in new thread? if output will be large
@@ -334,11 +334,11 @@ class MainWindow(QtGui.QMainWindow):
         self.show_job_list_action.triggered.connect(self.show_job_list)   
 
         #    settings - menu
-        self.show_options_widget_action = QtGui.QAction('Options',
+        self.show_preferences_widget_action = QtGui.QAction('Preferences',
                                                                    self,
                                                                    shortcut="None",
-                                                                   statusTip='options')
-        self.show_options_widget_action.triggered.connect(self.options_widget._show)
+                                                                   statusTip='Preferences')
+        self.show_preferences_widget_action.triggered.connect(self.preferences_widget._show)
         
         #    help - menu
         #    about
@@ -426,7 +426,7 @@ class MainWindow(QtGui.QMainWindow):
         
         #    settings
         self.settingsMenu = QtGui.QMenu(self.tr("&Settings"), self)
-        self.settingsMenu.addAction(self.show_options_widget_action)
+        self.settingsMenu.addAction(self.show_preferences_widget_action)
         
         #    about
         self.helpMenu = QtGui.QMenu(self.tr("&Help"), self)

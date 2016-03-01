@@ -6,7 +6,6 @@ Created on 21. feb. 2014
 import copy
 import logging
 import os
-import time
 from operator import attrgetter
 
 import xlrd
@@ -459,7 +458,6 @@ class Contact(ContactItem):
         Function saves current calculated data at
         :return:
         """
-        print "step =", step, "h =", h
         #   step number
         self._step_num_solution_container = np.append(self._step_num_solution_container, step)
 
@@ -573,7 +571,6 @@ class Contact(ContactItem):
         _distance_list = []
 
         #    loop through list of overlapped AABB object pairs
-        print "number of overlap contact pairs=", len(self.AABB_list_of_overlap_pairs)
         for overlap_pair_obj in self.AABB_list_of_overlap_pairs:
             #    check for contact of overlapped AABB pair (object)
             overlap_pair_obj.check_for_contact_2D(q)
@@ -674,7 +671,6 @@ class Contact(ContactItem):
         """
         contact_nodes = []
         for i, overlap_pair in enumerate(self.AABB_list_of_overlap_pairs):
-            print "i =", i
             _contact_nodes = overlap_pair.get_contact_nodes()
 
             #   append contact nodes of each overlap pair to one list in contact object
@@ -683,12 +679,12 @@ class Contact(ContactItem):
         #   define empty list of normals and tangents for contact points
         self._n = []
         self._t = []
-        print "len(contact_nodes) =", len(contact_nodes)
+        # print "len(contact_nodes) =", len(contact_nodes)
 
-        for _contact_node in contact_nodes:
-            print "_contact_node =", _contact_node
-        print "self.AABB_list_of_overlap_pairs =", self.AABB_list_of_overlap_pairs
-        time.sleep(100)
+        # for _contact_node in contact_nodes:
+        #     print "_contact_node =", _contact_node
+        # print "self.AABB_list_of_overlap_pairs =", self.AABB_list_of_overlap_pairs
+        # time.sleep(100)
         #    get distance objects that have contacts from overlap pair objects
         min_overlap_pair_of_AABB = min(self.AABB_list_of_overlap_pairs, key=attrgetter('distance_min._distance'))
 
@@ -766,8 +762,8 @@ class Contact(ContactItem):
         #   list of normals and tangents of each body
         self._n_list = [n_i, n_j]
         self._t_list = [t_i, t_j]
-        print "self._n_list =", self._n_list
-        print "self._t_list =", self._t_list
+        # print "self._n_list =", self._n_list
+        # print "self._t_list =", self._t_list
 
         #   transform contact point data in GCS to LCS of each body (node and edge)
         self._contact_geometry_LCS(q)
@@ -785,7 +781,7 @@ class Contact(ContactItem):
         #    distance in local coordinate system of a body
         _node_GCS = self.min_distance_obj.get_node_2D()
         # u_P_GCS
-        print "_node_GCS =", _node_GCS
+        # print "_node_GCS =", _node_GCS
         # glVertex3f(_node_GCS[0],_node_GCS[1],self.z_dim)
 
         _edge_GCS = self.min_distance_obj.get_edge_2D()

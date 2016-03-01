@@ -93,7 +93,7 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         self.background_color = np.array([0, 0, 0, 1], dtype="float32")
 
         #   text color
-        self.text_color = self._check_text_color_contrast_update()
+        self.text_color = self._get_text_color()
 
         #   font
         self.font = QFont("Consolas", 10)
@@ -158,7 +158,6 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
 
         #   create CS view
         self.GCS_view._create_VBO()
-        print "self.GCS_view._VBO_created =", self.GCS_view._VBO_created
 
         #    display window
         self.window = Window(width=self.initial_window_width,
@@ -581,11 +580,18 @@ class OpenGLWidget(QtOpenGL.QGLWidget):
         :return:
         """
         if np.linalg.norm([np.array(glGetFloat(GL_COLOR_CLEAR_VALUE))], 2) > 1.2:
-            text_color = QtCore.Qt.black
+            self.text_color = QtCore.Qt.black
         else:
-            text_color = QtCore.Qt.white
+            self.text_color = QtCore.Qt.white
 
-        return text_color
+    def _get_text_color(self):
+        """
+
+        :return:
+        """
+        self._check_text_color_contrast_update()
+
+        return self.text_color
 
     @QtCore.pyqtSlot()
     def viewFront(self):

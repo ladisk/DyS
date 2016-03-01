@@ -6,6 +6,7 @@ Created on 3. mar. 2014
 import cProfile
 import time
 
+import numpy as np
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 
@@ -126,20 +127,28 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.TOL_dq_i.setText(str(self.MBD_system.TOL_dq_i))
         #   tolerance for constraint equations C
         self.ui.TOL_C.setText(str(self.MBD_system.TOL_C))
-
         #    create solver thread
         self.solver = Solver(MBD_system=MBD_system, parent=self)#parent
         self._solver_thread = QThread()
         self._solver_thread.start()
         self.solver.moveToThread(self._solver_thread)
 
-        #    update display on every i-th simulation step
-        self.ui.updateDisplayStep.setText(str(int(self.solver.analysis.update_opengl_widget_every_Nth_step)))
-        self.ui.updateDisplayStep.setValidator(__validator_int)
+        #   display update
+        self._update_display_type = "dt"
+        #   available options
+        self._update_display_types = ["dt",
+                              "step"]
+        #   update display on every i-th simulation step
+        self.ui.updateStep_lineEdit.setText(str(int(self.solver.analysis.update_opengl_widget_every_Nth_step)))
+        self.ui.updateStep_lineEdit.setValidator(__validator_int)
         self._delta_step = self.solver.analysis.update_opengl_widget_every_Nth_step
-        
-        self.ui.currentStep.setEnabled(False)
-        self.ui.currentStep.setValidator(__validator_int)
+        #   update display on dt of simulation time
+        #   default value
+        self._dt = self.MBD_system.t_n / 100.
+
+
+        self.ui.currentStep_lineEdit.setEnabled(False)
+        self.ui.currentStep_lineEdit.setValidator(__validator_int)
 
         #    connections and signals
         self.ui.simulationStartButton.clicked.connect(self.simulationStart)
@@ -163,8 +172,8 @@ class SimulationControlWidget(QtGui.QWidget):
         
         self.ui.loadSolutionFileStatus.stateChanged.connect(self.__update_loadSolutionFileWhenFinished)
         
-        self.ui.currentStep.textChanged.connect(self.__update_currentStep)
-        self.ui.updateDisplayStep.textChanged.connect(self.__update_updateDisplayStep)
+        self.ui.currentStep_lineEdit.textChanged.connect(self.__update_currentStep)
+        self.ui.updateStep_lineEdit.textChanged.connect(self.__update_updateStep)
         self.ui.endTime.textChanged.connect(self.__update_endTime)
 
 
@@ -222,7 +231,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         print "profile here"
         self.profile.enable()
-        self.solver.analysis.ode_fun.create_M()
+        self.solver.analysis.DAE_fun.evaluate_M()
         self.profile.disable()
         self.profile.print_stats()
 
@@ -248,7 +257,7 @@ class SimulationControlWidget(QtGui.QWidget):
         
         """
         try:
-            self._step = int(self.ui.currentStep.text())
+            self._step = int(self.ui.currentStep_lineEdit.text())
             self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[self._step, :])
             self.MBD_system.update_simulation_properties(time=self.t[self._step], step_num=self._step)
             self.step_num_signal.signal_step.emit(self._step)
@@ -303,12 +312,12 @@ class SimulationControlWidget(QtGui.QWidget):
         self.ui.forwardButton.setEnabled(True)
         self.ui.backwardButton.setEnabled(False)
         self.ui.playButton.setEnabled(True)
-        self.ui.currentStep.setEnabled(True)
+        self.ui.currentStep_lineEdit.setEnabled(True)
         
-        self.ui.currentStep.setText(str(int(self._step)))
+        self.ui.currentStep_lineEdit.setText(str(int(self._step)))
         
         self.ui.solutionFileLoaded_display.setText(filename)
-        self.ui.numberOfSteps.setText(str(int(len(self.step)-1)))
+        self.ui.numberOfSteps_lineEdit.setText(str(int(len(self.step)-1)))
         self._update_GL()
         
         # self.status_signal.signal_status.emit("Animation")
@@ -320,7 +329,7 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         
         """
-        self.ui.currentStep.setText(str(int(self._step)))
+        self.ui.currentStep_lineEdit.setText(str(int(self._step)))
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(self.q[int(self._step), :])
         self.opengl_widget.repaintGL(int(self._step))
         
@@ -364,13 +373,13 @@ class SimulationControlWidget(QtGui.QWidget):
         """
         self.MBD_system.integrationMethod = str(self.ui.integrationMethodComboBox.currentText())
     
-    def __update_updateDisplayStep(self):
+    def __update_updateStep(self):
         """
 
         :return:
         """
-        self.solver.analysis.update_opengl_widget_every_Nth_step = int(self.ui.updateDisplayStep.text())
-        self._delta_step = int(self.ui.updateDisplayStep.text())
+        self.solver.analysis.update_opengl_widget_every_Nth_step = int(self.ui.updateStep_lineEdit.text())
+        self._delta_step = int(self.ui.updateStep_lineEdit.text())
         self.MBD_system.updateEveryIthStep = self._delta_step
 
     def __update_Hmax(self):
@@ -438,11 +447,21 @@ class SimulationControlWidget(QtGui.QWidget):
         Function plays animation when solution data is loaded
         :return:
         """
-        for _step in xrange(0, len(self.step), int(self._delta_step)):
-            self._step = int(_step)
-            self._update_GL()
+        if self._update_display_type == "step":
+            for _step in xrange(0, len(self.step), int(self._delta_step)):
+                self._step = int(_step)
+                self._update_GL()
 
-            time.sleep(self.ui.playBackSpeed_doubleSpinBox.value()*1E-2)
+                time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
+
+        if self._update_display_type == "dt":
+            _t = np.arange(0, self.t[-1], self._dt)
+            for i in xrange(0, len(_t)):
+                indx = np.argmin(abs(self.t - _t[i]))
+                self._step = self.step[indx]
+                self._update_GL()
+
+                time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
 
     def _create_animation_file(self):
         """
