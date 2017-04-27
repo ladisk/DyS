@@ -1,8 +1,0 @@
-BODIES FILE-START
-data_body_1.txt
-data_body_1.txt
-data_body_1.txt
-data_body_1.txt
-data_body_1.txt
-data_body_1.txt
-BODIES FILE-END

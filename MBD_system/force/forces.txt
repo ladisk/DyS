@@ -1,9 +1,0 @@
-FORCES FILE-START
-force_name=force_1
-body_id = 1
-Fx = 1.5-0.2*t
-Fy = 0
-Mz = 0
-u_iP_f = 1,0
-function of time = 1*time + cos(time)
-FORCES FILE-END
