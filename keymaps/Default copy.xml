@@ -1,0 +1,6 @@
+<keymap version="1" name="Default copy" parent="$default">
+  <action id="Resume" />
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="f9" />
+  </action>
+</keymap>
