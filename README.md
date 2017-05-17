@@ -4,9 +4,10 @@
 A multibody dynamics simulator written in python 2.7.x.
 
 We developed this module while working on this publication:
+
 L. Skrinjar, J. Slavič and M. Boltežar
 A Validated Model for a Pin-Slot Clearance Joint
-Nonlinear Dyn (2017) 88: 131-143
+Nonlinear Dyn (2017) 88: 131-143 dx.doi.org/10.1007/s11071-016-3234-y
 
 See: [www.ladisk.si](http://www.ladisk.si?what=abstract&ID=180)
 
