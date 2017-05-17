@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>300</width>
+    <height>642</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>300</width>
+    <height>642</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>302</width>
+    <height>642</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Spring</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox_basicInfo">
+     <property name="title">
+      <string>Basic Info</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="springID_label">
+        <property name="text">
+         <string>Spring id</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="name_lineEdit"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="springType_comboBox">
+        <item>
+         <property name="text">
+          <string>Translational</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rotational</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="springType_label">
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="springID_lineEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="name_label">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_simulationParameters">
+     <property name="title">
+      <string>Simulation Parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="bodyIDi_label">
+        <property name="text">
+         <string>Body ID i</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="uPj_label">
+        <property name="text">
+         <string>u_P i, [x, y]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="uPi_label">
+        <property name="text">
+         <string>u_P i, [x, y]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="bodyIDj_lineEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="bodyIDj_label">
+        <property name="text">
+         <string>Body ID j</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="K_lineEdit"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="bodyIDi_lineEdit"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="uPi_lineEdit"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="K_label">
+        <property name="text">
+         <string>K, N/m</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="D_label">
+        <property name="text">
+         <string>D, N/m s</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="uPj_lineEdit">
+        <property name="inputMask">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="D_lineEdit"/>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="L0_lineEdit"/>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="L0_label">
+        <property name="text">
+         <string>L0, m</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="visualization_groupBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Visualization</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="scale_lineEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="scale_label">
+        <property name="text">
+         <string>Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="color_lineEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="color_label">
+        <property name="text">
+         <string>Color, RGB</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_comment">
+     <property name="title">
+      <string>Comment</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QTextEdit" name="comment_textEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>40</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="bottom_horizontalLayout">
+     <item>
+      <widget class="QLineEdit" name="info_lineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="save_pushButton">
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancel_pushButton">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>name_lineEdit</tabstop>
+  <tabstop>springID_lineEdit</tabstop>
+  <tabstop>springType_comboBox</tabstop>
+  <tabstop>bodyIDi_lineEdit</tabstop>
+  <tabstop>bodyIDj_lineEdit</tabstop>
+  <tabstop>uPi_lineEdit</tabstop>
+  <tabstop>uPj_lineEdit</tabstop>
+  <tabstop>K_lineEdit</tabstop>
+  <tabstop>D_lineEdit</tabstop>
+  <tabstop>info_lineEdit</tabstop>
+  <tabstop>save_pushButton</tabstop>
+  <tabstop>cancel_pushButton</tabstop>
+  <tabstop>comment_textEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

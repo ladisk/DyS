@@ -1,0 +1,1121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e19d91a6-c341-49a6-a040-849fa05d4793" name="Default" comment="new code">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/ancf_beam_shape/ancf_beam_shape.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/beam_element/solution_data_00.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/discuntinuity_problem_1_2elements.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/discuntinuity_problem_1_4elements.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/solution_data_2.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/solution_data_2elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/solution_data_4elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/falling_flexible_pendulum.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/module_of_elasticity/solution_data_E=1E+10.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/module_of_elasticity/solution_data_E=1E+7.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/module_of_elasticity/solution_data_E=1E+8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/module_of_elasticity/solution_data_E=1E+9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/solution_data_00.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/legendre_polynomials/legengre_polynomials.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/problem_constraint_Qd_analysis.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/problem_geometry.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_HMAX=2e-4.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_Hmax=1E-3.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_Hmax=5E-4.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_Qd=0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_Qd=Qdi-Qdj.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/solution_data_00_Qd=Qdi.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/compare_models/pin_slot_clearance_joint_0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/compare_models/rc_joint_0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/compare_models/revolute_0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/discussion/pin_slot_clearance_joint_0_1_hertz.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/discussion/pin_slot_clearance_joint_0_2_kelvin-voigt.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/discussion/pin_slot_clearance_joint_0_3_johnson.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/discussion/pin_slot_clearance_joint_0_4_johnson_dissipation.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/discussion/pin_slot_clearance_joint_0_5_LN.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_PSCJ.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_PSCJ.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_RCJ.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_RCJ.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_data.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_data_opt.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_data_zoom.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F0.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1x.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1x_PSCJ.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1x_contact_models.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1x_models.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1y.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1y_PSCJ.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1y_contact_models.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1y_joint_models.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/plot_F1y_models.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/rc_joint_0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/revolute_0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_F1x.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_F1y.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_plot_F1x.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_plot_F1x_raw.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_x_meas_raw.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_x_meas_smooth.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_y_meas_raw.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/test_y_meas_smooth.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/Brush_forces_2016_10_06_17_02_18.lvm.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/Brush_forces_2016_10_06_17_04_52.lvm.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/FRF_H1_at_F_2.4_speed_5520.0.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/long.lvm.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/short.lvm.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_ancf-rigid.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_ancf-rigid_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_node_2.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_param_c_t.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_param_c_t_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_param_prestress.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_param_y_spring.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_param_y_spring_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_params.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_params_1.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xt_params_2.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xy.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_xy_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt_param_c_t.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt_param_prestress.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt_param_y_spring.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_yt_param_y_spring_old.pdf" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_0/solution_data_04_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_0/solution_data_13_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_c_t/solution_data_00_flexible_c_t=0.0625.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_c_t/solution_data_00_flexible_c_t=0.125.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_c_t/solution_data_00_flexible_c_t=0.5.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_prestress/solution_data_00_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_prestress/solution_data_00_flexible_0.5xF_prestressed.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_prestress/solution_data_00_flexible_2xF_prestressed.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_prestress/solution_data_00_flexible_2xF_prestressed_0.5x_c_t.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_prestress/solution_data_00_flexible_2xF_prestressed_0.5x_c_t_y_spring=-1mm.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_y_spring/solution_data_flex_1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_y_spring/solution_data_flex_2_y_spring=-0.5mm.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/results_y_spring/solution_data_flex_3_y_spring=+1mm.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_00_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_01_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_02_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_03_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_04_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_05_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_06_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_07_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_08_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_09_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_10_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_11_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_12_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/rigid/solution_data_13_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_00.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_00_flexible_slot=+1mm.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_01.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_01_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_02.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_02_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_03.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_03_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_04.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_04_flexible.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_13_rigid.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/test_3000001.tif" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4.7_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4.8_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4.9_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4_H=0.9.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4_H=1.1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4_H=1.1_NOhanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=4_H=1.1_hanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=5.1_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=5.2_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=5.8_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=5_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=6.1_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=6.4_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=6.8_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/B=7_H=1.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/eigenfrequency_plots.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/eigfreq_frame.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/eigfreq_simple_beam.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/freq_E.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/freq_elements.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/labview/meas_eig_V1.vi" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=00.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=01.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=02.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=03.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=04.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=05.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=06.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=07.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=08.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=09.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=10.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=11.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=12.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=13.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=14.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=15.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=16.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=17.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=18.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_20.lvm_i=19.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko1.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko1.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko3.tdx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_1.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_1.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_10.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_10.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_11.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_11.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_12.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_12.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_13.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_13.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_14.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_14.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_15.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_15.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_16.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_16.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_17.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_17.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_18.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_18.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_19.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_19.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_2.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_2.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_20.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_20.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_21.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_21.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_22.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_22.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_23.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_23.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_24.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_24.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_25.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_25.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_26.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_26.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_27.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_27.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_28.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_28.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_29.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_29.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_3.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_3.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_30.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_30.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_31.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_31.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_4.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_4.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_5.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_5.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_6.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_6.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_7.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_7.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_8.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_8.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_9.tdms" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/meas_9.tdms_index" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_19.lvm.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=00.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=01.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=02.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=03.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=04.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=05.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=06.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=07.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=08.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=09.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=10.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=11.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=12.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=13.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=14.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=15.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=16.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=17.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=18.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/opt_1/meas_20.lvm_i=19.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/2016.12.27_E/solution_data_E=127E+6.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/2016.12.27_E/solution_data_E=127E+7.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/2016.12.27_E/solution_data_E=127E+8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/2016.12.27_E/solution_data_E=127E+9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/computation_times.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/eig_element_num_elements.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/equivalent_stiffness.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=5_H=0.8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=5_H=0.81.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=5_H=0.9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=5_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=6_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/old/solution_data_B=7_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/eigenfrequencies.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/equivalent_stiffness.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/freq_new.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/freq_new_n=2len-y.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/freq_new_n=4len-y.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/freq_new_zoom.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/plots/y_t.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/solution_data_B=4_H=0.7.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/solution_data_B=4_H=0.8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/solution_data_B=4_H=0.9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/equivalent_stiffness/solution_data_B=4_H=1.0.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/fft.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/fft_V2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=5_H=0.8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=5_H=0.81.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=5_H=0.9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=5_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=6_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/old/solution_data_B=7_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/solution_data_B=4_H=0.7.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/solution_data_B=4_H=0.8.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_2.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_2_hanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_3_NOtranslation.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_3_translation.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_3_translation_and_hanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_4_translation_and_NOhanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_4_translation_and_hanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_F0_geometry.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/eigfrequencies_hanning.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/screenshot_2017.03.14_21.48.36.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_01_B=4_H=0.9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_02_B=4_H=0.9.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_03_B=4_H=1.1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_04_B=5.1_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_04_B=5.2_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_04_B=5.8_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_04_B=5_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_05_B=4.7_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_05_B=4.8_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_05_B=4.9_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_06_B=6.1_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_07_B=6.4_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_08_B=6.8_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_09_B=7_H=1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/larger_tn/solution_data_10_B=5.2_H=1.1.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/number_of_elements/solution_data_2elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/number_of_elements/solution_data_4elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/number_of_elements/solution_data_8elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/number_of_elements/unused/solution_data_16elements.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/solution_data_00.xlsx" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_others/rotate.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/ancf_beam_shape/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/ancf_beam_shape/ancf_plot_beam_shape.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/beam_element/beam_element.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/beam_element/beam_mesh_2d_1element.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/discuntinuity.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/frame_mesh_2d_2elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/discontinuity/frame_mesh_2d_4elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/beam_mesh_2d_12elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/beam_mesh_2d_6elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/falling_flexible_pendulum.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/falling_flexible_pendulum/solution_data_01.sol" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/legendre_polynomials/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/legendre_polynomials/legendre_polynomials.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/beam_mesh_2d_2elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/revolute_rigid_flexible_constraint.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/dissertation/revolute_rigid_flexible_constraint/revolute_rigid_flexible_constraint_Qd_analysis.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/analysis_contact_forces.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/analysis_contact_forces_discussion.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/analysis_external_applied_force.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/input_force_PSCJ.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/input_force_RCJ.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/interpolate_data.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/meas_data_analysis.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_1/smooth.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/Brush_forces_2016_10_06_17_02_18.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/Brush_forces_2016_10_06_17_04_52.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/long.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/multi_time_column.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/short.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/short_new_line_end.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/data/with_empty_fields.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/aturel/dynamic_force_analysis.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/_problem_E_elastic_strain" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/_problem_M_ANCF.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/contact_pad.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/get_image_scale.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_and_num_results.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_and_num_results_old.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_data_csv.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/moving_contact_flexible.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/moving_contact_line_2elements.mesh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/moving_contact_rigid.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/node_0.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/node_0.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/node_N.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/node_N.pkl" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/pin_body.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_multiple_y_axis.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/plot_multiple_y_axis_matplotlib.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/q_i_dim_flexible.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/q_i_dim_rigid.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/reshape_meas_data.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/slot_body.dat" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/dynamic_model/solution_data_00.sol" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/eigen_frequency_simulation.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/frame.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/eigfrequency_meas.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/fft_tools.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/frf.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/lvm_read.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko3.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko3.tdm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_3/janko3.tdms.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_01.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_02.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_03.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_04.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_05.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_06.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_07.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_08.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_09.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_10.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_11.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_12.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_13.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_14.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_15.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_16.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_17.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_18.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_19.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_20.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_21.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_22.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_24.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_25.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_26.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_27.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_28.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_29.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/meas/meas_4/meas_30.lvm" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/convert_sol_data_xlsx_to_txt.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/eigenfrequency_fft.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/solution_data_00_B=3mm_H=0.6mm.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/numerical_simulation/fft/solution_data_00_B=4mm_H=0.7mm.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/eigenfrequency/simple_beam.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/external_and_contact_forces.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/fft_tools.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/frf.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/_PhD/paper_2/lvm_read.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MBD_system/force/force.py.bak" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MBD_system/ancf/mesh/finite_element/shape_functions.nb" afterPath="$PROJECT_DIR$/MBD_system/ancf/mesh/finite_element/shape_functions.nb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MBD_system/force/force.py" afterPath="$PROJECT_DIR$/MBD_system/force/force.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/preferences_widget/preferences_widget.py" afterPath="$PROJECT_DIR$/preferences_widget/preferences_widget.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py" afterPath="$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FileEditorManager">
+    <splitter split-orientation="horizontal" split-proportion="0.56963927">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+          <file leaf-file-name="dys.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/dys.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1900">
+                  <caret line="91" column="0" lean-forward="false" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="vtk_widget.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="25">
+                  <caret line="100" column="41" lean-forward="false" selection-start-line="100" selection-start-column="41" selection-end-line="100" selection-end-column="41" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/.gitignore">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="648">
+                  <caret line="104" column="7" lean-forward="false" selection-start-line="104" selection-start-column="7" selection-end-line="104" selection-end-column="7" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="TODO.md" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/TODO.md">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="0">
+                  <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="preferences_widget.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/preferences_widget/preferences_widget.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1500">
+                  <caret line="64" column="36" lean-forward="false" selection-start-line="64" selection-start-column="36" selection-end-line="64" selection-end-column="36" />
+                  <folding>
+                    <element signature="e#84#102#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+          <file leaf-file-name="vtk_widget.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="253">
+                  <caret line="571" column="45" lean-forward="false" selection-start-line="571" selection-start-column="45" selection-end-line="571" selection-end-column="45" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>self.filepath</find>
+      <find>s</find>
+      <find>color</find>
+      <find>textactor_time</find>
+      <find>textactor_step</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>textActor_time</replace>
+      <replace>textActor_step</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="lskrinjar &lt;skrinjar.luka@gmail.com&gt;" />
+        <option value="skrinjar.luka@gmail.com" />
+        <option value="Luka Skrinjar" />
+        <option value="lskrinjar" />
+      </list>
+    </option>
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SIGN_OFF_COMMIT" value="true" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/dys.py" />
+        <option value="$PROJECT_DIR$/MBD_system/force/force.py" />
+        <option value="$PROJECT_DIR$/preferences_widget/preferences_widget.py" />
+        <option value="$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-11" />
+    <option name="y" value="-11" />
+    <option name="width" value="2070" />
+    <option name="height" value="1128" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="simulation_control_widget" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="simulation_control_widget" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="movie_maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DyS_project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="_others" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="DyS_project" is-module-sdk="true">
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="DyS_project" />
+      </console-settings>
+    </option>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.DyS">
+    <configuration default="false" name="force" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/MBD_system/force" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MBD_system/force/force.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+    <configuration default="false" name="DyS" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Python27\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DyS_project" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dys.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Python.DyS" />
+      <item index="1" class="java.lang.String" itemvalue="Python.force" />
+    </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Python.force" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e19d91a6-c341-49a6-a040-849fa05d4793" name="Default" comment="" />
+      <created>1493273503287</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1493273503287</updated>
+    </task>
+    <task id="LOCAL-00001" summary="new code">
+      <created>1493276429855</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1493276429855</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-11" y="-11" width="2070" height="1128" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16082165" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33892968" sideWeight="0.73046094" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34942287" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.27072403" sideWeight="0.2695391" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18587175" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32948583" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39979014" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296593" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="C:\Users\lskrinjar\Dropbox\DyS\DyS_project\DyS" />
+    </ignored-roots>
+    <MESSAGE value="new code" />
+    <option name="LAST_COMMIT_MESSAGE" value="new code" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2500">
+          <caret line="100" column="41" lean-forward="false" selection-start-line="100" selection-start-column="41" selection-end-line="100" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_others/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1900">
+          <caret line="91" column="0" lean-forward="false" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/preferences_widget/preferences_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="64" column="36" lean-forward="true" selection-start-line="64" selection-start-column="36" selection-end-line="64" selection-end-column="36" />
+          <folding>
+            <element signature="e#84#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1900">
+          <caret line="91" column="0" lean-forward="false" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="13700">
+          <caret line="557" column="19" lean-forward="false" selection-start-line="557" selection-start-column="13" selection-end-line="557" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/preferences_widget/preferences_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1475">
+          <caret line="62" column="11" lean-forward="true" selection-start-line="62" selection-start-column="11" selection-end-line="62" selection-end-column="11" />
+          <folding>
+            <element signature="e#84#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1650">
+          <caret line="81" column="25" lean-forward="false" selection-start-line="81" selection-start-column="25" selection-end-line="81" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/force/force.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15150">
+          <caret line="606" column="38" lean-forward="false" selection-start-line="606" selection-start-column="38" selection-end-line="606" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/ancf/mesh/finite_element/beam_2d_euler_bernoulli.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9325">
+          <caret line="380" column="33" lean-forward="false" selection-start-line="380" selection-start-column="33" selection-end-line="380" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/body/body_flexible.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="14525">
+          <caret line="608" column="50" lean-forward="true" selection-start-line="608" selection-start-column="50" selection-end-line="608" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_and_num_results.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12425">
+          <caret line="521" column="4" lean-forward="false" selection-start-line="521" selection-start-column="4" selection-end-line="522" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/ancf/mesh/mesh.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="24350">
+          <caret line="990" column="8" lean-forward="false" selection-start-line="990" selection-start-column="8" selection-end-line="990" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1650">
+          <caret line="81" column="25" lean-forward="false" selection-start-line="81" selection-start-column="25" selection-end-line="81" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_and_num_results.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12425">
+          <caret line="521" column="4" lean-forward="false" selection-start-line="521" selection-start-column="4" selection-end-line="522" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/force/force.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23775">
+          <caret line="951" column="30" lean-forward="true" selection-start-line="951" selection-start-column="30" selection-end-line="951" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python27/Lib/site-packages/matplotlib/pyplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="3789" column="4" lean-forward="false" selection-start-line="3789" selection-start-column="4" selection-end-line="3789" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_PhD/dissertation/beam_element/beam_element.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="37" column="4" lean-forward="true" selection-start-line="37" selection-start-column="4" selection-end-line="37" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_PhD/paper_2/dynamic_model/meas_and_num_results.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12425">
+          <caret line="521" column="4" lean-forward="false" selection-start-line="521" selection-start-column="4" selection-end-line="522" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/ancf/mesh/mesh.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="282">
+          <caret line="989" column="0" lean-forward="true" selection-start-line="989" selection-start-column="0" selection-end-line="989" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/body/body_flexible.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="470">
+          <caret line="608" column="50" lean-forward="false" selection-start-line="608" selection-start-column="50" selection-end-line="608" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/ancf/mesh/finite_element/beam_2d_euler_bernoulli.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="332">
+          <caret line="380" column="33" lean-forward="false" selection-start-line="380" selection-start-column="33" selection-end-line="380" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MBD_system/force/force.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="25">
+          <caret line="606" column="38" lean-forward="false" selection-start-line="606" selection-start-column="38" selection-end-line="606" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1900">
+          <caret line="91" column="0" lean-forward="false" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/preferences_widget/preferences_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="64" column="36" lean-forward="false" selection-start-line="64" selection-start-column="36" selection-end-line="64" selection-end-column="36" />
+          <folding>
+            <element signature="e#84#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/_others/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulation_control_widget/vtk_widget/vtk_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="25">
+          <caret line="100" column="41" lean-forward="false" selection-start-line="100" selection-start-column="41" selection-end-line="100" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TODO.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="104" column="7" lean-forward="false" selection-start-line="104" selection-start-column="7" selection-end-line="104" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file alias="application.png">icons/application.png</file>
+<file alias="folder_open.png">icons/folder_open.png</file>
+<file alias="folder.png">icons/folder.png</file>
+<file alias="settings.png">icons/settings.png</file>
+</qresource>
+</RCC>

@@ -1,0 +1,14 @@
+MeshVersionFormatted 2
+
+Dimension 3
+
+Vertices
+2
+0 0 0 2 
+10 0 0 3 
+
+Edges
+1
+1 2 1 
+
+End

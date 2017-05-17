@@ -1,0 +1,16 @@
+name = actuating_lever
+geometry_filename = actuating_lever.stl
+_visible = false
+volume[m^3] = 0
+mass[kg] = 4.3763924e-04
+J_zz[kg*m^2] = 1.3659885e-08
+CM_CAD_LCS[m] = 4.5973174E-3,1.7800621E-3,5.5886163E-3
+CAD_LCS_GCS[m] = 0.0, 0.0, -0.0095
+theta[deg] = 0,0,0
+dR[m/s] = 0,0,0
+dtheta[deg/s] = 0,0,0
+color[1, 1, 1] = 0.0,0.5,0.0
+transparent[1] = 1
+material = PBT(celanex 30%GF)
+density[kg/m^3] = 1320
+display_style = filled
