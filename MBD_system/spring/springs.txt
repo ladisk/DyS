@@ -1,0 +1,10 @@
+SPRINGS FILE-START
+spring_name=test_spring_1
+spring_type=translational
+k = 12E+3
+c = 0
+body_i = 2
+body_j = 3
+u_iP = 10E-3,-10E-3
+u_jP = 10E-3,-10E-3
+SPRINGS FILE-END

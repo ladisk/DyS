@@ -1,0 +1,5 @@
+python=2.7
+numpy>=1.11.0
+scipy=0.17.0
+matplotlib=1.5.0
+VTK=7.0.0
