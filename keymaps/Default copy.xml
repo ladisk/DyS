@@ -1,3 +1,8 @@
 <keymap version="1" name="Default copy" parent="$default">
   <action id="AddToFavoritesPopup" />
+  <action id="CommentByBlockComment" />
+  <action id="CommentByLineComment">
+    <keyboard-shortcut first-keystroke="ctrl 3" />
+  </action>
+  <action id="GotoBookmark3" />
 </keymap>
