@@ -5,4 +5,8 @@
     <keyboard-shortcut first-keystroke="ctrl 3" />
   </action>
   <action id="GotoBookmark3" />
+  <action id="Resume" />
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="f9" />
+  </action>
 </keymap>
