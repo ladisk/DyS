@@ -54,9 +54,9 @@ Kinematic analysis of a parameterized slider-crank mechanism
 [Kinematic analysis of a parameterized slider-crank mechanism](https://youtu.be/o5CIaI6hqw4)
 
 
-Kinematic analysis of a slider-crank mechanism
+Dynamic analysis of a slider-crank mechanism
 -----------------------
-[Kinematic analysis of a slider-crank mechanism](https://youtu.be/QZYYzvIH95s)
+[Dynamic analysis of a slider-crank mechanism](https://youtu.be/QZYYzvIH95s)
 
 
 Libraries used
