@@ -104,3 +104,5 @@ ENV/
 /bin
 /source
 /.idea
+/_windows
+/codestyles
