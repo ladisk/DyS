@@ -22,22 +22,22 @@ class ContactModelCylinder(ContactModel):
     """
 
 
-    def __init__(self, _type, K=0., c_r=0., properties_dict={}, _substring="contact_model", parent=None):
+    def __init__(self, _type, K=0., c_r=0., properties_dict={}, _substring="contact_model", contact_location="internal", parent=None):
         """
         If internal type of cylindrical contact is used:
         Body i - hole
         Body j - pin
 
         :param _type:   supported types for cylindrical contact model
-                        1 Hertz
+                        1 Hertz cylinder
                         2 Johnson
                         3 Radzimovsky
                         4 Goldsmith
                         5 Dubowsky-Freudenstein
                         6 ESDU-78035
-                        7 Liu etal
-                        8 Lankarani-Nikravesh
-                        9 Pereira etal
+                        7 Liu et al
+                        8 Lankarani-Nikravesh cylinder
+                        9 Pereira et al
                        10 Persson
         :return:
         """
@@ -46,7 +46,7 @@ class ContactModelCylinder(ContactModel):
         #   contact location, options:
         #   internal (default)
         #   external
-        self.contact_location = "internal"
+        self.contact_location = contact_location
         
         #   sub string
         self._substring = _substring
@@ -55,6 +55,7 @@ class ContactModelCylinder(ContactModel):
         self._evaluate_E()
 
         #   reduced contact radius
+        self.dR = None
         self._evaluate_dR()
 
         #   relative curvature of the contact (only used for Radzimovsky type)
@@ -84,15 +85,7 @@ class ContactModelCylinder(ContactModel):
         #   persson not implemented
         self._type = _type
         self.__types = copy.copy(self._types)
-        self._types = ["hertz cylinder",                     #done
-                    "johnson",                  #done
-                    "radzimovsky",              #done
-                    "goldsmith",                #done
-                    "dubowsky-freudenstein",    #done
-                    "esdu-78035",               #done
-                    "liu et al",                #done
-                    "lankarani-nikravesh cylinder",      #done
-                    "pereira et al"]            #done
+        self._types = ContactModelCylinder._supported_types()
 
         #   set parameters by type
         if isinstance(self._type, basestring) or self._type is None:
@@ -118,9 +111,10 @@ class ContactModelCylinder(ContactModel):
                     "goldsmith",                        #done
                     "dubowsky-freudenstein",            #done
                     "esdu-78035",                       #done
-                    "liu et al",                        #done
+                    "liu et al.",                        #done
                     "lankarani-nikravesh cylinder",     #done
-                    "pereira et al"]                    #NOK
+                    "pereira et al.",                   #done
+                    "persson"]
         return _types
 
     def _type_check(self):
@@ -129,10 +123,16 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         if self._type.lower() in self._types:
-            if self._type.lower() == "pereira et al":
+            if self._type.lower() == "goldsmith":
+                self._set_parameters_Goldsmith()
+
+            if self._type.lower() == "dubowsky-freudenstein":
+                self._set_parameters_Dubowsky_Freudenstein()
+
+            if self._type.lower() == "pereira et al.":
                 self._set_parameters_Pereira_etal()
         else:
-            raise ValueError, "Cylindrical contact model type not correct! Define contact model type."
+            raise ValueError, "Cylindrical contact model type not correct! Define contact model type. Defined type is: %s" % self._type
 
     def _evaluate_R(self, R_i=None, R_j=None, dR=None):
         """
@@ -208,6 +208,20 @@ class ContactModelCylinder(ContactModel):
         else:
             self.E = (sum(self.h_list))**(-1)
 
+    def _set_parameters_Goldsmith(self):
+        """
+        
+        :return: 
+        """
+        self.m = 1
+
+    def _set_parameters_Dubowsky_Freudenstein(self):
+        """
+        
+        :return: 
+        """
+        self.m = 3
+
     def _set_parameters_Pereira_etal(self, dR=None):
         """
 
@@ -221,7 +235,7 @@ class ContactModelCylinder(ContactModel):
                 self.a = 0.965
                 self.b = 0.0965
                 Y = self._evaluate_Y()
-                self.n = (Y * self.dR)**(-0.005)
+                self.n = Y * (self.dR * 1E+3)**(-0.005)
 
             if self.contact_location == "external":
                 self.a = 0.39
@@ -236,10 +250,11 @@ class ContactModelCylinder(ContactModel):
         if 0.005 <= self.dR*1E+3 <= 0.34954:    #   dR from m to mm
             # print "self.dR =", self.dR, self.dR * 1E+3
             # print "np.log(self.dR) =", np.log(self.dR), np.log(self.dR * 1E+6)
-            Y = 1.51*(np.log((self.dR * 1E+3 * 1E+3)))**(-0.151)
-            # print "Y =", Y
-        elif 0.34954 <= self.dR*1E+3 <= 10:
-            Y = 0.0151*self.dR + 1.151
+            Y = 1.51 * (np.log(self.dR * 1E+6))**(-0.151)
+
+        elif 0.34954 <= self.dR*1E+3 <= 10.:
+            Y = 0.0151 * self.dR + 1.151
+
         else:
             raise ValueError, "Value for attribute dR not in expected range!"
 
@@ -257,47 +272,63 @@ class ContactModelCylinder(ContactModel):
         """
         if self._type in ContactModel._supported_types():
             Fn = self._contact_force(delta, dq_n)
-        elif self._type in self._types:
+
+        elif self._type in ContactModelCylinder._supported_types():
             Fn = self._contact_force_cylinder(delta, dq_n)
 
             if self._hysteresis_damping_model is not None:
                 if self._hysteresis_damping_model in self._hysteresis_damping_models:
-                    damping_factor = self._evaluate_hysteresis_damping()
+                    damping_factor = self._evaluate_hysteresis_damping(dq_n)
+
                     #   damping factor is added to contact force
-                    Fn = Fn * (1 + damping_factor)
+                    Fn = Fn * (1. + damping_factor)
 
         else:
             raise ValueError, "Contact model type not defined! Define contact model type. Contact model is %s"%self._type
         
         return Fn
 
-    def _evaluate_hysteresis_damping(self):
+    def _evaluate_hysteresis_damping(self, dqn):
         """
 
         :return:
         """
+        damping_factor = 1.
         if self._hysteresis_damping_model == "hunt-crossley":
-            damping_factor = self._hysteresis_damping_factor_HC()
+            damping_factor = self._hysteresis_damping_factor_HC(dqn)
+
         elif self._hysteresis_damping_model == "herbert-mcwhannell":
-            damping_factor = self._hysteresis_damping_factor_HM()
+            damping_factor = self._hysteresis_damping_factor_HM(dqn)
+
         elif self._hysteresis_damping_model == "lee-wang":
-            damping_factor = self._hysteresis_damping_factor_LW()
+            damping_factor = self._hysteresis_damping_factor_LW(dqn)
+
         elif self._hysteresis_damping_model == "lankarani-nikravesh":
-            damping_factor = self._hysteresis_damping_factor_LN()
+            damping_factor = self._hysteresis_damping_factor_LN(dqn)
+
         elif self._hysteresis_damping_model == "gonthier et al":
-            damping_factor = self._hysteresis_damping_factor_Gonthier_etal()
+            damping_factor = self._hysteresis_damping_factor_Gonthier_etal(dqn)
+
         elif self._hysteresis_damping_model == "zhiying-qishao":
-            damping_factor = self._hysteresis_damping_factor_ZQ()
+            damping_factor = self._hysteresis_damping_factor_ZQ(dqn)
+
         elif self._hysteresis_damping_model == "flores et al":
-            damping_factor = self._hysteresis_damping_factor_Flores_etal()
+            damping_factor = self._hysteresis_damping_factor_Flores_etal(dqn)
+
         elif self._hysteresis_damping_model == "hu-guo":
-            damping_factor =  self._hysteresis_damping_factor_HG()
+            damping_factor =  self._hysteresis_damping_factor_HG(dqn)
         else:
             print "Not supported!"
 
         return damping_factor
 
     def _contact_force_cylinder(self, delta, dq_n):
+        """
+
+        :param delta:
+        :param dq_n:
+        :return:
+        """
 
         delta = abs(delta)
         if self._type == "hertz cylinder":
@@ -314,11 +345,11 @@ class ContactModelCylinder(ContactModel):
             Fn = self._Fn_ESDU_78035(delta)
         elif self._type.lower() == "persson":
             Fn = self._Fn_Persson(delta)
-        elif self._type.lower() == "liu et al":
+        elif self._type.lower() == "liu et al.":
             Fn = self._Fn_Liu_etal(delta)
         elif self._type.lower() == "lankarani-nikravesh cylinder":
             Fn = self._Fn_LankaraniNikraveshCylinder(delta)
-        elif self._type.lower() == "pereira et al":
+        elif self._type.lower() == "pereira et al.":
             Fn = self._Fn_Pereira_etal(delta, dq_n)
         else:
             raise ValueError, "Type not corrent. Type is %s"%self._type
@@ -346,7 +377,6 @@ class ContactModelCylinder(ContactModel):
         :param delta:
         :return:
         """
-        # print "__Fn_Hertz()"
         #   initial approximation value of contact force
         self._Fn0 = self._Fn_last
 
@@ -360,10 +390,9 @@ class ContactModelCylinder(ContactModel):
         :param Fn:  normal contact force
         :return:
         """
-        # print "Fn (_evaluate_delta_Hertz) =", Fn
         EdRFn = self.__evaluate_EdRFn(Fn)
-        # print "EdRFn =", EdRFn
-        delta = ((2. * abs(Fn))/(self.E * np.pi)) * (np.log(np.pi * EdRFn) - 1.)
+
+        delta = ((2. * Fn) / (self.E * np.pi)) * (np.log(np.pi * EdRFn) - 1.)
         return delta
 
     def __evaluate_Fn_Hertz(self, Fn, delta):
@@ -371,11 +400,7 @@ class ContactModelCylinder(ContactModel):
         Hertz contact force model as implicit function
         :return:
         """
-        # print "__evaluate_Fn_Hertz()"
-        # self.EdRFn = self.__evaluate_EdRFn(Fn)
-
         f = self._evaluate_delta_Hertz(Fn) - abs(delta)
-        # print "f =", f
         return f
 
     def __evaluate_dFn_Hertz(self, Fn, delta):
@@ -410,7 +435,7 @@ class ContactModelCylinder(ContactModel):
         """
         EdRFn = self.__evaluate_EdRFn(Fn)
 
-        delta = (Fn / (self.E * np.pi)) * (np.log(4 * np.pi * EdRFn) - 1) #( * (np.log(4. * self.EdRFn) - 1))
+        delta = (1. * Fn / (self.E * np.pi)) * (np.log(4 * np.pi * EdRFn) - 1.) #( * (np.log(4. * self.EdRFn) - 1))
         return delta
 
     def __evaluate_Fn_Johnson(self, Fn, delta):
@@ -420,21 +445,21 @@ class ContactModelCylinder(ContactModel):
         :param delta:
         :return:
         """
-        f = self._evaluate_delta_Johnson(Fn) - delta
+        f = self._evaluate_delta_Johnson(Fn) - abs(delta)
 
         return f
 
-    def __evaluate_dFn_Johnson(self, Fn, delta):
-        """
-
-        :param Fn:
-        :param delta:
-        :return:
-        """
-        EdRFn = self.__evaluate_EdRFn(Fn)
-
-        df = (-2 + np.log(4 * EdRFn * np.pi)) / (self.E * np.pi)
-        return df
+    # def __evaluate_dFn_Johnson(self, Fn, delta):
+    #     """
+    #
+    #     :param Fn:
+    #     :param delta:
+    #     :return:
+    #     """
+    #     EdRFn = self.__evaluate_EdRFn(Fn)
+    #
+    #     df = (-2 + np.log(4 * EdRFn * np.pi)) / (self.E * np.pi)
+    #     return df
 
     def _Fn_Radzimovsky(self, delta):
         """
@@ -455,6 +480,17 @@ class ContactModelCylinder(ContactModel):
         """
         b = (8/5.) * (abs(Fn) * self.R / self.E)**(1/2.)
         return b
+
+    def _Fn_Persson(self, delta):
+        """
+        
+        :param delta: 
+        :return: 
+        """
+        eps = np.arccos(self.dR / (self.dR + delta))
+        b = np.tan(eps/2.)
+        f = (self.E * self.dR * np.pi * (b**2 + 1.) * b**2) / (2. - (np.log(b**2 + 1.) + 2.*b**4))
+        return f
 
     def _evaluate_delta_Radzimovsky(self, Fn):
         """
@@ -499,7 +535,7 @@ class ContactModelCylinder(ContactModel):
         self._Fn0 = self._Fn_last
 
         _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Goldsmith, self._Fn0, fprime=self.__evaluate_dFn_Goldsmith, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn
+        return _Fn * self.L
 
     def _evaluate_delta_Goldsmith(self, Fn):
         """
@@ -549,7 +585,7 @@ class ContactModelCylinder(ContactModel):
         # print "initial approximation =", self._Fn0
         _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_DubowskyFreudenstein, self._Fn0, fprime=self.__evaluate_dFn_DubowskyFreudenstein, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
         # print "F =", _Fn
-        return _Fn
+        return _Fn * self.L
 
     def _evaluate_delta_DubowskyFreudenstein(self, Fn):
         """
@@ -609,7 +645,7 @@ class ContactModelCylinder(ContactModel):
         self._Fn0 = self._Fn_last
 
         _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_ESDU, self._Fn0, fprime=self.__evaluate_dFn_ESDU, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn
+        return _Fn * self.L
 
     def _evaluate_delta_ESDU78035(self, Fn):
         """
@@ -645,18 +681,6 @@ class ContactModelCylinder(ContactModel):
         df = (np.pi * (self.h_i + self.h_j)/self.L) * np.log((4 * (self.R_i - self.R_j))/(abs(Fn) * hihjL))
         return df
 
-    def _Fn_Persson(self, delta):
-        """
-        Not working
-        :param delta:
-        :return:
-        """
-        eps = np.arccos(self.dR / (self.dR + abs(delta)))
-        b = np.arctan(eps/2.)
-        _Fn = (self.E * self.dR * (b**2 + 1) * b**2) / (2 - (np.log(b**2 + 1) + 2*(b**4)))
-
-        return _Fn
-
     def _Fn_Liu_etal(self, delta):
         """
 
@@ -673,8 +697,8 @@ class ContactModelCylinder(ContactModel):
         :param delta:
         :return:
         """
-        _Fn = (4./3.) * (self.E * self.R**0.5) * (abs(delta)**self.n)
-        return _Fn
+        Fn = (4./3.) * (np.pi * self.E * self.R**0.5) * (abs(delta)**self.n)
+        return Fn * self.L
 
     def _Fn_Pereira_etal(self, delta, dq_n):
         """
@@ -683,12 +707,20 @@ class ContactModelCylinder(ContactModel):
         :param dq_n:
         :return:
         """
-        _Fn = (((self.a * (self.dR) + self.b) * (self.L) * (self.E)) / (self.dR)) * (abs(delta)**self.n) * (1 + ((3. / 4.) * (1 - self.c_r**2) * (dq_n / self._dq0_n))) #
-        # print "delta =", delta, "Fn =", _Fn
-        return _Fn * self.L
+        Fn = ((self.a * (self.dR * 1E+3) + self.b) * (self.L * 1E+3) * (self.E * 1E-6)) / (self.dR * 1E+3) * (abs(delta * 1E+3)**self.n) * (1. + ((3. / 4.) * (1. - self.c_r**2) * (dq_n / self._dq0_n)))
+        return Fn
+
+    def testing(self, Fn):
+        """
+        
+        :param delta: 
+        :return: 
+        """
+        delta = self._evaluate_delta_Hertz(Fn)
+        return delta
+
 
 if __name__ == "__main__":
-
     _type = "kelvin-voigt" #hertz cylinder, johnson, radzimovsky, goldsmith, dubowsky-freudenstein, esdu-78035, persson, liu et al, lankarani-nikravesh, pereira et al
     # print _type
     model = ContactModelCylinder(_type)

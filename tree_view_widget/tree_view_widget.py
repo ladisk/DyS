@@ -753,7 +753,7 @@ class TreeViewWidget(QWidget):  # QMainWindow#, QAbstractItemView
 
         if hasattr(self._item, "solution_data"):
             print_solution_data_Action = QtGui.QAction("Print solution data", self)
-            print_solution_data_Action.triggered.connect(self._item.solution_data.print_solution_containers)
+            print_solution_data_Action.triggered.connect(self._item.print_solution_containers)
             self.menu.addAction(print_solution_data_Action)
 
         testingAction = self.menu.addAction("TESTING")

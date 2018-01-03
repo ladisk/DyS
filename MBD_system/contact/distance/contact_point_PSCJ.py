@@ -108,7 +108,7 @@ class ContactPointPSCJ(DistancePSCJ):
                 F = Force(body_id, force_name=self._parent._name + "_F" + d + "_on_body_" + str(body_id), visible=visibility, scale=self.scale, parent=self._parent)
                 F_list.append(F)
 
-                #   create force visualization datad
+                #   create force visualization data
                 ren = self._parent._parent._parent._parent.dys.simulation_control_widget.vtkWidget.renderer
                 F.set_vtk_data(renderer=ren)
 

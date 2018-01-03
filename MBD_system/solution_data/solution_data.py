@@ -6,7 +6,7 @@ Created on 9. jul. 2014
 import itertools
 import os
 import datetime
-from ast import literal_eval
+from pprint import pprint
 
 
 import numpy as np
@@ -16,16 +16,12 @@ from PyQt4 import QtCore
 from matplotlib import pyplot as plt
 import logging
 import threading
-from collections import OrderedDict
 
-# try:
-#     from moviepy.editor import *
-# except:
-moviepy = None
 
 from MBD_system.MBD_system_items import SolutionDataItem
 from MBD_system.check_filename import check_filename
 from MBD_system import convert_bytes_to_
+from global_variables import GlobalVariables
 
 
 class SolutionData(SolutionDataItem):
@@ -63,6 +59,9 @@ class SolutionData(SolutionDataItem):
         #   abs path to solution file
         self._file_abs_path = _file
 
+        #   print output
+        self.print_output_information = False
+
         #    set file type: .dat, .xlsx, .csv, .sol(default)
         self._qfiletypes = self.qfiletypes()
         self._filetypes = [".dat", ".xlsx", ".csv", ".sol"]
@@ -79,6 +78,8 @@ class SolutionData(SolutionDataItem):
         #   overwrite
         #   save to new
         self._solution_save_options = "discard"
+        self.use_old_format = False
+        self.format = "new"
 
         #   load data from file if already exists
         self.solution_data = None
@@ -101,6 +102,7 @@ class SolutionData(SolutionDataItem):
 
         #   color
         self.color = None
+        self.linestyle = None
 
         #    simulation status
         #    options: finished, running, waiting
@@ -123,6 +125,8 @@ class SolutionData(SolutionDataItem):
 
         #   number of absolute coordinates of the system
         self.n = None
+        self.n_q = None
+        self.n_dq = None
 
         #   skip rows
         self._skip_rows = 2
@@ -146,6 +150,7 @@ class SolutionData(SolutionDataItem):
                          "contact"]
 
         #    initialize containers attributes
+        self._q_solution_container = []
         self._containers()
         self.solution_container_names = ["_step_num_solution_container",
                                          "_mechanical_energy_solution_container",
@@ -158,6 +163,59 @@ class SolutionData(SolutionDataItem):
                                          "_t_solution_container",
                                          "_iterNumber_solution_container",
                                          "_contact_status_solution_container"]
+
+    def set_format(self, format):
+        """
+        
+        :param format: 
+        :return: 
+        """
+        print "set_format()"
+        print "format =", format
+        self.format = format
+
+    def _set_old_format(self):
+        """
+        This function is called if data is formated in old style (without additional simulation properties)
+        :return: 
+        """
+        self.use_old_format = True
+        self._header0 = ["step",
+                         "Em",
+                         "Error",
+                         "h",
+                         "t"]
+
+        self.solution_container_names = ["_step_num_solution_container",
+                                         "_mechanical_energy_solution_container",
+                                         "_absError_solution_container",
+                                         "_h_solution_container",
+                                         "_t_solution_container"]
+    def _set_old_format_2(self):
+        """
+        
+        :return: 
+        """
+        print "_set_old_format_2()"
+        self.use_old_format = True
+
+        self._header0 = ["step",
+                         "Em",
+                         "Error",
+                         "h level",
+                         "h",
+                         "t",
+                         "contact",
+                         "iterNum"]
+        print "self._header0 =", self._header0
+        self.solution_container_names = ["_step_num_solution_container",
+                                         "_mechanical_energy_solution_container",
+                                         "_absError_solution_container",
+                                         "_h_level_solution_container",
+                                         "_h_solution_container",
+                                         "_t_solution_container",
+                                         "_contact_status_solution_container",
+                                         "_iterNumber_solution_container"]
 
     def _clear_file(self):
         """
@@ -272,12 +330,19 @@ class SolutionData(SolutionDataItem):
         """
         Read (load) solution data from file
         """
+        print "Reading file at path:", file_abs_path
         if file_abs_path is not None:
             self._file_abs_path = file_abs_path
 
         #   load data from file if already exists
         _path, self._file = os.path.split(self._file_abs_path)
         self._name, self._filetype = os.path.splitext(self._file)
+
+        if self.format == "old":
+            self._set_old_format()
+
+        if self.format == "old2":
+            self._set_old_format_2()
 
         if self._filetype == ".dat" or self._filetype == ".sol":
             data = self._read_ascii_file()
@@ -295,8 +360,11 @@ class SolutionData(SolutionDataItem):
             print "Variable data is None!"
 
         else:
+            print "self.format =", self.format
+
             self.add_data(data)
-            print "Solution read from file: %s"%self._file_abs_path
+            if self.print_output_information:
+                print "Solution read from file: %s" % self._file_abs_path
 
     def add_data(self, data):
         """
@@ -304,9 +372,9 @@ class SolutionData(SolutionDataItem):
         :return:
         """
         self.solution_data = data
-
         if data.ndim == 2:
             n = len(self.solution_container_names)
+            print "n =", n
             for i in range(0, n):
                 name = self.solution_container_names[i]
 
@@ -315,6 +383,7 @@ class SolutionData(SolutionDataItem):
                             "_step_size_solution_container",
                             "_h_level_solution_container"
                             ]:
+
                     col = np.array(data[:, i], dtype="float64")
                     setattr(self, name, col)
 
@@ -358,9 +427,14 @@ class SolutionData(SolutionDataItem):
             #
             # #   iter number
             # self._iterNumber_solution_container = np.array(data[:, 7])
-
+            print "data ="
+            print data[0,:]
             #   positions and velocities
-            self._q_solution_container = np.array(data[:, len(self._header0)+1::], dtype="float64")
+            if self.use_old_format:
+                self._q_solution_container = np.array(data[:, len(self._header0)::], dtype="float64")
+            # print data[:, len(self._header0)+1::]
+            else:
+                self._q_solution_container = np.array(data[:, len(self._header0)+1::], dtype="float64")
 
             #   number of absolute nodal coordinates
             self.n = len(self._q_solution_container[0])
@@ -375,8 +449,8 @@ class SolutionData(SolutionDataItem):
         """
         if filename is None:
             filename = self._file_abs_path
-        print filename
-        data = np.loadtxt(str(filename), skiprows=0)
+
+        data = np.loadtxt(str(filename), skiprows=2)
         return data
 
     def _read_excel_file(self):
@@ -399,15 +473,24 @@ class SolutionData(SolutionDataItem):
         _mechanical_energy_solution_container = worksheet.col_values(colx=self._col_mechanical_energy_solution_container, start_rowx=self._column_start_write)
         # print "_mechanical_energy_solution_container =", type(_mechanical_energy_solution_container[0])
         #   kinetic energy
-        _kinetic_energy_solution_container = worksheet.col_values(colx=self._col_kinetic_energy_solution_container, start_rowx=self._column_start_write)
+        if self._col_kinetic_energy_solution_container is not None:
+            _kinetic_energy_solution_container = worksheet.col_values(colx=self._col_kinetic_energy_solution_container, start_rowx=self._column_start_write)
+        else:
+            _kinetic_energy_solution_container = None
         # print "_kinetic_energy_solution_container =", _kinetic_energy_solution_container
         # print "_kinetic_energy_solution_container =", len(_kinetic_energy_solution_container)
         # print "_kinetic_energy_solution_container =", type(_kinetic_energy_solution_container[0])
         #   potential energy
-        _potential_energy_solution_container = worksheet.col_values(colx=self._col_potential_energy_solution_container, start_rowx=self._column_start_write)
+        if self._col_potential_energy_solution_container is not None:
+            _potential_energy_solution_container = worksheet.col_values(colx=self._col_potential_energy_solution_container, start_rowx=self._column_start_write)
+        else:
+            _potential_energy_solution_container = None
 
         #   elastic strain energy
-        _elastic_strain_energy_solution_container = worksheet.col_values(colx=self._col_elastic_strain_energy_solution_container, start_rowx=self._column_start_write)
+        if self._col_elastic_strain_energy_solution_container is not None:
+            _elastic_strain_energy_solution_container = worksheet.col_values(colx=self._col_elastic_strain_energy_solution_container, start_rowx=self._column_start_write)
+        else:
+            _elastic_strain_energy_solution_container = None
 
         #   error
         _absError_solution_container = worksheet.col_values(colx=self._col_absError_solution_container, start_rowx=self._column_start_write)
@@ -432,26 +515,49 @@ class SolutionData(SolutionDataItem):
         # print self.n
 
         _q_sol_container = []
-        for i in range(self._header0_size - 1, len(worksheet.row_values(self._column_start_write - 1))):
-            col = np.array(worksheet.col_values(colx=i, start_rowx=self._column_start_write))
-            _q_sol_container.append(col)
+        if self.format in ["old", "old2"]:
+            for i in range(self._header0_size, len(worksheet.row_values(self._column_start_write - 1))):
+                col = np.array(worksheet.col_values(colx=i, start_rowx=self._column_start_write))
+                _q_sol_container.append(col)
+        else:
+            for i in range(self._header0_size - 1, len(worksheet.row_values(self._column_start_write - 1))):
+                col = np.array(worksheet.col_values(colx=i, start_rowx=self._column_start_write))
+                _q_sol_container.append(col)
 
-        _data = np.array([_step_num_solution_container,
-                          _mechanical_energy_solution_container,
-                          _kinetic_energy_solution_container,
-                          _potential_energy_solution_container,
-                          _elastic_strain_energy_solution_container,
-                          _absError_solution_container,
-                          _h_level_solution_container,
-                          _h_solution_container,
-                          _t_solution_container,
-                          _iterNumber_solution_container,
-                          _contact_status_solution_container])
+        _data = []
+        for solution_container in [_step_num_solution_container,
+                                   _mechanical_energy_solution_container,
+                                   _kinetic_energy_solution_container,
+                                   _potential_energy_solution_container,
+                                   _elastic_strain_energy_solution_container,
+                                   _absError_solution_container,
+                                   _h_level_solution_container,
+                                   _h_solution_container,
+                                   _t_solution_container,
+                                   _iterNumber_solution_container,
+                                   _contact_status_solution_container]:
+            if solution_container is not None:
+                _data.append(solution_container)
+        # _data = np.array([_step_num_solution_container,
+        #                   _mechanical_energy_solution_container,
+        #                   _kinetic_energy_solution_container,
+        #                   _potential_energy_solution_container,
+        #                   _elastic_strain_energy_solution_container,
+        #                   _absError_solution_container,
+        #                   _h_level_solution_container,
+        #                   _h_solution_container,
+        #                   _t_solution_container,
+        #                   _iterNumber_solution_container,
+        #                   _contact_status_solution_container])
 
-        data = np.hstack((_data.T, np.array(_q_sol_container).T))
+        data = np.hstack((np.array(_data).T, np.array(_q_sol_container).T))
         return data
 
     def _read_csv_file(self):
+        """
+
+        :return:
+        """
         print "Under Construction: ", os.path.realpath(__file__)
         return None
 
@@ -533,7 +639,7 @@ class SolutionData(SolutionDataItem):
         #    format for each column
         __frmt = ['%5i']+['%20.16f']+['%20.16f']+['%20.16f']+['%20.16f']+['%.10E']*self.n
 
-        #   add new line at the end of comment
+        #   add new line at the end of a comment
         self._comments = self._comments + "\n"
 
         #   write data to txt file
@@ -590,7 +696,7 @@ class SolutionData(SolutionDataItem):
         solution_worksheet.write(0, 0, comments)
 
         #   write index of vector q of MBD system
-        indx = np.arange(0, self.n, dtype=int)
+        indx = np.arange(0, self.n+1, dtype=int)
         solution_worksheet.write_row(0, self._header0_size, indx)
 
         #   write header
@@ -605,7 +711,7 @@ class SolutionData(SolutionDataItem):
             solution_worksheet.write_column(self._column_start_write, i, self.solution_data[:,i])
 
         #   freeze first two rows
-            solution_worksheet.freeze_panes(2, 0)
+        solution_worksheet.freeze_panes(2, 0)
 
         #   write MBD system data
         self._write_to_excel_file_MBD_system_properties()
@@ -693,17 +799,32 @@ class SolutionData(SolutionDataItem):
         self._column_start_write = 2
 
         #   number of column
-        self._col_step_num_solution_container = 0
-        self._col_mechanical_energy_solution_container = 1
-        self._col_kinetic_energy_solution_container = 2
-        self._col_potential_energy_solution_container = 3
-        self._col_elastic_strain_energy_solution_container = 4
-        self._col_absError_solution_container = 5
-        self._col_h_level_solution_container = 6
-        self._col_h_solution_container = 7
-        self._col_t_solution_container = 8
-        self._col_iterNumber_solution_container = 9
-        self._col_contact_status_solution_container = 10
+        if self.format == "new":
+            self._col_step_num_solution_container = 0
+            self._col_mechanical_energy_solution_container = 1
+            self._col_kinetic_energy_solution_container = 2
+            self._col_potential_energy_solution_container = 3
+            self._col_elastic_strain_energy_solution_container = 4
+            self._col_absError_solution_container = 5
+            self._col_h_level_solution_container = 6
+            self._col_h_solution_container = 7
+            self._col_t_solution_container = 8
+            self._col_iterNumber_solution_container = 9
+            self._col_contact_status_solution_container = 10
+
+        elif self.format == "old2":
+            self._col_step_num_solution_container = 0
+            self._col_mechanical_energy_solution_container = 1
+            self._col_absError_solution_container = 2
+            self._col_h_level_solution_container = 3
+            self._col_h_solution_container = 4
+            self._col_t_solution_container = 5
+            self._col_iterNumber_solution_container = 6
+            self._col_contact_status_solution_container = 7
+
+            self._col_kinetic_energy_solution_container = None
+            self._col_potential_energy_solution_container = None
+            self._col_elastic_strain_energy_solution_container = None
 
     def _excel_headers(self):
         """
@@ -711,23 +832,28 @@ class SolutionData(SolutionDataItem):
         :return:
         """
         header = []
+        #   length of header of simulation data (time, step number, num. error, contact status, energy, etc.)
         self._header0_size = len(self._header0)
 
         for _header in self._header0:
             header.append(_header)
 
         #   number of bodies
-        self.n_b = int((self.cols - self._header0_size) / 6)
+        if hasattr(GlobalVariables, "q_i_dim"):
+            self.n_b = len(GlobalVariables.q_i_dim)
+        else:
+            self.n_b = None
 
         #   header for q of a MBD system
         if self.MBD_item is not None:
-            for body in self.MBD_item.bodies:
-                header += body._excel_header_q()
+            for i, body in enumerate(self.MBD_item.bodies):
+                header_body_q_i = body._excel_header_q()
+                header += header_body_q_i
 
             #   header for dq of a MBD system
             for body in self.MBD_item.bodies:
-                # header += dq_i_header
-                header += body._excel_header_dq()
+                header_body_dq_i = body._excel_header_dq()
+                header += header_body_dq_i
 
         return header
 
@@ -828,6 +954,11 @@ class SolutionData(SolutionDataItem):
 
             plt.plot(x_data, y_data, marker=None, color=color, label=label)
 
+    def testing(self):
+        """"""
+        for i in xrange(0, 2):
+            print i, self._q_solution_container[i, 0:12]
+
 
 class SaveSolutionThread(threading.Thread):
 
@@ -848,6 +979,7 @@ class SaveSolutionThread(threading.Thread):
 if __name__ == "__main__":
     # filename = "solution_data.xlsx"
     filename = "solution_data_00_rigid.xlsx"
+    filename = "C://Users//lskrinjar//Dropbox//DyS//dynamic_systems//1_0_0_ancf-cantilever_2elements//solution_data_00.xlsx"
     # _file = "solution_data_01_hertz.sol"
     sol = SolutionData()
 

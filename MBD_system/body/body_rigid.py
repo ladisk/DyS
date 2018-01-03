@@ -144,6 +144,57 @@ class RigidBody(Body):
         elif self._geometry_type == "line":
             self.geometry = Line(parent=self)
 
+        elif self._geometry_type == "cylinder":
+            self.geometry = vtk.vtkCylinderSource()
+            self.geometry.SetRadius(self.R0)
+            self.geometry.SetHeight(self.L)
+            self.geometry.SetResolution(40)
+
+        elif self._geometry_type == "box-cylinder":
+            self.geometry_list = [None, None]
+
+            #   create a box
+            box = vtk.vtkBox()
+            box.SetBounds(-self.a,
+                          +self.a,
+                          -self.b,
+                          +self.b,
+                          -self.c,
+                          +self.c)
+
+            #   create a sphere
+            cylinder = vtk.vtkCylinder()
+            cylinder.SetRadius(self.R0)
+            # cylinder.SetCenter(0,0,0)
+
+            geometry_list = [box, cylinder]
+
+            # combine the two implicit functions
+            boolean = vtk.vtkImplicitBoolean()
+            boolean.SetOperationTypeToDifference()
+            # boolean.SetOperationTypeToUnion()
+            # boolean.SetOperationTypeToIntersection()
+            for geometry in geometry_list:
+                boolean.AddFunction(geometry)
+
+            #   The sample function generates a distance function from the implicit
+            #   function. This is then contoured to get a polygonal surface.
+            sample = vtk.vtkSampleFunction()
+            sample.SetImplicitFunction(boolean)
+            sample.SetModelBounds(-10E-3,
+                                  +10E-3,
+                                  -10E-3,
+                                  +10E-3,
+                                  -10E-3,
+                                  +10E-3)
+            sample.SetSampleDimensions(40, 40, 40)
+            sample.ComputeNormalsOn()
+
+            #   contour
+            self.surface = vtk.vtkContourFilter()
+            self.surface.SetInputConnection(sample.GetOutputPort())
+            self.surface.SetValue(0, 0.0)
+
         else:
             if self.geometry is None:
                 print "Body geometry file %s not found! Attribute self.geometry for body %s not created."%(self.geometry_filename, self._name)
@@ -221,6 +272,26 @@ class RigidBody(Body):
             self.vtk_actor = vtk.vtkActor()
             self.vtk_actor.SetMapper(self.vtk_mapper)
 
+        elif self._geometry_type == "cylinder":
+            #   mapper
+            self.vtk_mapper = vtk.vtkPolyDataMapper()
+            self.vtk_mapper.SetInputConnection(self.geometry.GetOutputPort())
+
+            #   actor
+            self.vtk_actor = vtk.vtkActor()
+            self.vtk_actor.SetMapper(self.vtk_mapper)
+
+        elif self._geometry_type == "box-cylinder":
+            #   mapper
+            self.vtk_mapper = vtk.vtkPolyDataMapper()
+            self.vtk_mapper.SetInputConnection(self.surface.GetOutputPort())
+            self.vtk_mapper.ScalarVisibilityOff()
+
+            #   actor
+            self.vtk_actor = vtk.vtkActor()
+            self.vtk_actor.SetMapper(self.vtk_mapper)
+            self.vtk_actor.GetProperty().EdgeVisibilityOff()
+
         else:
             print "Body geometry not known!"
 
@@ -251,10 +322,12 @@ class RigidBody(Body):
 
             self.vtk_actor.SetPosition(self.R)
             self.vtk_actor.SetOrientation(np.rad2deg(self.theta))
+            print "test =", self.vtk_actor.GetProperty().GetColor(), self._name
 
-        for geom in self.geometry_list:
-            geom.vtk_actor.SetPosition(self.R)
-            geom.vtk_actor.SetOrientation(np.rad2deg(self.theta))
+        for i, geom in enumerate(self.geometry_list):
+            if hasattr(geom, "vtk_actor"):
+                geom.vtk_actor.SetPosition(self.R)
+                geom.vtk_actor.SetOrientation(np.rad2deg(self.theta))
 
         # #   LCS marker
         # self.update_vtk_LCS()

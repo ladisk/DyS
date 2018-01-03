@@ -53,6 +53,11 @@ class ContactPointRCJ(DistanceRCJ):
         #   status of contact point
         self.active = True
 
+        #   contact point found
+        self._contact_point_found = False
+
+        self.sign_list = [+1, -1]
+
         #   visualization properties
         self.scale = scale
 
@@ -67,6 +72,10 @@ class ContactPointRCJ(DistanceRCJ):
         #   normals and tangents in GCS
         self._n_GCS_list = [np.zeros(2, dtype="float32"), np.zeros(2, dtype="float32")]
         self._t_GCS_list = [np.zeros(2, dtype="float32"), np.zeros(2, dtype="float32")]
+
+        #   contact geometry
+        self._n_GCS = None
+        self._t_GCS = None
 
         #   contact force
         self.Fn = 0.
@@ -95,13 +104,9 @@ class ContactPointRCJ(DistanceRCJ):
                 F = Force(body_id, force_name=self._parent._name + "_F" + dir + "_on_body_" + str(body_id), visible=visibility, scale=self.scale, parent=self._parent)
                 F_list.append(F)
 
-                #   create force visualization datad
-                F.set_vtk_data()
-                #   add force actor to renderer
-                if F.vtk_actor is not None:
-                    self._parent._parent._parent._parent.dys.simulation_control_widget.vtkWidget.renderer.AddActor(F.vtk_actor)
-                else:
-                    print Warning, "Force visualizations not created!"
+                #   create force visualization data
+                ren = self._parent._parent._parent._parent.dys.simulation_control_widget.vtkWidget.renderer
+                F.set_vtk_data(renderer=ren)
 
                 #   append force object to list of forces of MBD system object
                 self._parent._parent._parent.forces.append(F)
@@ -129,7 +134,7 @@ class ContactPointRCJ(DistanceRCJ):
         self._Fn_list = []
         self._Ft_list = []
 
-    def _remove_forces(self, F_list):
+    def _remove_forces_OLD(self, F_list):
         """
 
         :param F_list:
@@ -155,6 +160,31 @@ class ContactPointRCJ(DistanceRCJ):
                 self._parent._parent._parent.bodies[body_id].forces.remove(F)
 
                 del F
+
+    def remove_forces(self, F_list):
+        """
+        Remove force objects from lists
+        :return:
+        """
+        print "_remove_forces()"
+        for F, body_id in zip(F_list, self._parent.body_id_list):
+            print "F =", F
+            if F in self._parent._parent._parent.forces:
+                print "force removed!"
+                self._parent._parent._parent.forces.remove(F)
+
+            if F in self._parent._parent._parent.bodies[body_id].forces:
+                self._parent._parent._parent.bodies[body_id].forces.remove(F)
+
+    def _clear_VTK_data(self, F_list):
+        """
+
+        :param F_list:
+        :return:
+        """
+        for F in F_list:
+            if F.vtk_actor is not None and F.renderer is not None:
+                F.remove_vtk_data()
 
     def set_dq0(self, dq0_n=None, dq0_t=None):
         """
@@ -191,5 +221,48 @@ class ContactPointRCJ(DistanceRCJ):
         """
         self.Fn = Fn
         self.Ft = Ft
+
         self.F = self.Fn * self.normal + self.Ft * self.tangent
 
+    def contact_velocity(self, q):
+        """
+        Function evaluates relative contact velocity vectors in normal and tangent direction
+        :param q:
+        :return:
+        """
+        dr_P = [np.zeros(2, dtype="float32"), np.zeros(2, dtype="float32")]
+
+        for i, (body_id, u_P) in enumerate(zip(self.body_id_list, self.u_P_LCS_list)):
+            #   body velocity, R, theta
+            dR = q2dR_i(q, body_id)
+            theta = q2theta_i(q, body_id)
+            #    dtheta - omega
+            dtheta = q2dtheta_i(q, body_id)
+            #    point velocity
+            dr_P_i = dr_contact_point_uP(dR, theta, dtheta, u_P)
+            #    update list
+            dr_P[i] = dr_P_i
+
+        #    relative contact velocity vector
+        _dq = dr_P[1] - dr_P[0]
+
+        #   relative contact velocity
+        #   normal direction
+        self._n_GCS = self.normal
+        self._dq_n = np.dot(_dq, self._n_GCS)
+
+        #   tangent direction
+        self._t_GCS = self.tangent
+        self._dq_t = np.dot(_dq, self._t_GCS)
+
+        return self._dq_n, self._dq_t
+
+    def evaluate_contact_point(self):
+        """
+        
+        :return: 
+        """
+        print "contact_geometry_LCS() @", __name__
+        for i, (body_id, sign) in enumerate(zip(self.body_id_list, self.sign_list)):
+            self._n_GCS_list[i] = sign * self.normal
+            self._t_GCS_list[i] = sign * self.tangent

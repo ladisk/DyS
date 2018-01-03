@@ -116,7 +116,7 @@ class Contact(ContactItem):
         self.contact_geometry_list = [None, None]
 
         #   position of contact in z direction
-        self.z_dim = 0
+        self.z_dim = 0.
 
         #   vector of initial positions
         self.q0 = self._parent._parent.evaluate_q0()
@@ -126,6 +126,8 @@ class Contact(ContactItem):
         self._t = 0.
         self._distance = None
         self._sign_check = None
+        #   this variable is constant value for all types except pin-slot clearance joint
+        self.section_changed = False
 
         #   solution attributes
         #   save solution - properties
@@ -245,6 +247,8 @@ class Contact(ContactItem):
         self._dq_n = 0.
         self._dq_t = 0.
         self.initial_contact_velocity_calculated = False
+        self._dq0_n = 0.
+        self._dq0_t = 0.
 
         #   create solution containers
         self._solution_containers()
@@ -306,15 +310,21 @@ class Contact(ContactItem):
         if "type" in self.properties_contact_model:
             self.contact_model_type = self.properties_contact_model["type"]
 
+        if "_type" in self.properties_contact_model:
+            self.contact_model_type = self.properties_contact_model["_type"]
+
         if _n == 1 or _n == 0:
             _properties = extract_from_dictionary_by_string_in_key(properties_dict, "contact_model.")
-            if _properties["type"] in ContactModel._supported_types():
+
+            if _properties["_type"] in ContactModel._supported_types():
                 self.contact_model = ContactModel(self.contact_model_type, properties_dict=_properties, parent=self)
-            elif _properties["type"] in ContactModelCylinder._supported_types():
+
+            elif _properties["_type"] in ContactModelCylinder._supported_types():
                 self.contact_model = ContactModelCylinder(self.contact_model_type, properties_dict=_properties, parent=self)
+
             else:
                 self.contact_model = ContactModel(self.contact_model_type, properties_dict=_properties, parent=self)
-                raise Warning, "Contact model type not correct: %s", _properties["_type"]
+                raise Warning, "Contact model type not correct: %s" % _properties["_type"]
         else:
             self.contact_model = None
             for i in range(0, _n):
@@ -323,6 +333,7 @@ class Contact(ContactItem):
 
                 if _properties["_type"] in ContactModel._supported_types():
                     _contact_model = ContactModel(_properties["_type"], properties_dict=_properties, _substring=_substring, parent=self)
+
                 else:
                     _contact_model = ContactModelCylinder(_properties["_type"], properties_dict=_properties, _substring=_substring, parent=self)
 
@@ -338,8 +349,8 @@ class Contact(ContactItem):
 
         #    friction model
         self._dq_t_TOL = 1E-3
-        self.coef_of_friction_dynamic = 0
-        self.coef_of_friction_static = 0
+        self.coef_of_friction_dynamic = 0.
+        self.coef_of_friction_static = 0.
         self.properties_friction_model = extract_from_dictionary_by_string_in_key(properties_dict, "friction_model.")
 
         if self.friction_model_type is None:
@@ -617,7 +628,10 @@ class Contact(ContactItem):
         :param q:
         :return:
         """
+        print "evaluate_Q_e() @",__name__
         self.Q_e_list = []
+        print "self._Fn_list =", self._Fn_list
+        print "self._Ft_list =", self._Ft_list
         for Fn, Ft in zip(self._Fn_list, self._Ft_list):
             Q_e = Fn.evaluate_Q_e(t, q) + Ft.evaluate_Q_e(t, q)
             self.Q_e_list.append(Q_e)
@@ -759,20 +773,22 @@ class Contact(ContactItem):
         # print "_solve_ECF_N()"
         #   check if contact is finished
         #   contact
+
         if self.check_for_contact_continued_condition(_delta, _dq_n, q):
             for i, (contact_point, delta) in enumerate(zip(self._contact_point_obj_list, _delta)):
                 #   normal contact force
+                print "i =", i, "_delta =", _delta
                 Fn = self.contact_model.contact_force(delta, contact_point._dq_n, dq0_n=contact_point._dq0_n)
+
                 #   tangent contact force
                 Ft = self.friction_model.friction_force(contact_point.Fn, contact_point._dq_t)
-                # print contact_point, "Fn =", Fn, "Ft =", Ft, "_delta =", _delta
+
+                #   evaluate contact force vector
                 contact_point.evaluate_F(Fn, Ft)
 
         #   no contact
         else:
-            print "CONTACT FINISHED - self._step =", self._step
-            print "delta =", _delta
-
+            print "NO CONTACT"
             self._contact_point_found = False
             self.initial_contact_velocity_calculated = False
             self.contact_distance_inside_tolerance = False
@@ -795,12 +811,15 @@ class Contact(ContactItem):
         self._update_contact_forces(q)
 
     def _update_contact_forces(self, q):
+        """
 
+        :param q:
+        :return:
+        """
         #   create, update or delete force object of contact forces at contact points
         for i, contact_point in enumerate(self._contact_point_obj_list):
             if contact_point._contact_point_found and contact_point.active:
-                for body_id, Fn_i, Ft_i, u_P_i, n_i, t_i in zip(contact_point.body_id_list, contact_point._Fn_list, contact_point._Ft_list, contact_point.u_P_LCS_list, contact_point._n_GCS_list, contact_point._t_GCS_list):
-
+                for j, (body_id, Fn_i, Ft_i, u_P_i, n_i, t_i) in enumerate(zip(contact_point.body_id_list, contact_point._Fn_list, contact_point._Ft_list, contact_point.u_P_LCS_list, contact_point._n_GCS_list, contact_point._t_GCS_list)):
                     #   print only contact point of body j - pin
                     #   normal force
                     Fn_i.update_F(q=q, step=self._step, F=contact_point.Fn * n_i, u_P=u_P_i)

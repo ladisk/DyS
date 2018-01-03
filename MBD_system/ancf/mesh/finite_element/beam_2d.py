@@ -151,7 +151,7 @@ class Beam2D(Body):
 
         :return:
         """
-        return 21
+        return 41
 
     def _evaluate_S(self, ksi):
         """
@@ -198,6 +198,7 @@ class Beam2D(Body):
 
         self.vtk_actor = vtk.vtkActor()
         self.vtk_actor.SetMapper(self.vtk_mapper)
+        self.vtk_actor.GetProperty().SetLineWidth(10)
         self.vtk_actor.GetProperty().SetColor(self.color)
 
         if self.mesh._parent._visible_elements:
@@ -316,8 +317,11 @@ class Beam2D(Body):
         # print "self.evaluate_T() =", self.evaluate_T()
         # print "self.evaluate_B() =", self.evaluate_B()
         # print "e =", e
+        if self.mesh is not None:
+            e_i = reduce(np.dot, [self.evaluate_T(), self.evaluate_B(), e])
 
-        e_i = reduce(np.dot, [self.evaluate_T(), self.evaluate_B(), e])
+        else:
+            e_i = e
 
         # else:
         #     if self.mesh is None:

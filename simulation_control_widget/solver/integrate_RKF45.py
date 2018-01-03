@@ -139,7 +139,7 @@ class IntegrateRKF45(DynamicAnalysis):
         if self.FLAG_contact == -1:
             h = 0.5 * h
 
-        if h < self.Hmin:
+        if h < self.Hmin and t < self.t_n - self.Hmin:
             print "h =", h
             print "self.Hmin =", self.Hmin
             print "self.absTol =", self.absTol
@@ -318,6 +318,11 @@ class IntegrateRKF45(DynamicAnalysis):
                 self.refresh(t=t, q=w)
                 self.stop_solve()
                 self.FLAG = 0
+
+            if np.isnan(t):
+                self._error = True
+                self.failed = True
+                print "t is NaN! Check Hmax!"
 
         if self._error or self.failed or self.simulation_error.error:
             print "self._error =", self._error

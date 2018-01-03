@@ -55,6 +55,7 @@ class MovieMaker(threading.Thread):
         """
         self.windowToImageFilter = vtk.vtkWindowToImageFilter()
         self.windowToImageFilter.SetInput(renWin)
+        # self.windowToImageFilter.SetMagnification(1)
         self.windowToImageFilter.SetInputBufferTypeToRGB()
         self.windowToImageFilter.ReadFrontBufferOn()#Off
         self.windowToImageFilter.Update()
@@ -66,11 +67,14 @@ class MovieMaker(threading.Thread):
         """
         if self.windowToImageFilter is not None:
             self.movieWriter = vtk.vtkAVIWriter()
+            self.movieWriter.SetQuality(2)
             # self.movieWriter = vtk.vtkOggTheoraWriter()
             self.movieWriter.SetInputConnection(self.windowToImageFilter.GetOutputPort())
 
             filename = self._name + ".avi"
             # filename = self._name + ".ogv"
             self.movieWriter.SetFileName(filename)
+
+            print "Animation saved to file: %s"%filename
 
             # self.movieWriter.Start()

@@ -4,7 +4,6 @@ from pprint import pprint
 import itertools
 from operator import attrgetter
 import numpy as np
-from OpenGL.GL import *
 import matplotlib.pyplot as plt
 
 

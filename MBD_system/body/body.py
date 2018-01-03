@@ -76,6 +76,12 @@ class Body(BodyItem):
         self.q_i_dim = None
         self.M = None
         self.M_size = None
+        #   cylinder radius
+        self.R0 = None
+        #   sube size
+        self.a = None
+        self.b = None
+        self.c = None
 
         #   material properties
         self.density = 0.
@@ -232,11 +238,26 @@ class Body(BodyItem):
         self._set_vtk_data()
 
         #   common settings
-        self.vtk_actor.GetProperty().SetColor(self.color)
-        self.vtk_actor.GetProperty().SetOpacity(self.transparent)
+        if self.vtk_actor is not None:
+            # self.vtk_actor.GetProperty().SetColor(0, 1, 0)
+            self.vtk_actor.GetProperty().SetColor(self.color)
+            self.vtk_actor.GetProperty().SetOpacity(self.transparent)
 
-        self.vtk_actor.SetPosition(self.R)
-        self.vtk_actor.SetOrientation(np.rad2deg(self.theta))
+            self.vtk_actor.SetPosition(self.R)
+            if self._geometry_type in ["cylinder", "box-cylinder"]:
+                self.theta[0] = np.pi / 2.
+                # if self._geometry_type in ["box-cylinder"]:
+                #     self.vtk_actor.SetDiffuseColor(self.color)
+
+            self.vtk_actor.SetOrientation(np.rad2deg(self.theta))
+
+
+
+                # if self._geometry_type in ["box-cylinder"]:
+
+
+        else:
+            print "vtk_actor for body object " + self._name + " is None!"
 
         #   marker of LCS
         self.set_vtk_LCS()

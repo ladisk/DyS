@@ -12,7 +12,6 @@ from OpenGL.GL import *
 
 from MBD_system.A import A_matrix
 from MBD_system.contact.contact import Contact
-from MBD_system.contact.distance.distance_RCJ import DistanceRCJ
 from MBD_system.contact_model.contact_model_cylinder import ContactModelCylinder
 from MBD_system.dr_contact_point_uP import dr_contact_point_uP
 from MBD_system.q2dR_i import q2dR_i
@@ -24,6 +23,9 @@ from MBD_system.transform_cs import uP_gcs2lcs
 from MBD_system.u_P_lcs2gcs import u_P_lcs2gcs
 from MBD_system.q2R_i import q2R_i
 from MBD_system.n2t import n2t
+from simulation_control_widget.vtk_widget.marker.marker import Marker
+from MBD_system.contact.distance.distance_RCJ import DistanceRCJ
+from MBD_system.contact.distance.contact_point_RCJ import ContactPointRCJ
 
 
 class RevoluteClearanceJoint(Contact):
@@ -110,7 +112,7 @@ class RevoluteClearanceJoint(Contact):
             node = np.array(np.append(_u_P, self.z_dim), dtype='float32')
             
             #    create marker object
-            _marker = Marker(node, visible=True, parent=body)
+            _marker = Marker(node, parent=body)
             
             #    append marker to list of body markers
             body.markers.append(_marker)
@@ -123,20 +125,21 @@ class RevoluteClearanceJoint(Contact):
         """
         Function checks condition for contact
         """
-        if (sign == -1) and (delta <= 0):
+        if (sign[0] == -1) and (delta <= 0):
             return True
-        elif (sign == +1) and (delta <= 0) and (np.sign(self._distance_solution_container[-1]) == -1) and (self._distance_solution_container[-1] > delta):
+        elif (sign[0] == +1) and (delta <= 0) and (np.sign(self._distance_solution_container[-1]) == -1) and (self._distance_solution_container[-1] > delta):
             return True
         else:
             return False
 
-    def check_for_contact_continued_condition(self, delta, dq_n):
+    def check_for_contact_continued_condition(self, delta, dq_n, q):
         """
         Function checks condition for contact to continue
         :param delta:
+        :param dq_n:
         :return:
         """
-        return (delta <= self._delta0)# and (dq_n < self._dq0_n)
+        return delta <= self._delta0 # and (dq_n < self._dq0_n)
 
     def check_for_contact(self, step, t, q):
         """
@@ -155,7 +158,7 @@ class RevoluteClearanceJoint(Contact):
         # self._distance_solution_container = np.append(self._distance_solution_container, self._delta)
 
         #   check sign
-        self._sign_check = np.sign(self._delta * self._distance_solution_container[-1])
+        self._sign_check = [np.sign(self._delta * self._distance_solution_container[-1])]
 
         #    contact has happened, but time step has to be reduced as initial penetration depth is too large
         # if (np.sign(self._dqn_solution_container[-1]) == +1) or (self._dqn_solution_container[-1] == 0) and (self._sign_check == -1) and (self._distance >= self._radial_clearance):
@@ -167,9 +170,14 @@ class RevoluteClearanceJoint(Contact):
             if abs(self._delta) <= self.distance_TOL:
                 # print "check 2"
                 self._delta0 = self._delta
-                # print "------------------------------"
-                # print "contact detected"
-                # print "step =", self._step
+                self._contact_point_obj = ContactPointRCJ(self._distance_obj, parent=self)
+                self._contact_point_obj._contact_point_found = True
+                self._contact_point_obj.evaluate_contact_point()
+                self._contact_point_obj_list = [self._contact_point_obj]
+
+                print "------------------------------"
+                print "contact detected"
+                print "step =", self._step
                 # print "self._sign_check =", self._sign_check
                 # print "self._distance_solution_container[-1] =", self._distance_solution_container[-1]
                 # print "self._delta0 =", self._delta0
@@ -193,6 +201,53 @@ class RevoluteClearanceJoint(Contact):
         self.no_contact()
 
         return 0
+
+    def _solve_ECF_N(self, t, q, _delta, _dq_n, _dq_t):
+        """
+        Function evaluates contact forces based on selected contact and friction model
+        :param t:       time (np.float)
+        :param q:       vector of displacements and velocities (np.array)
+        :param _delta:  penetration depth (np.float)
+        :param _dq_n:   relative normal contact velocity (np.float)
+        :param _dq_t:   relative tangent contact velocity (np.float)
+        :returns None:
+        """
+        # print "_solve_ECF_N()"
+        #   check if contact is finished
+        #   contact
+
+        if self.check_for_contact_continued_condition(_delta, _dq_n, q):
+            self.Fn = self.contact_model.contact_force(_delta, self._contact_point_obj._dq_n, dq0_n=self._contact_point_obj._dq0_n)
+
+            #   tangent contact force
+            self.Ft = self.friction_model.friction_force(self._contact_point_obj.Fn, self._contact_point_obj._dq_t)
+
+            #   evaluate contact force vector
+            self._contact_point_obj.evaluate_F(self.Fn, self.Ft)
+
+        #   no contact
+        else:
+            print "NO CONTACT"
+            self._contact_point_found = False
+            self.initial_contact_velocity_calculated = False
+            self.contact_distance_inside_tolerance = False
+            self.contact_detected = False
+            self.status = 0
+
+            # fig = plt.figure(num=1, figsize=(6, 4), dpi=100, facecolor='w', edgecolor='k')
+            # ax = plt.subplot(111, aspect="equal")
+            # for i, contact_point in enumerate(self._contact_point_obj_list):
+            #     contact_point.plot()
+            # filename = "step_" + str(self._step).zfill(4) + "_contact_finished" + ".png"
+            # plt.savefig(filename)
+            # print "Plot saved to file: ", filename
+            # plt.clf()
+
+            #   delete force objects from contact force lists (normal and tangent direction)
+            self.no_contact()
+
+        #   update contact forces
+        self._update_contact_forces(q)
 
     def _contact_update_condition(self):
         """
@@ -246,6 +301,7 @@ class RevoluteClearanceJoint(Contact):
         Function calculates normal and tangent vector of body i, j in GCS
         """
         #   normal in GCS of body i, j
+
         self._n_GCS_list = [+self._n_GCS, -self._n_GCS]
 
         #   tangent in GCS of body i, j
@@ -282,34 +338,30 @@ class RevoluteClearanceJoint(Contact):
         self._distance_obj = DistanceRCJ(self.r_CP_GCS_list[0], self.r_CP_GCS_list[1], parent=self)
 
         #   penetration depth is difference between nominal radial clearance and actual calculated clearance at time t
-        _distance = self._distance_obj._distance
-        _delta = self._radial_clearance - _distance
+        distance = self._distance_obj._distance
+        delta = self._radial_clearance - distance
         
         #   unit vector in direction from one center to another (pin to hole)
-        _n_GCS = self._distance_obj._distance_vector / self._distance_obj._distance
+        n_GCS = self._distance_obj._distance_vector / self._distance_obj._distance
+
+        #   normal unit vector for body i, j
+        n_GCS_list = [n_GCS, -n_GCS]
 
         #    tangent in GCS
-        _t_GCS = n2t(_n_GCS)
+        t_GCS = n2t(n_GCS)
 
-        #   create normal list in GCS
-#         self._n_GCS_list = [-self._n_GCS, +self._n_GCS]
-#         self._t_GCS_list = []
-
-#         #   calculate a actual contact point in revolute clearance joint of each body in GCS
+        #   calculate a actual contact point in revolute clearance joint of each body in GCS
         self.r_P_GCS_list = copy.copy(self.r_P_GCS_0_list)
+
         #   evaluate actual contact point in LCS of each body and in GCS
-        for i, (_u_CP_GCS, _u_CP_LCS, _R0) in enumerate(zip(self.r_CP_GCS_list, self.u_CP_LCS_list, self.R0_list)):
+        for i, (_u_CP_GCS, _u_CP_LCS, _R0, n_i) in enumerate(zip(self.r_CP_GCS_list, self.u_CP_LCS_list, self.R0_list, n_GCS_list)):
             #   contact point in GCS
-            _u_P_GCS = _u_CP_GCS + _R0 * self._n_GCS
+            _u_P_GCS = _u_CP_GCS + _R0 * n_i
  
             #   add to list
             self.r_P_GCS_list[i] = _u_P_GCS
-# 
-#             #   create normal in GCS of a body
-#             t_i = n2t(n_i)
-#             self._t_GCS_list.append(t_i)
 
-        return _distance, _delta, _n_GCS, _t_GCS
+        return distance, delta, n_GCS, t_GCS
     
     def _contact_geometry_LCS(self, q):
         """
@@ -324,14 +376,14 @@ class RevoluteClearanceJoint(Contact):
         self._n_LCS_list = []
 
         #    vector of contact point in LCS
-        for i, (body_id, _normal, r_P) in enumerate(zip(self.body_id_list, self._n_GCS_list, self.r_P_GCS_list)):
+        for i, (body_id, n_i, r_P) in enumerate(zip(self.body_id_list, self._n_GCS_list, self.r_P_GCS_list)):
             #    R
             R_i = q2R_i(q, body_id)
             #   theta
             theta_i = q2theta_i(q, body_id)
 
             #   normal in LCS
-            normal_LCS = uP_gcs2lcs(u_P=_normal, theta=theta_i)
+            normal_LCS = uP_gcs2lcs(n_i, theta=theta_i)
             #   append normal to list
             self._n_LCS_list.append(normal_LCS)
 
@@ -439,42 +491,35 @@ class RevoluteClearanceJoint(Contact):
         
         return _delta
 
-    def _paint_GL_GCS(self, step=None):
+    def contact_velocity(self, q):
         """
-        Paint contact point in GCS
+        Function evaluates relative contact velocity vectors in normal and tangent direction
+        :param q:
         :return:
         """
-        #   during integration process (simulation)
-        if step is None:
-            #   display contact point in GCS on each body in contact
-            if self.contact_detected:
+        dq_n, dq_t = self._contact_point_obj_list[0].contact_velocity(q)
 
-                #   actual contact point on body i, j in GCS
-                for body_id, r_P_GCS, Fn, Ft in zip(self.body_id_list, self.r_P_GCS_list, self._Fn_list, self._Ft_list):
-                    if Fn._visible or Ft._visible:
-                        glColor3f(self._bodies[body_id].color_GL[0], self._bodies[body_id].color_GL[1], self._bodies[body_id].color_GL[2])
-                        glVertex3f(r_P_GCS[0], r_P_GCS[1], self.z_dim)
+        return dq_n, dq_t
 
-            #   center of pin and hole
-            if self._distance_obj is not None:
-                for body_id, r_P in zip(self.body_id_list, [self._distance_obj.r_iP, self._distance_obj.r_jP]):
-                    #    paint pin center in GCS
-                    glColor3f(self._bodies[body_id].color_GL[0], self._bodies[body_id].color_GL[1], self._bodies[body_id].color_GL[2])
-                    glVertex3f(r_P[0], r_P[1], self.z_dim)
+    def _no_contact(self):
+        """
 
-        #   during animation
-        else:
-            #   paint contact point only if contact is present (status=1)
-            if self._status_container[step] == 1:
-                for i, (body_id, Fn, Ft) in enumerate(zip(self.body_id_list, self._Fn_list, self._Ft_list)):
-                    if Fn._visible or Ft._visible:
-                        glColor3f(self._bodies[body_id].color_GL[0], self._bodies[body_id].color_GL[1], self._bodies[body_id].color_GL[2])
-                        glVertex3f(self._r_P_solution_container[step][i][0], self._r_P_solution_container[step][i][1], self.z_dim)
+        :return:
+        """
+        for i, contact_point in enumerate(self._contact_point_obj_list):
+            if contact_point.active:
+                contact_point.deactivate_forces()
+
+            else:
+                contact_point.remove_forces()
+
+        self._contact_point_obj = None
 
     def testing(self):
-#         #    evaluate rCP vector of center points in GCS of pin and hole
-#         q = self._parent._parent.evaluate_q()
-#         print self._contact_geometry_CP_GCS(q)
+        """
+
+        :return:
+        """
         print self.contact_model
         pprint(vars(self.contact_model))
 

@@ -80,6 +80,7 @@ class DAEfun(object):
         """
         Create mass matrix
         """
+        print "PREPROCESSING STARTED"
         #   size of mass matrix of MBD system
         self.M_dim = self.MBD_system.evaluate_M_size()
 
@@ -98,6 +99,8 @@ class DAEfun(object):
             _row += body.M_size
 
         self.M = M
+        print "self.M ="
+        print self.M
         self.M_created = True
 
         #    inverse mass matrix
@@ -115,6 +118,8 @@ class DAEfun(object):
 
         #   set data of forces on flexible bodies - meshes
         self._set_forces_properties()
+
+        print "PREPROCESSING FINISHED"
 
     def _set_forces_properties(self):
         """
@@ -471,6 +476,7 @@ class DAEfun(object):
                     if isinstance(body_id, int) and Q_e_ij is not None:
                         Q_e[np.sum(GlobalVariables.q_i_dim[0:body_id]):np.sum(GlobalVariables.q_i_dim[0:body_id + 1])] += Q_e_ij
 
+        # print "Q_e =", Q_e
         return Q_e
 
     def evaluate_Q_s(self, q):
@@ -596,23 +602,14 @@ class DAEfun(object):
             Q_d = self.evaluate_Q_d(q)
 
         _vector[self.M_dim:rows] = Q_d
-        # print "_vector ="
-        # print _vector
 
-        B = np.zeros([self.col_C_q, self.rows_C_q])
         B = self.C_qT
 
-        C = np.zeros([self.rows_C_q, self.col_C_q])
         C = self.C_q
 
         D = np.zeros([self.rows_C_q, self.rows_C_q])
 
         #    inverse matrix block-wise
-        # print "self.M_inv =", self.M_inv
-        # print "B =", B
-        # print "C =", C
-        # print "D =", D
-        # print "self.M_dim =", self.M_dim
         if B != [] and C != [] and D != []:
             _matrix_inverse = inverse_blockwise.inverse_blockwise(self.M_inv, B, C, D, self.M_dim)
         else:
@@ -660,7 +657,8 @@ class DAEfun(object):
         Solve all contact that are detected at integration time t
         """
         #   loop through all contacts
-        for contact in self.MBD_system.contacts:
+        for i, contact in enumerate(self.MBD_system.contacts):
+            # print "i =", i, "contact.contact_detected =", contact.contact_detected, "contact.status =", contact.status, "contact.active =", contact.active
             #   check if contact is detected and calculated contact distance is inside the tolerance, then contact is present
             if contact.contact_detected and contact.status == 1 and contact.active:#and contact.contact_distance_inside_tolerance
                 #   get contact forces

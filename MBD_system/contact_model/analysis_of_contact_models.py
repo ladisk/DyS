@@ -58,6 +58,7 @@ class MBD_solution_analysis(object):
             sol._plot(x, y, color=color, label=label)
                 # plt.plot(sol._t_solution_container, sol._q_sol_container[:, 6], color=color, linestyle="-", label=_label)
                 # plt.plot(sol._t_solution_container, sol._q_sol_container[:, 9], color=color, linestyle="--", label=_label)
+
         # Shink current axis by 20%
         # box = ax.get_position()
         # ax.set_position([box.x0, box.y0, box.width * 0.65, box.height])

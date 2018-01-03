@@ -176,9 +176,11 @@ class VTKWidget(QVTKRenderWindowInteractor):
             body.set_vtk_data()
 
             for geom in body.geometry_list:
-                geom.set_vtk_data()
-                if geom.vtk_actor is not None:
-                    self.renderer.AddActor(geom.vtk_actor)
+                if hasattr(geom, "set_vtk_data"):
+                    geom.set_vtk_data()
+
+                    if geom.vtk_actor is not None:
+                        self.renderer.AddActor(geom.vtk_actor)
 
             if body.vtk_actor is not None:
                 self.renderer.AddActor(body.vtk_actor)
@@ -201,7 +203,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
 
                     # body.vtkCreateBoxWidget(self.interactor)
 
-        # create main AABB frame vtk data for visualization
+        #   create main AABB frame vtk data for visualization
         for contact in self.MBD_system.contacts:
             contact.set_vtk_data(interactor=self.interactor)
             for AABB in contact.AABB_list:
@@ -211,14 +213,14 @@ class VTKWidget(QVTKRenderWindowInteractor):
             for marker in contact.markers:
                 self.renderer.AddActor(marker)
 
-        # display forces
+        #   display forces
         for i, force in enumerate(self.MBD_system.forces):
             force.set_vtk_data()
 
             if force.vtk_actor is not None:
                 self.renderer.AddActor(force.vtk_actor)
 
-        # add spring actors to renderer
+        #   add spring actors to renderer
         for i, spring in enumerate(self.MBD_system.springs):
             spring.set_vtk_data()
 
@@ -228,7 +230,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
             for marker in spring.markers:
                 self.renderer.AddActor(marker)
 
-        # joints
+        #   joints
         for i, joint in enumerate(self.MBD_system.joints):
             joint.set_vtk_data()
 
@@ -476,7 +478,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
 
         :return:
         """
-        dx0 = 10
+        dx0 = 10.
 
         #   filename
         self.textActor_filename = vtk.vtkTextActor()
@@ -487,10 +489,8 @@ class VTKWidget(QVTKRenderWindowInteractor):
         textProperty.SetFontSize(self.fontSize)
 
         self.textActor_filename.dx0 = dx0
-        self.textActor_filename.dy0 = 30
-        print "self.geometry().height() =", self.geometry().height()
-        print "self.textActor_filename.dy0 =", self.textActor_filename.dy0
-        print "1 =", self.geometry().height() - self.textActor_filename.dy0
+        self.textActor_filename.dy0 = 30.
+
         self.textActor_filename.SetPosition(self.textActor_filename.dx0, self.geometry().height() - self.textActor_filename.dy0)
         self.renderer.AddActor(self.textActor_filename)
 
@@ -503,7 +503,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
         textProperty.SetFontSize(self.fontSize)
 
         self.textActor_time.dx0 = dx0
-        self.textActor_time.dy0 = 60
+        self.textActor_time.dy0 = 60.
         self.textActor_time.SetPosition(self.textActor_time.dx0, self.geometry().height() - self.textActor_time.dy0)
         self.renderer.AddActor(self.textActor_time)
 
@@ -516,7 +516,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
         textProperty.SetFontSize(self.fontSize)
 
         self.textActor_step.dx0 = dx0
-        self.textActor_step.dy0 = 90
+        self.textActor_step.dy0 = 90.
         self.textActor_step.SetPosition(self.textActor_step.dx0, self.geometry().height() - self.textActor_step.dy0)
         self.renderer.AddActor(self.textActor_step)
 
@@ -529,7 +529,7 @@ class VTKWidget(QVTKRenderWindowInteractor):
         textProperty.SetFontSize(self.fontSize)
 
         self.textActor_stepSize.dx0 = dx0
-        self.textActor_stepSize.dy0 = 120
+        self.textActor_stepSize.dy0 = 120.
         self.textActor_stepSize.SetPosition(self.textActor_stepSize.dx0, self.geometry().height() - self.textActor_stepSize.dy0)
         self.renderer.AddActor(self.textActor_stepSize)
 
@@ -541,11 +541,10 @@ class VTKWidget(QVTKRenderWindowInteractor):
         textProperty.SetFontFamilyToCourier()
         textProperty.SetFontSize(self.fontSize)
 
-        self.textActor_time_date.dx0 = 300
-        self.textActor_time_date.dy0 = 30
+        self.textActor_time_date.dx0 = 300.
+        self.textActor_time_date.dy0 = 30.
         self.textActor_time_date.SetPosition(self.geometry().width() - self.textActor_time_date.dx0, self.geometry().height() - self.textActor_time_date.dy0)
         self.renderer.AddActor(self.textActor_time_date)
-        print "2 =", self.geometry().height() - self.textActor_time_date.dy0
 
     def refresh(self, step=None, h=None):
         """

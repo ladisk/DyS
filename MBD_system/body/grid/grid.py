@@ -81,7 +81,7 @@ class Grid(object):
         self.vtk_actor = vtk.vtkActor()
         self.vtk_actor.SetMapper(self.vtk_mapper)
         self.vtk_actor.GetProperty().SetRepresentationToWireframe()
-        self.vtk_actor.GetProperty().SetColor(self.color)
+        # self.vtk_actor.GetProperty().SetColor(self.color)
         self.vtk_actor.GetProperty().SetColor(.5, .5, .5)
 
     def update_vtk_data(self):

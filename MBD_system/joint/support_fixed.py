@@ -14,6 +14,7 @@ from MBD_system.joint.joint import Joint
 from MBD_system.joint.joint_C_q_matrix import Joint_C_q_matrix
 from global_variables import GlobalVariables
 from MBD_system.joint.support import Support
+from MBD_system.ancf.mesh.mesh import Mesh
 
 
 class SupportFixed(Support):
@@ -48,7 +49,8 @@ class SupportFixed(Support):
         #   number of constrained nodal coordinates of a support
         for body_id in self.body_id_list:
             if type(body_id) is int:
-                e_n = self._parent._parent.bodies[body_id].mesh.element_e_n
+                if isinstance(self._parent._parent.bodies[body_id].mesh, Mesh):
+                    e_n = self._parent._parent.bodies[body_id].mesh.element_e_n
 
                 #   number of constrained nodal coordinates by support
                 self.n_CNC = e_n / 2

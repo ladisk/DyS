@@ -189,22 +189,30 @@ class ContactModel(object):
         K = (4/(3 * np.pi * (self.h_i + self.h_j)))*(self.R0_j**0.5)
         return K
 
-    def _evaluate_h(self):
+    def _evaluate_h(self, E_list=[], ni_list=[]):
         """
 
         :return:
         """
         self.h_list = []
-        for body_id in self._parent.body_id_list:
-            body = self._parent._parent._parent.bodies[body_id]
 
-            _h = self._h(body.module_of_elasticity, body.poisson_ratio)
+        if not E_list and not ni_list:
+            for body_id in self._parent.body_id_list:
+                body = self._parent._parent._parent.bodies[body_id]
 
-            self.h_list.append(_h)
+                h_i = self._h(body.module_of_elasticity, body.poisson_ratio)
 
-        [h_i, h_j] = self.h_list
+                self.h_list.append(h_i)
 
-        return h_i, h_j
+        else:
+            for E_i, ni_i in zip(E_list, ni_list):
+                h_i = self._h(E_i, ni_i)
+
+                self.h_list.append(h_i)
+
+        [self.h_i, self.h_j] = self.h_list
+
+        return self.h_i, self.h_j
 
     def _h(self, E, ni):
         """
@@ -337,7 +345,7 @@ class ContactModel(object):
         :return:
         """
         #   hysteresis damping factor
-        self.ksi = self._hysteresis_damping_factor_LN()
+        self.ksi = self._hysteresis_damping_factor_LN(_dq_n)
         #    normal force
         _Fn = self._Fn(delta, _dq_n)
         return _Fn
@@ -432,101 +440,114 @@ class ContactModel(object):
         _Fn = self._Fn(delta, _dq_n)
         return _Fn
 
-    def hysteresis_damping_factor(self):
+    def hysteresis_damping_factor(self, dqn):
         """
         Function evaluates hysteresis damping factor based on type of contact model used only for testing not during simulation
         :return:
         """
+        ksi = 1.
+
         if self._type.lower() == "hertz":
             pass
+
         elif self._type.lower() == "kelvin-voigt":
             pass
+
         elif self._type.lower() == "lankarani-nikravesh":
-            ksi = self._hysteresis_damping_factor_LN()
+            ksi = self._hysteresis_damping_factor_LN(dqn)
+
         elif self._type.lower() == "hunt-crossley":
-            ksi = self._hysteresis_damping_factor_HC()
+            ksi = self._hysteresis_damping_factor_HC(dqn)
+
         elif self._type.lower() == "herbert-mcwhannell":
-            ksi = self._hysteresis_damping_factor_HM()
+            ksi = self._hysteresis_damping_factor_HM(dqn)
+
         elif self._type.lower() == "lee-wang":
-            ksi = self._hysteresis_damping_factor_LW()
+            ksi = self._hysteresis_damping_factor_LW(dqn)
+
         elif self._type.lower() == "flores et al":
-            ksi = self._hysteresis_damping_factor_Flores_etal()
+            ksi = self._hysteresis_damping_factor_Flores_etal(dqn)
+
         elif self._type.lower() == "zhiying-qishao":
-            ksi = self._hysteresis_damping_factor_ZQ()
+            ksi = self._hysteresis_damping_factor_ZQ(dqn)
+
         elif self._type.lower() == "gonthier et al":
-            ksi = self._hysteresis_damping_factor_Gonthier_etal()
+            ksi = self._hysteresis_damping_factor_Gonthier_etal(dqn)
+
         elif self._type.lower() == "hu-guo":
-            ksi = self._hysteresis_damping_factor_HG()
+            ksi = self._hysteresis_damping_factor_HG(dqn)
+
         else:
             raise ValueError, "Contact model type not defined! Define contact model type."
+
         return ksi * (self.K/self._dq0_n)
 
-    def _hysteresis_damping_factor_LN(self):
+    def _hysteresis_damping_factor_LN(self, dqn):
         """
         Lankarani-Nikravesh
         :return:
         """
-        ksi = (3./4.)*(1. - self.c_r ** 2)
+        ksi = (3./4.) * (1. - self.c_r ** 2)
         return ksi
 
-    def _hysteresis_damping_factor_HC(self):
+    def _hysteresis_damping_factor_HC(self, dqn):
         """
         Hunt-Crossley
         :return:
         """
-        ksi = (3/2.)*(1-self.c_r)
+        ksi = (3/2.) * (1-self.c_r)
         return ksi
 
-    def _hysteresis_damping_factor_HM(self):
+    def _hysteresis_damping_factor_HM(self, dqn):
         """
 
         :return:
         """
-        ksi = (6.*(1. - self.c_r))/((2.*self.c_r-1.)**2 + 3.)
+        ksi = (6. * (1. - self.c_r))/((2.*self.c_r - 1.)**2 + 3.)
         return ksi
 
-    def _hysteresis_damping_factor_LW(self):
+    def _hysteresis_damping_factor_LW(self, dqn):
         """
-
+        Lee-Wang
         :return:
         """
-        ksi = (3./4.)*(1. - self.c_r)
+        ksi = (3. / 4.) * (1. - self.c_r)
         return ksi
 
-    def _hysteresis_damping_factor_Flores_etal(self):
+    def _hysteresis_damping_factor_Flores_etal(self, dqn):
         """
         Flores et al
         :return:
         """
-        ksi = (8*(1-self.c_r))/(5*self.c_r)
+        ksi = (8. * (1. - self.c_r)) / (5. * self.c_r)
         return ksi
 
-    def _hysteresis_damping_factor_ZQ(self):
+    def _hysteresis_damping_factor_ZQ(self, dqn):
         """
 
         :return:
         """
-        ksi = ((3/4.)*(1-self.c_r**2)*np.exp(2*(1-self.c_r)))
+        ksi = ((3. / 4.) * (1. - self.c_r**2)*np.exp(2. * (1. - self.c_r)))
         return ksi
 
-    def _hysteresis_damping_factor_Gonthier_etal(self):
+    def _hysteresis_damping_factor_Gonthier_etal(self, dqn):
         """
         Gonthier et al
         :return:
         """
         #   dimensionless factor approximated by
-        d = 1-self.c_r**2
+        d = 1. - self.c_r**2
 
         #   hysteresis damping factor
-        ksi = (d/self.c_r)
+        ksi = (d / self.c_r)
         return ksi
 
-    def _hysteresis_damping_factor_HG(self):
+    def _hysteresis_damping_factor_HG(self, dqn):
         """
 
         :return:
         """
-        ksi = ((3/2.)*(1-self.c_r)/(2*self.c_r))
+        ksi = ((3./2.) * (1. - self.c_r) / (2. * self.c_r))
         return ksi
 
 

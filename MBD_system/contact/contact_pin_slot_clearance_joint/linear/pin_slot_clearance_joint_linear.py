@@ -458,6 +458,7 @@ class PinSlotClearanceJointLinear(Contact):
 
         if self.check_for_contact_continued_condition(self._delta, self._dq_n, q):
             self.status = 1
+
         else:
             self.status = 0
             self.contact_detected = False

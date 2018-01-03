@@ -5,7 +5,6 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
 from matplotlib.backends.backend_pdf import PdfPages
-import seaborn as sb
 
 from contact_model import ContactModel
 from MBD_system.fix_string import fix_string

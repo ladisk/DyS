@@ -163,6 +163,7 @@ class Mesh(object):
 
         self.vtk_actor = vtk.vtkActor()
         self.vtk_actor.SetMapper(self.vtk_mapper)
+        self.vtk_actor.GetProperty().SetLineWidth(10)
 
         self.vtk_cells = vtk.vtkCellArray()
 
@@ -507,16 +508,19 @@ class Mesh(object):
         :param e:
         :return:
         """
+        # print "evaluate_Q_s() @", __name__
         if self.K_constant_matrix:
             Q_s = np.dot(self.K, e)
         else:
             Q_s = np.zeros_like(e)
 
-            for element in self.elements:
+            for i, element in enumerate(self.elements):
+                # print i
                 e_i = element.evaluate_e_i(e_b=e)
                 Q_s_i = element.evaluate_Q_s(e_i)
                 Q_s += reduce(np.dot, [element.evaluate_B().T, element.evaluate_T().T, Q_s_i])
 
+        # print "Q_s =", Q_s
         return Q_s
 
     def evaluate_mass(self):

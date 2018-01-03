@@ -6,8 +6,7 @@ Created on 9. jul. 2014
 from pprint import pprint
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import rc
-from matplotlib import rcParams
+import matplotlib as mpl
 
 
 from MBD_system.fix_string import fix_string
@@ -57,7 +56,6 @@ class FrictionModel(object):
                        "leuven",
                        "bristle",
                        "reset integrator",
-                       "karnopp",
                        "bliman-sorine"]
 
         #   sub string
@@ -274,7 +272,7 @@ class FrictionModel(object):
         if abs(dq_t) > self.v1:
             Ft = self.__Ft_coulomb(Fn, dq_t)
         else:
-            #   here has to be implemented to access to Qe of a body and tangemt
+            #   here has to be implemented to access to Qe of a body and tangent
             Ft = 0.
 
         return Ft
@@ -294,14 +292,14 @@ if __name__ == "__main__":
     coef_of_friction_dynamic = 0.2
     coef_of_friction_static = 0.6
 
-    v0=10
-    v1=4
-    v_sigma=.002
-    delta_v=2
+    v0 = 10.
+    v1 = 4.
+    v_sigma = .002
+    delta_v = 2.
 
     models = []
 
-    Fn = 1
+    Fn = 1.
     dv = 0.001
     v = np.arange(-40, 40+dv, dv)
     gamma = .1
@@ -319,16 +317,19 @@ if __name__ == "__main__":
 
         models.append(model)
 
-    sb.set_style("whitegrid")
+    #   tex settings
+    fontsize = 10
+    useTex = True#False
+    mpl.rcParams['text.usetex'] = useTex
+    plt.rcParams['font.family'] = 'serif'
+    mpl.rcParams.update({'font.size': fontsize})
+
     fig = plt.figure(num=1, figsize=(6, 4), dpi=100, facecolor='w', edgecolor='k')
     ax = plt.subplot(111, aspect="auto")
     ax.ticklabel_format(style='sci',scilimits=(-4,4), axis='both')
     ax.xaxis.set_major_formatter(plt.NullFormatter())
-    ax.yaxis.set_major_formatter(plt.NullFormatter())
-
-    #   tex settings
-    rcParams['text.usetex'] = True
-    rc('font', family='serif')
+    # ax.yaxis.set_major_formatter(plt.NullFormatter())
+    plt.grid(True)
 
     for i, model in enumerate(models):
         model.Ft_solution_data = []
@@ -339,20 +340,28 @@ if __name__ == "__main__":
             model.Ft_solution_data.append(Ft)
 
         if i in [0, 1, 2, 3, 4, 5, 6, 7]:
-            plt.plot(v, np.array(model.Ft_solution_data), label=model._type)
+            plt.plot(v, np.array(model.Ft_solution_data), label=r"\ \textrm{%s}"%model._type)#model._type
 
-
-    plt.xlabel(r'\ $v_t$', fontsize=12)
-    plt.ylabel(r'\ $\mu$',  fontsize=12)
+    #   axis labels
+    plt.xlabel(r'\ $v_t$ [$\frac{m}{s}$]', fontsize=fontsize)
+    plt.ylabel(r'\ $\frac{\mu}{\mu_0} [/]$', fontsize=fontsize, rotation=0)
     plt.ylim([-1., 1.])
-    legend = plt.legend(frameon=1, loc='upper left')
-    frame = legend.get_frame()
-    frame.set_color('white')
+    legend = plt.legend(frameon=True, loc='upper left')
+    plt.setp(plt.gca().get_legend().get_texts(), fontsize=12)
+    # frame = legend.get_frame()
+    # frame.set_color('white')
 
+    ylabels = [item.get_text() for item in ax.get_yticklabels()]
+    # print "ylabels =", ylabels
+    ylabels[-7] = r'\ $-1$'
+    ylabels[-5] = r'\ $0$'
+    ylabels[-3] = r'\ $+1$'
+
+    ax.set_yticklabels(ylabels)
 
     # plt.savefig("c:\Users\lskrinjar\Documents\FS_3_pd\podiplomski seminar 2\PorociloPodiplomskiSeminar2\teoreticneOsnove\modeliSileTrenja\modeliSileTrenja_primerjava.pdf")
     filename = "modeliSileTrenja_primerjava.pdf"
     plt.savefig(filename)
-
+    print "Figure saved to file:", filename
     # plt.show()
 

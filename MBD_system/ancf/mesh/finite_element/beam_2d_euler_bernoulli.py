@@ -120,8 +120,9 @@ class Beam2DEulerBernoulli(Beam2D):
         e = np.zeros(self.e_n)
 
         #   coordinates
-        e[0:2] = self.mesh.nodes0[self.node_id_i][0:2]
-        e[4:6] = self.mesh.nodes0[self.node_id_j][0:2]
+        if self.mesh is not None:
+            e[0:2] = self.mesh.nodes0[self.node_id_i][0:2]
+            e[4:6] = self.mesh.nodes0[self.node_id_j][0:2]
 
         #   gradient coordinates
         de = np.array([np.cos(self.theta[2]), np.sin(self.theta[2])])

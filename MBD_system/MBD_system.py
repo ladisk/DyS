@@ -54,6 +54,7 @@ class MBDsystem(MBDsystemItem):
         """
         super(MBDsystem, self).__init__(MBD_filename, parent)
         self.list_of_object_groups = ["Bodies", "Forces", "Joints", "Contacts", "Springs", "Motions", "Measures", "Variables", "Markers"]
+        self.dict_of_object_group_indexes = {}
 
         #   paths to files
         self.abs_path_to_bodies = None
@@ -74,6 +75,7 @@ class MBDsystem(MBDsystemItem):
         self.Contacts = None
         self.Measures = None
         self.Variables = None
+        self.Solutions = None
 
         #   list of all paths
         self.abs_paths = []
@@ -110,10 +112,12 @@ class MBDsystem(MBDsystemItem):
         self.loaded_solution = None
         #   filetype, options:
         #   .dat, (.xlsx, .csv - not implemented yet)
+        self.solutionMBDFormat = "new" #    new or old
         self._solution_filetype = ".sol" #.sol,.xlsx
         self._solution_filetypes = [".sol",
                                     ".xlsx",
                                     ".dat"]
+
         self._soltuion_filetype_software = ["Solution file", "Excel file", "Text file"]
         #   options:
         #   discard
@@ -170,6 +174,8 @@ class MBDsystem(MBDsystemItem):
         self._log_file = LOG_FILENAME
         self.loadSolutionFileWhenFinished = False
         self.restoreInitialConditionsWhenFinished = False
+        #   a filename of solution
+        self.solutionFilename = None
 
         self._logger = logging.getLogger('DyS_logger')
         self._logger.addHandler(logging.StreamHandler())
@@ -445,7 +451,8 @@ class MBDsystem(MBDsystemItem):
         """
 
     def __create_groups(self):
-        for group_name in self.list_of_object_groups:
+        for i, group_name in enumerate(self.list_of_object_groups):
+            #   group object
             group_obj = GroupItem(group_name, parent=self)
             setattr(self, group_name, group_obj)
 
@@ -457,6 +464,10 @@ class MBDsystem(MBDsystemItem):
 
         group_obj = SolutionGroupItem("Solution", self)
         setattr(self, group_obj._name, group_obj)
+
+        for i, group_obj in enumerate(self._children):
+            #   index of group object at children list as dictionary
+            self.dict_of_object_group_indexes[group_obj._name] = i
 
     def _create_abs_path_to_group_file(self, group_name):
         abs_path_by_group = "abs_path_to_" + group_name.lower()
@@ -636,25 +647,29 @@ class MBDsystem(MBDsystemItem):
 
         #   create body
         if body_data_dict:
-            if body_data_dict["body_type"] == "rigid body":
-                body = RigidBody(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
-                # self.bodies.append(body)
+            if "body_type" in body_data_dict:
+                if body_data_dict["body_type"] == "rigid body":
+                    body = RigidBody(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
+                    # self.bodies.append(body)
 
-            elif body_data_dict["body_type"] == "flexible body":
-                body = FlexibleBody(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
-                # self.bodies.append(body)
-                # body.check_slope_discontinuity(parent=self.Joints)
-                for slope_discontinuity in body.mesh.slope_discontinuities:
-                    self.joints.append(slope_discontinuity)
+                elif body_data_dict["body_type"] == "flexible body":
+                    body = FlexibleBody(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
+                    # self.bodies.append(body)
+                    # body.check_slope_discontinuity(parent=self.Joints)
+                    for slope_discontinuity in body.mesh.slope_discontinuities:
+                        self.joints.append(slope_discontinuity)
 
-            elif body_data_dict["body_type"] == "point mass":
-                body = PointMass(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
+                elif body_data_dict["body_type"] == "point mass":
+                    body = PointMass(name=body_name, file_path=file_path, _dict=body_data_dict, parent=self.Bodies)
+
+                else:
+                    raise Warning, "Body data filename %s for body %s not found" % (file_path, body_name)
+
+                if body is not None:
+                    self.bodies.append(body)
 
             else:
-                raise "Body data filename %s for body %s not found"%(file_path, body_name)
-
-            if body is not None:
-                self.bodies.append(body)
+                print Warning, "Body attribute body_type not defined! Body object for body %s is not defined!" % body_name
 
         else:
             print "Body properties are not defined!"
@@ -1141,7 +1156,7 @@ class MBDsystem(MBDsystemItem):
         :return:
         """
         print "testing()@",__name__
-        print "N =", len(self.forces)
+        pprint(vars(self))
 
         # for contact_point in self.contacts[0]._contact_point_obj_list:
         #     contact_point.active = False

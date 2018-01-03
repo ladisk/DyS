@@ -36,7 +36,24 @@ class SolutionDataContact(SolutionData):
         self.filename = self._filename + self._filetype
         self.contact_model = None
 
+        #   read columns
+        self.read_uP = True
+        self.read_rP = True
+
         self._containers()
+
+    def _get_label(self):
+        """
+        
+        :return: 
+        """
+        if "-" not in self.contact_model:
+            label = self.contact_model.capitalize()
+
+        else:
+            label = self.contact_model.title().replace("C", "c")
+
+        return label
 
     def reset(self):
         """
@@ -265,7 +282,7 @@ class SolutionDataContact(SolutionData):
                                         self.__col_uP_solution_container,
                                         self.__col_rP_solution_container]
 
-    def read_file(self, _file_abs_path):
+    def read_file(self, file_abs_path=None):
         """
 
 
@@ -273,11 +290,11 @@ class SolutionDataContact(SolutionData):
         :return:
         """
         #   load data from file if already exists
-        _path, _file = os.path.split(_file_abs_path)
+        _path, _file = os.path.split(file_abs_path)
         self.filename, self._filetype = os.path.splitext(_file)
 
         if self._filetype == ".xlsx" or self._solution_filetype == ".xls":
-            self._read_excel_file(_file_abs_path)
+            self._read_excel_file(file_abs_path)
 
     def _read_excel_file(self, file_path):
         """
@@ -292,10 +309,15 @@ class SolutionDataContact(SolutionData):
         worksheet = workbook.sheet_by_name(self.__workbook_name)
 
         #   get contact model
-        __contact_model_type_info = worksheet.cell(0, 0).value
-        self.contact_model = __contact_model_type_info.encode('ascii','ignore')
+        cell_value = worksheet.cell(0, 0).value
+        if ":" in cell_value:
+            __contact_model_type_info = cell_value.strip()[cell_value.index(":")+2::]
+            self.contact_model = __contact_model_type_info.encode('ascii','ignore')
 
-        #   size of first column
+        else:
+            self.contact_model = cell_value
+
+            #   size of first column
         self.__N_col0 = len(worksheet.col(0))-2
 
         # for i, (sol_container_name, col_sol_container) in enumerate(zip(self.solution_container_names, self.__cols_containers_list)):
@@ -331,7 +353,7 @@ class SolutionDataContact(SolutionData):
         setattr(self, self.solution_container_names[0], array)
 
         #   contact status
-        array = np.array(worksheet.col_values(self.__col_status_container, start_rowx=2), dtype=np.int32)
+        array = np.array(worksheet.col_values(self.__col_status_container, start_rowx=2))
         setattr(self, self.solution_container_names[1], array)
 
         #   step size
@@ -363,23 +385,28 @@ class SolutionDataContact(SolutionData):
         setattr(self, self.solution_container_names[8], array)
 
         #   Fx
-        array_x = np.array(worksheet.col_values(self.__col_F_solution_container, start_rowx=2), dtype=np.float64)
-        array_y = np.array(worksheet.col_values(self.__col_F_solution_container + 1, start_rowx=2), dtype=np.float64)
+        Fx = worksheet.col_values(self.__col_F_solution_container, start_rowx=2)
+        array_x = np.array(Fx)#.replace('', np.nan)
+        Fy = np.array(worksheet.col_values(self.__col_F_solution_container + 1, start_rowx=2))
+        array_y = np.array(Fy)
         setattr(self, self.solution_container_names[9], np.array([array_x, array_y]))
 
         #   uPi and uPj of contact force in LCS
-        uP = []
-        for i in range(0, 4):
-            array = np.array(worksheet.col_values(self.__col_uP_solution_container + i, start_rowx=2), dtype=np.float64)
-            uP.append(array)
-        setattr(self, self.solution_container_names[10], np.array(uP))
+        if self.read_uP:
+            uP = []
+            for i in range(0, 4):
+                col = self.__col_uP_solution_container + i
+                array = np.array(worksheet.col_values(col, start_rowx=2))
+                uP.append(array)
+            setattr(self, self.solution_container_names[10], np.array(uP))
 
         #   rPi and rPj of contact force in GCS
-        rP = []
-        for i in range(0, 4):
-            array = np.array(worksheet.col_values(self.__col_rP_solution_container + i, start_rowx=2), dtype=np.float64)
-            rP.append(array)
-        setattr(self, self.solution_container_names[11], np.array(rP))
+        if self.read_rP:
+            rP = []
+            for i in range(0, 4):
+                array = np.array(worksheet.col_values(self.__col_rP_solution_container + i, start_rowx=2))
+                rP.append(array)
+            setattr(self, self.solution_container_names[11], np.array(rP))
 
     def plot(self, x, y, color=None, label=None, str_id=None):
         """

@@ -24,6 +24,8 @@ from solver.solver_process_manager import SolverProcessManager
 from signals import StatusSignal
 from movie_maker.movie_maker import MovieMaker
 from signals import SignalSimulationStatus
+from MBD_system.solution_data.solution_data import SolutionData
+
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -72,7 +74,7 @@ class SimulationControlWidget(QtGui.QWidget):
         self.pool.setMaxThreadCount(1)
         
         self.MBD_system = MBD_system
-        self.simulation_control_widget = self
+        # self.simulation_control_widget = self
 
         #   when simulation is finishes
         #   automatically load solution file
@@ -116,18 +118,23 @@ class SimulationControlWidget(QtGui.QWidget):
         
         #   simulation time step
         self.step = 0
+        self._step = 0
+
+        #   animation properties
+        self._delta_step = None
             
-        #   Hmin
+        #   H min
         self.MBD_system.evaluate_Hmin()
 
+        #   H max
         self.ui.Hmax.setText(str(self.MBD_system.Hmax))
         self.ui.Hmax.setValidator(__validator_dbl)
         
-        #   Hmin
+        #   H min
         self.ui.Hmin.setText(str(self.MBD_system.Hmin))
         self.ui.Hmin.setValidator(__validator_dbl)
         
-        #   Hcontact
+        #   H contact
         self.ui.Hcontact.setText(str(self.MBD_system.Hcontact))
         
         #    abs tol
@@ -178,6 +185,7 @@ class SimulationControlWidget(QtGui.QWidget):
             self._delta_step = self.solver.analysis.update_opengl_widget_every_Nth_step
 
         self.ui.updateStep_lineEdit.setValidator(__validator_int)
+        self.ui.updateStep_lineEdit.setText(str(int(self.MBD_system.updateEveryIthStep)))
 
         #   update display on dt of simulation time
         #   default value
@@ -188,7 +196,6 @@ class SimulationControlWidget(QtGui.QWidget):
 
         self.ui.updateDt_lineEdit.setValidator(__validator_dbl)
         self.ui.updateDt_lineEdit.setText(str(self._dt))
-
 
         self.ui.currentStep_lineEdit.setEnabled(False)
         self.ui.currentStep_lineEdit.setValidator(__validator_int)
@@ -229,6 +236,16 @@ class SimulationControlWidget(QtGui.QWidget):
 
         #   connections
         self.connect_UIWidgetItems2variables()
+
+        #   check if solutionfile is defined and load it
+        if self.MBD_system.solutionFilename is not None:
+            solutionFilePath = os.path.join(self.MBD_system.MBD_folder_abs_path, self.MBD_system.solutionFilename)
+            if os.path.isfile(solutionFilePath):
+
+                self.__automaticaly_load_solution_file(filename=solutionFilePath)
+            else:
+                print "Solution File not found at path %s: " % self.MBD_system.MBD_folder_abs_path
+                print "Check Filename: %s" % self.MBD_system.solutionFilename
 
     def setMBDsystem(self, MBD_system):
         """
@@ -391,9 +408,7 @@ class SimulationControlWidget(QtGui.QWidget):
         :param solution_data_object:    a solution data object with attribute solution_data
         :return: None
         """
-        print "solution_data_object_ID =", solution_data_object_ID
-        print "filename =", filename
-        if self.MBD_system.loadSolutionFileWhenFinished:
+        if self.MBD_system.loadSolutionFileWhenFinished or self.MBD_system.solutionFilename is not None:
             self.load_solution_file(solution_data_object_ID, filename)
 
     def load_solution_file(self, solution_object_id=None, filename=None):
@@ -401,8 +416,22 @@ class SimulationControlWidget(QtGui.QWidget):
         Function loads solution data from object (first) or from file (second)
         """
         if solution_object_id is None:
-            #   assign solution data from solution data object to ne variable
-            solution_data = self.solver.analysis._solution_data.load_solution_data()
+            #   assign solution data from solution data object to new variable
+            if isinstance(self.solver.analysis._solution_data, SolutionData):
+                solution_data = self.solver.analysis._solution_data.load_solution_data()
+
+            #   load solution data from file specified
+            elif self.solver.analysis._solution_data is None:
+                solution_data = SolutionData(parent=self.MBD_system._children[self.MBD_system.dict_of_object_group_indexes["Solution"]])
+
+                if self.MBD_system.solutionMBDFormat != "new":
+                    solution_data.set_format(self.MBD_system.solutionMBDFormat)
+
+                solution_data.read_file(filename)
+                self.MBD_system.loaded_solution = solution_data
+
+            else:
+                raise Warning, "Solution object not constructed!"
         elif filename is not None:
             pass
         else:
@@ -463,7 +492,7 @@ class SimulationControlWidget(QtGui.QWidget):
         self.MBD_system.step_num = step
 
         t = self.MBD_system.loaded_solution._t_solution_container[int(step)]
-        q = self.MBD_system.loaded_solution._q_sol_container[int(step)]
+        q = self.MBD_system.loaded_solution._q_solution_container[int(step)]
         self.MBD_system.update_coordinates_and_angles_of_all_bodies(t, q, step=step)
         self.vtkWidget.refresh(step=int(step))
 
@@ -471,8 +500,8 @@ class SimulationControlWidget(QtGui.QWidget):
         self.step_num_signal.signal_step.emit(int(step))
 
         #    energy data signal
-        _energy = self.MBD_system.loaded_solution._energy_solution_container[step]
-        _energy_delta = _energy - self.MBD_system.loaded_solution._energy_solution_container[int(step)-1]
+        _energy = self.MBD_system.loaded_solution._mechanical_energy_solution_container[step]
+        _energy_delta = _energy - self.MBD_system.loaded_solution._mechanical_energy_solution_container[int(step)-1]
         self.energy_signal.signal_energy.emit(_energy, _energy_delta)
 
     def _refresh_measure_graph(self):
@@ -689,21 +718,45 @@ class SimulationControlWidget(QtGui.QWidget):
         Function plays animation when solution data is loaded
         :return:
         """
+        print "animationPlay()"
         if self._update_display_type == "step":
-            for _step in xrange(0, len(self.step), int(self._delta_step)):
-                self._step = int(_step)
-                self._refresh()
-
-                time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
+            self.animationPlay_step()
 
         if self._update_display_type == "dt":
-            _t = np.arange(0, self.t[-1], self._dt)
-            for i in xrange(0, len(_t)):
-                indx = np.argmin(abs(self.t - _t[i]))
-                self._step = self.step[indx]
-                self._refresh()
+            self.animationPlay_dt()
 
-                time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
+    def animationPlay_step(self):
+        """
+        
+        :return: 
+        """
+        print "animationPlay_step()"
+        print "self.ui.updateStep_lineEdit.text() =", self.ui.updateStep_lineEdit.text()
+        self._delta_step = int(self.ui.updateStep_lineEdit.text())
+        for _step in xrange(0, len(self.step), self._delta_step):
+            print "_step =", _step
+            self._step = int(_step)
+            self._refresh()
+
+            time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
+
+    def animationPlay_dt(self):
+        """
+        
+        :return: 
+        """
+        print "animationPlay_dt()"
+        print "self.t[-1] =", self.t[-1]
+        print "self._dt =", self._dt
+        t = np.arange(0., self.t[-1], self._dt)
+        print "t =", t
+        for i in xrange(0, len(t)):
+            print i
+            indx = np.argmin(abs(self.t - t[i]))
+            self._step = self.step[indx]
+            self._refresh()
+
+            time.sleep(self.ui.playbackSpeed_doubleSpinBox.value()*1E-2)
 
     def _create_animation_file(self):
         """
@@ -717,13 +770,13 @@ class SimulationControlWidget(QtGui.QWidget):
         self.movie_maker.fps = self._parent.preferences_widget.ui.fps_spinBox.value()
         self.movie_maker.fps = 24
 
-
         self.movie_maker.movieWriter.SetRate(self.movie_maker.fps)
         self.movie_maker.movieWriter.Start()
 
         if self._update_display_type == "step":
+            self._delta_step = int(self.ui.updateStep_lineEdit.text())
             for _step in xrange(0, len(self.MBD_system.loaded_solution._step_num_solution_container), int(self._delta_step)):
-                #   assign step and repaint GL widget
+                #   assign step and repaint visualization widget
                 self._refresh(step=_step)
 
                 #   get image of current vtk widget scene
@@ -734,32 +787,22 @@ class SimulationControlWidget(QtGui.QWidget):
                 time.sleep(1E-3)
 
         if self._update_display_type == "dt":
-            _t = np.arange(0, self.t[-1], self._dt)
+            t = np.arange(0, self.t[-1], self._dt)
 
-            for i in xrange(0, len(_t)):
+            for i in xrange(0, len(t)):
                 #   find index of
-                _step = np.argmin(abs(self.t - _t[i]))
+                step = np.argmin(abs(self.t - t[i]))
 
-                #   filename
-                filename = "step_%06d"%_step+".png"
-                if _step < len(_t):
-                    #   assign step and repaint GL widget
-                    self._update_GL(step=_step)
+                #   assign step and repaint visualization widget
+                self._refresh(step=step)
 
-                    #   get image of current opengl widget scene
-                    image = self.opengl_widget.grabFrameBuffer(withAlpha=True)
+                #   get image of current vtk widget scene
+                self.movie_maker.windowToImageFilter.Modified()
+                self.movie_maker.movieWriter.Write()
 
-                    #   abs path to image object of current simulation time step
-                    file_abs_path = os.path.join(self.video_maker.folder, filename)
-                    #   save image to file
-                    image.save(file_abs_path)
-
-                    #   wait
-                    time.sleep(1E-2)
-
-                    del(image)
+                #   wait
+                time.sleep(1E-3)
 
         #   starts video maker in new thread
         self.movie_maker.movieWriter.End()
-
 

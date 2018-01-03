@@ -179,6 +179,9 @@ class Force(ForceItem):
         self.element_ksi = element_ksi
         self.L_i = L_i
 
+        if self.node_id == -1:
+            self.element_id = self._body.mesh.elements[-1].element_id
+
         #    z dimension
         if len(u_iP_f) == 2:
             self.z_dim_lcs = 0.
@@ -234,8 +237,6 @@ class Force(ForceItem):
         #         self.set_vtk_data()
 
         self._update_count = 0
-
-        # print "CREATED FORCE OBJECT =", self, self._name
 
     def set_element(self):
         """
@@ -386,7 +387,6 @@ class Force(ForceItem):
 
         :return:
         """
-        # print "deactivate()", self, self._name
         self.active = False
         self.remove = True
         self.vtk_actor.VisibilityOff()
@@ -500,6 +500,11 @@ class Force(ForceItem):
         print self._evaluate_F(0.)
 
     def print_Q_e(self, q):
+        """
+        
+        :param q: 
+        :return: 
+        """
         print self.evaluate_Q_e(0, q)
 
     def evaluate_Q_e(self, t, q):
@@ -510,7 +515,7 @@ class Force(ForceItem):
         out:
             vector of force acting on a body (Fx, Fy, Mz)
         """
-        #   construct force vector (can be function of time)
+        #   construct force vector (can be a function of time)
         self.F = self._evaluate_F(t)
 
         if self.active and not self.remove:
@@ -521,17 +526,7 @@ class Force(ForceItem):
 
                 elif self._body.body_type in ["flexible body", "finite element"]:
                     self.Q_e = self._evaluate_Q_e_flexible_F(t, q, self.F) + self._evaluate_Q_e_flexible_M(t, q, self.Mz)
-                    # if (self.F != np.zeros(2)).any():
-                    #     # print "_evaluate_Q_e_flexible_F()"
-                    #     self.Q_e =
-                    #
-                    # elif self.Mz != 0.:
-                    #     # print "_evaluate_Q_e_flexible_M()"
-                    #     self.Q_e = self._evaluate_Q_e_flexible_M(t, q, self.Mz)
-                    #
-                    # else:
-                    #
-                    #     print "Force Attribute F is not defined properly"
+
                 else:
                     raise ValueError, "Body type not correct! Body type is %s"%self._parent._parent.bodies[self.body_id].body_type
 
@@ -541,6 +536,7 @@ class Force(ForceItem):
         else:
             self.Q_e = np.zeros(3)
 
+        # print "self.Q_e =", self.Q_e
         return self.Q_e
 
     def _evaluate_Q_e_rigid(self, t, q, F):
@@ -634,13 +630,18 @@ class Force(ForceItem):
         Q_e = np.zeros(self._element.mesh.n_NC)
 
         for i, element in enumerate(self._body.mesh.elements):
+            #   this case is executed if force at node id is at boundary nodes of finite element or is the last node
+            #   in the mesh and therefore parameter of finite element parametirization is not needed
             if self.node_id in element.node_id_list or self.node_id == -1 and self.element_ksi is None:
                 #   undeformed position
                 # self.r_P_GCS = self._element.mesh.nodes[self.node_id]
 
-                #   deformed position
+                #   deformed position (for display I think)
+                #   in case of last node in mesh of nodes
                 if self.node_id == -1:
                     node = self._element.geometry_nodes[-1, :]
+
+                #   in case of any other node except last in a mesh
                 else:
                     if self._element.node_id_list.index(self.node_id) == 0:
                         node = self._element.geometry_nodes[0, :]
@@ -663,7 +664,6 @@ class Force(ForceItem):
                     ksi = 1
 
                 S = element._evaluate_S(ksi)
-
                 if (self.node_id == 0) or (self.node_id == len(self._body.mesh.nodes)):
                     pass
                 else:
@@ -671,12 +671,22 @@ class Force(ForceItem):
 
                 Q_e_i = np.dot(S.T, F)
 
+            #   in other cases
             else:
-                self.r_P_GCS = self._element.evaluate_r(self.element_ksi)
+                #   vector of absolute nodal coordinates of a deformable body - mesh
+                e_b = q2q_body(q, self.body_id)
+                #   vector of absolute nodal coordinates of a beam element
+                e_i = self._element.evaluate_e_i(e_b)
+                #   position vector of beam element
+                self.r_P_GCS = self._element.evaluate_r(self.element_ksi, e_i=e_i)
 
-                S = self._element._evaluate_S(self.element_ksi)
+                if element.element_id == self.element_id:
+                    S = self._element._evaluate_S(self.element_ksi)
 
-                Q_e_i = np.dot(S.T, F)
+                    Q_e_i = np.dot(S.T, F)
+
+                else:
+                    Q_e_i = np.zeros(element.get_e_size())
 
             #   transformed force vector
             if element.B is None:
@@ -689,7 +699,6 @@ class Force(ForceItem):
 
             #   sum
             Q_e += _Q_e_i
-
 
         return Q_e
 
