@@ -19,6 +19,10 @@ See: [www.ladisk.si](http://lab.fs.uni-lj.si/ladisk/?what=abstract&ID=197)
 
 If you find it useful, consider to cite us.
 
+DyS GUI animation
+-
+[DyS GUI animation](https://youtu.be/pkKwwK_OEaQ)
+
 A flexible pendulum ANCF (Absolute Nodal Coordinate Formulation)
 -----------------------
 [Animation of a flexible pendulum](https://youtu.be/rxF4enD211U)    
