@@ -21,7 +21,7 @@ If you find it useful, consider to cite us.
 
 DyS GUI animation
 -
-[DyS GUI animation](https://youtu.be/pkKwwK_OEaQ)
+[DyS GUI animation](https://youtu.be/A6Ha2OFU29I)
 
 A flexible pendulum ANCF (Absolute Nodal Coordinate Formulation)
 -----------------------
