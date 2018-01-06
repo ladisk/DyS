@@ -381,8 +381,11 @@ class ContactModelCylinder(ContactModel):
         self._Fn0 = self._Fn_last
 
         #   contact force per unit length
-        _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Hertz, self._Fn0, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn * self.L
+        fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Hertz, self._Fn0, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
+
+        #   total contact force
+        Fn = fn * self.L
+        return Fn
 
     def _evaluate_delta_Hertz(self, Fn):
         """
@@ -409,23 +412,25 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         EdRFn = self.__evaluate_EdRFn(Fn)
-        # print "EdRFn =", EdRFn
+
         df = (2. / (self.E * np.pi)) * (np.log(EdRFn * np.pi) - 2.)
-        # print "df =", df
         return df
 
     def _Fn_Johnson(self, delta):
         """
 
-        :param delta:
+        :param delta: a total contact force in N
         :return:
         """
         #   initial approximation value of contact force
         self._Fn0 = self._Fn_last
 
         #   contact force per unit length
-        _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Johnson, self._Fn0, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn * self.L
+        fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Johnson, self._Fn0, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
+
+        #   total contact force
+        Fn = fn * self.L
+        return Fn
 
     def _evaluate_delta_Johnson(self, Fn):
         """
@@ -446,20 +451,7 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         f = self._evaluate_delta_Johnson(Fn) - abs(delta)
-
         return f
-
-    # def __evaluate_dFn_Johnson(self, Fn, delta):
-    #     """
-    #
-    #     :param Fn:
-    #     :param delta:
-    #     :return:
-    #     """
-    #     EdRFn = self.__evaluate_EdRFn(Fn)
-    #
-    #     df = (-2 + np.log(4 * EdRFn * np.pi)) / (self.E * np.pi)
-    #     return df
 
     def _Fn_Radzimovsky(self, delta):
         """
@@ -470,8 +462,10 @@ class ContactModelCylinder(ContactModel):
         #   initial approximation value of contact force
         self._Fn0 = self._Fn_last
         #   contact force per unit length
-        _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Radzimovsky, self._Fn0, fprime=self.__evaluate_dFn_Radzimovsky, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn * self.L
+        fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Radzimovsky, self._Fn0, fprime=self.__evaluate_dFn_Radzimovsky, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
+
+        Fn = fn * self.L
+        return Fn
 
     def _evaluate_b(self, Fn):
         """
@@ -489,8 +483,8 @@ class ContactModelCylinder(ContactModel):
         """
         eps = np.arccos(self.dR / (self.dR + delta))
         b = np.tan(eps/2.)
-        f = (self.E * self.dR * np.pi * (b**2 + 1.) * b**2) / (2. - (np.log(b**2 + 1.) + 2.*b**4))
-        return f
+        Fn = (self.E * self.dR * np.pi * (b**2 + 1.) * b**2) / (2. - (np.log(b**2 + 1.) + 2.*b**4))
+        return Fn
 
     def _evaluate_delta_Radzimovsky(self, Fn):
         """
@@ -535,7 +529,7 @@ class ContactModelCylinder(ContactModel):
         self._Fn0 = self._Fn_last
 
         _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_Goldsmith, self._Fn0, fprime=self.__evaluate_dFn_Goldsmith, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn * self.L
+        return _Fn
 
     def _evaluate_delta_Goldsmith(self, Fn):
         """
@@ -579,13 +573,10 @@ class ContactModelCylinder(ContactModel):
         """
         #   initial approximation value of contact force
         self._Fn0 = self._Fn_last
-        # print "--------------------------------"
-        # print "delta =", abs(delta)
-        # print "F0 =", self._Fn0
-        # print "initial approximation =", self._Fn0
-        _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_DubowskyFreudenstein, self._Fn0, fprime=self.__evaluate_dFn_DubowskyFreudenstein, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        # print "F =", _Fn
-        return _Fn * self.L
+
+        #   a total contact force
+        Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_DubowskyFreudenstein, self._Fn0, fprime=self.__evaluate_dFn_DubowskyFreudenstein, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
+        return Fn
 
     def _evaluate_delta_DubowskyFreudenstein(self, Fn):
         """
@@ -613,9 +604,7 @@ class ContactModelCylinder(ContactModel):
         Dubowsky-Freudenstein contact force model as implicit function
         :return:
         """
-        # print "F0 =", Fn
         f = self._evaluate_delta_DubowskyFreudenstein(Fn) - abs(delta)
-        # print "f =", f
         return f
 
     def __evaluate_dFn_DubowskyFreudenstein(self, Fn, delta):
@@ -644,8 +633,12 @@ class ContactModelCylinder(ContactModel):
         #   initial approximation value of contact force
         self._Fn0 = self._Fn_last
 
-        _Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_ESDU, self._Fn0, fprime=self.__evaluate_dFn_ESDU, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-        return _Fn * self.L
+        #   contact force per unit length
+        fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_ESDU, self._Fn0, fprime=self.__evaluate_dFn_ESDU, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
+
+        #   total contact force
+        Fn = fn * self.L
+        return Fn
 
     def _evaluate_delta_ESDU78035(self, Fn):
         """
@@ -697,8 +690,9 @@ class ContactModelCylinder(ContactModel):
         :param delta:
         :return:
         """
+        #   total contact force
         Fn = (4./3.) * (np.pi * self.E * self.R**0.5) * (abs(delta)**self.n)
-        return Fn * self.L
+        return Fn
 
     def _Fn_Pereira_etal(self, delta, dq_n):
         """
