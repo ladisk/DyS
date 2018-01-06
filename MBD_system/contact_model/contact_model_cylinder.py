@@ -194,14 +194,14 @@ class ContactModelCylinder(ContactModel):
             self.ni_list = ni_list
 
             for _E, _ni in zip(self.E_list, self.ni_list):
-                _h = self._h(_E, _ni)
+                _h = self._evaluate_h(_E, _ni)
 
                 self.h_list.append(_h)
 
             self.h_i, self.h_j = self.h_list
 
         elif hasattr(self._parent, "body_id_list"):
-            self.h_i, self.h_j = self._evaluate_h()
+            self.h_i, self.h_j = self._evaluate_h_list()
 
         if self.h_list == []:
             self.E = None
@@ -483,7 +483,12 @@ class ContactModelCylinder(ContactModel):
         """
         eps = np.arccos(self.dR / (self.dR + delta))
         b = np.tan(eps/2.)
-        Fn = (self.E * self.dR * np.pi * (b**2 + 1.) * b**2) / (2. - (np.log(b**2 + 1.) + 2.*b**4))
+
+        #   contact force per unit length
+        fn = (self.E * self.dR * np.pi * (b**2 + 1.) * b**2) / (2. - (np.log(b**2 + 1.) + 2.*b**4))
+
+        #   total contact force
+        Fn = fn * self.L
         return Fn
 
     def _evaluate_delta_Radzimovsky(self, Fn):
@@ -586,7 +591,7 @@ class ContactModelCylinder(ContactModel):
         """
         self._f_log_DF = self._evaluate_f_log_DF(Fn)
 
-        delta = (abs(Fn) * ((self.h_i + self.h_j)/self.L) * (np.log(self._f_log_DF) + 1))
+        delta = (abs(Fn) * ((self.h_i + self.h_j) / self.L) * (np.log(self._f_log_DF) + 1.))
         return delta
 
     def _evaluate_f_log_DF(self, Fn):
@@ -595,9 +600,8 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         #   part of function written separately for clearer view of code
-        # print "Fn =", Fn, "self.R_i =", self.R_i, "self.R_j =", self.R_j, "self.h_i =", self.h_i, "self.h_j =", self.h_j
-        _f_log_DF = (self.L**self.m * (self.R_i - self.R_j))/(abs(Fn) * self.R_i * self.R_j * (self.h_i + self.h_j))
-        return _f_log_DF
+        f_log_DF = (self.L**self.m * (self.R_i - self.R_j)) / (abs(Fn) * self.R_i * self.R_j * (self.h_i + self.h_j))
+        return f_log_DF
 
     def __evaluate_Fn_DubowskyFreudenstein(self, Fn, delta):
         """
@@ -634,10 +638,7 @@ class ContactModelCylinder(ContactModel):
         self._Fn0 = self._Fn_last
 
         #   contact force per unit length
-        fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_ESDU, self._Fn0, fprime=self.__evaluate_dFn_ESDU, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
-
-        #   total contact force
-        Fn = fn * self.L
+        Fn = self._Fn_last = scipy.optimize.newton(self.__evaluate_Fn_ESDU, self._Fn0, fprime=self.__evaluate_dFn_ESDU, args=(delta, ), tol=self._tol, maxiter=self._maxiter)
         return Fn
 
     def _evaluate_delta_ESDU78035(self, Fn):
@@ -648,7 +649,7 @@ class ContactModelCylinder(ContactModel):
         """
         hihjL = self.__evaluaate_hihjL()
 
-        delta = abs(Fn) * np.pi * hihjL * (np.log(4 * (self.R_i - self.R_j) / (abs(Fn) * hihjL)) + 1)
+        delta = abs(Fn) * np.pi * hihjL * (np.log(4. * (self.R_i - self.R_j) / (abs(Fn) * hihjL)) + 1.)
         return delta
 
     def __evaluate_Fn_ESDU(self, Fn, delta):
@@ -681,8 +682,11 @@ class ContactModelCylinder(ContactModel):
         :return:
         """
         #   contact force per unit length
-        _Fn = (1/2.) * np.pi * abs(delta) * self.E * (abs(delta) / (2 * (self.dR + abs(delta))))**0.5
-        return _Fn * self.L
+        fn = (1/2.) * np.pi * abs(delta) * self.E * (abs(delta) / (2. * (self.dR + abs(delta))))**0.5
+
+        #   total contact force
+        Fn = fn * self.L
+        return Fn
 
     def _Fn_LankaraniNikraveshCylinder(self, delta):
         """
